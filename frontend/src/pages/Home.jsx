@@ -1,3 +1,4 @@
+import Layout from '../components/Layout'
 import HomeModals from '../components/HomeModals'
 import HomeToolbar from '../components/HomeToolbar'
 import HomeTable from '../components/HomeTable'
@@ -10,8 +11,8 @@ function Home() {
   const home = useHomePage()
   const { activeTab, data, actions } = home
 
-  return (
-    <div className="home">
+  const chrome = (
+    <>
       <HomeToolbar
         activeTab={activeTab}
         searchQuery={home.searchQuery}
@@ -26,11 +27,15 @@ function Home() {
         onToggleMyRecords={home.toggleMyRecords}
         onSearchChange={home.setSearchQuery}
       />
-
       <HomeTabs activeTab={activeTab} onChange={home.setActiveTab} />
+    </>
+  )
 
-      <HomeTable
-        columns={home.columns}
+  return (
+    <Layout chrome={chrome}>
+      <div className="home">
+        <HomeTable
+          columns={home.columns}
         listData={data.listData}
         activeTab={activeTab}
         selectedRowId={data.selectedRowId}
@@ -38,10 +43,10 @@ function Home() {
         error={data.error}
         getRowId={getRowId}
         formatCell={formatCell}
-        onSelectRow={data.setSelectedRowId}
-      />
+          onSelectRow={data.setSelectedRowId}
+        />
 
-      <HomeModals
+        <HomeModals
         activeTab={activeTab}
         selectedRowId={data.selectedRowId}
         preformTypesFiltered={data.preformTypesFiltered}
@@ -53,9 +58,10 @@ function Home() {
         substituteForm={home.substituteForm}
         fittingForm={home.fittingForm}
         hydrotestForm={home.hydrotestForm}
-        transitionsRef={home.transitionsRef}
-      />
-    </div>
+          transitionsRef={home.transitionsRef}
+        />
+      </div>
+    </Layout>
   )
 }
 

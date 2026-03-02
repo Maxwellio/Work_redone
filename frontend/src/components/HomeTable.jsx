@@ -1,3 +1,10 @@
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Box from '@mui/material/Box'
 import '../styles/Home.css'
 
 function HomeTable({
@@ -12,44 +19,45 @@ function HomeTable({
   onSelectRow,
 }) {
   return (
-    <div className="home-table-wrap">
+    <TableContainer className="home-table-wrap" sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'secondary.main', borderRadius: 1 }}>
       {error && (
-        <div className="home-table-message home-table-message_error">{error}</div>
+        <Box className="home-table-message home-table-message_error">{error}</Box>
       )}
       {loading && (
-        <div className="home-table-message">Загрузка…</div>
+        <Box className="home-table-message">Загрузка…</Box>
       )}
       {!loading && !error && (
-        <table className="home-table">
-          <thead>
-            <tr>
+        <Table size="small" stickyHeader className="home-table">
+          <TableHead>
+            <TableRow>
               {columns.map((col) => (
-                <th key={col.key}>{col.label}</th>
+                <TableCell key={col.key}>{col.label}</TableCell>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {listData.map((row) => {
               const id = getRowId(row, activeTab)
               return (
-                <tr
+                <TableRow
                   key={id}
                   data-row-id={id}
-                  className={selectedRowId === id ? 'home-table-row_selected' : ''}
+                  selected={selectedRowId === id}
                   onClick={() => onSelectRow(selectedRowId === id ? null : id)}
+                  sx={{ cursor: 'pointer' }}
                 >
                   {columns.map((col) => (
-                    <td key={col.key}>
+                    <TableCell key={col.key}>
                       {formatCell(col.getValue ? col.getValue(row) : row[col.key])}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               )
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
-    </div>
+    </TableContainer>
   )
 }
 

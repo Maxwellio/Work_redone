@@ -1,5 +1,18 @@
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
-import '../styles/SubstituteModal.css'
 import '../styles/TransitionsRefModal.css'
 
 function TransitionsRefModal({
@@ -14,118 +27,108 @@ function TransitionsRefModal({
   errorGroups,
   errorOperations,
 }) {
-
-  if (!open) return null
-
   const formatCell = (value) => (value == null ? '—' : String(value))
   const groupsSorted = [...groups].sort((a, b) => (a.idGroupOperations ?? 0) - (b.idGroupOperations ?? 0))
   const operationsSorted = [...operations].sort((a, b) => (a.idOperations ?? 0) - (b.idOperations ?? 0))
 
   return (
-    <div
-      className="home-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="transitions-ref-modal-title"
-      title="Справочник переходов"
-    >
-      <div className="home-modal__backdrop" onClick={onClose} />
-      <div className="home-modal__panel transitions-ref-modal__panel" onClick={(e) => e.stopPropagation()}>
-        <div className="home-modal__header">
-          <h2 id="transitions-ref-modal-title" className="home-modal__title">
-            Справочник переходов
-          </h2>
-          <button
-            type="button"
-            className="home-modal__close"
-            onClick={onClose}
-            aria-label="Закрыть"
-          >
-            ×
-          </button>
-        </div>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        Справочник переходов
+        <IconButton onClick={onClose} aria-label="Закрыть" size="small">
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers className="transitions-ref-modal__body">
+        <Box className="transitions-ref-modal__columns">
+          <Box className="transitions-ref-modal__column">
+            <Typography variant="subtitle1" fontWeight={600} className="transitions-ref-modal__column-title">
+              Группа
+            </Typography>
+            <TableContainer className="transitions-ref-modal__table-wrap">
+              {loadingGroups && (
+                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                  Загрузка…
+                </Box>
+              )}
+              {errorGroups && (
+                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+                  {errorGroups}
+                </Box>
+              )}
+              {!loadingGroups && !errorGroups && (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Группа</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {groupsSorted.map((g) => (
+                      <TableRow
+                        key={g.idGroupOperations}
+                        selected={selectedGroupId === g.idGroupOperations}
+                        onClick={() => onSelectGroup(selectedGroupId === g.idGroupOperations ? null : g.idGroupOperations)}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell>{formatCell(g.nmGroupOperations)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+          </Box>
 
-        <div className="home-modal__body transitions-ref-modal__body">
-          <div className="transitions-ref-modal__columns">
-            <div className="transitions-ref-modal__column">
-              <h3 className="transitions-ref-modal__column-title">Группа</h3>
-              <div className="transitions-ref-modal__table-wrap">
-                {loadingGroups && <div className="home-table-message">Загрузка…</div>}
-                {errorGroups && (
-                  <div className="home-table-message home-table-message_error">{errorGroups}</div>
-                )}
-                {!loadingGroups && !errorGroups && (
-                  <table className="home-table transitions-ref-modal__table">
-                    <thead>
-                      <tr>
-                        <th>Группа</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {groupsSorted.map((g) => (
-                        <tr
-                          key={g.idGroupOperations}
-                          className={selectedGroupId === g.idGroupOperations ? 'home-table-row_selected' : ''}
-                          onClick={() =>
-                            onSelectGroup(
-                              selectedGroupId === g.idGroupOperations ? null : g.idGroupOperations
-                            )
-                          }
-                        >
-                          <td>{formatCell(g.nmGroupOperations)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
+          <Box className="transitions-ref-modal__column">
+            <Typography variant="subtitle1" fontWeight={600} className="transitions-ref-modal__column-title">
+              Операции
+            </Typography>
+            <TableContainer className="transitions-ref-modal__table-wrap">
+              {selectedGroupId == null && !loadingOperations && (
+                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                  Выберите группу слева
+                </Box>
+              )}
+              {loadingOperations && (
+                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                  Загрузка…
+                </Box>
+              )}
+              {errorOperations && (
+                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+                  {errorOperations}
+                </Box>
+              )}
+              {!loadingOperations && !errorOperations && selectedGroupId != null && (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Наименование перехода</TableCell>
+                      <TableCell>Tk, мин</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {operationsSorted.map((op) => (
+                      <TableRow key={op.idOperations}>
+                        <TableCell>{formatCell(op.nmOperations)}</TableCell>
+                        <TableCell>{formatCell(op.tk)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+          </Box>
+        </Box>
+      </DialogContent>
 
-            <div className="transitions-ref-modal__column">
-              <h3 className="transitions-ref-modal__column-title">Операции</h3>
-              <div className="transitions-ref-modal__table-wrap">
-                {selectedGroupId == null && !loadingOperations && (
-                  <div className="home-table-message">Выберите группу слева</div>
-                )}
-                {loadingOperations && <div className="home-table-message">Загрузка…</div>}
-                {errorOperations && (
-                  <div className="home-table-message home-table-message_error">{errorOperations}</div>
-                )}
-                {!loadingOperations && !errorOperations && selectedGroupId != null && (
-                  <table className="home-table transitions-ref-modal__table">
-                    <thead>
-                      <tr>
-                        <th>Наименование перехода</th>
-                        <th>Tk, мин</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {operationsSorted.map((op) => (
-                        <tr key={op.idOperations}>
-                          <td>{formatCell(op.nmOperations)}</td>
-                          <td>{formatCell(op.tk)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="home-modal__footer">
-          <button
-            type="button"
-            className="home-modal__btn home-modal__btn_secondary"
-            onClick={onClose}
-          >
-            <Close className="home-modal__btn-icon" fontSize="small" />
-            Закрыть
-          </button>
-        </div>
-      </div>
-    </div>
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
+          Закрыть
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 

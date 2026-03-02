@@ -1,3 +1,6 @@
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
 import '../styles/Home.css'
 
 function HomeToolbar({
@@ -15,54 +18,57 @@ function HomeToolbar({
   onSearchChange,
 }) {
   return (
-    <div className="home-toolbar">
+    <Box className="home-toolbar">
       {(activeTab === 0 || activeTab === 1 || activeTab === 2 || activeTab === 3) && (
         <>
-          <button type="button" className="home-toolbar-btn" onClick={onAdd}>
+          <Button variant="contained" color="primary" size="small" onClick={onAdd}>
             Добавить
-          </button>
-          <button type="button" className="home-toolbar-btn" onClick={onEdit}>
+          </Button>
+          <Button variant="contained" color="primary" size="small" onClick={onEdit}>
             Редактировать
-          </button>
+          </Button>
         </>
       )}
       {activeTab !== 3 && (
-        <button type="button" className="home-toolbar-btn" onClick={onTransitions}>
+        <Button variant="contained" color="primary" size="small" onClick={onTransitions}>
           Переходы по трубе
-        </button>
+        </Button>
       )}
-      <button type="button" className="home-toolbar-btn" onClick={onDelete}>
+      <Button variant="contained" color="primary" size="small" onClick={onDelete}>
         Удалить
-      </button>
-      <button type="button" className="home-toolbar-btn" onClick={onCalcNorms}>
+      </Button>
+      <Button variant="contained" color="primary" size="small" onClick={onCalcNorms}>
         Расчёт норм времени
-      </button>
-      <button type="button" className="home-toolbar-btn" onClick={onPrint}>
+      </Button>
+      <Button variant="contained" color="primary" size="small" onClick={onPrint}>
         Печать отчёта
-      </button>
-      <button
-        type="button"
-        className={`home-toolbar-btn ${showMyRecords ? 'home-toolbar-btn_active' : ''}`}
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
         onClick={onToggleMyRecords}
+        sx={
+          showMyRecords
+            ? { bgcolor: 'primary.dark', fontWeight: 600, '&:hover': { bgcolor: 'primary.dark' } }
+            : {}
+        }
       >
         Мои записи
-      </button>
-      <input
+      </Button>
+      <TextField
         type="search"
-        className="home-toolbar-search"
+        size="small"
         placeholder="Поиск по записям"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
         aria-label="Поиск по записям"
+        sx={{ ml: 'auto', minWidth: 200 }}
       />
-      <button
-        type="button"
-        className="home-toolbar-btn"
-        onClick={onOpenTransitionsRef}
-      >
+      <Button variant="contained" color="primary" size="small" onClick={onOpenTransitionsRef}>
         Справочник переходов
-      </button>
-    </div>
+      </Button>
+    </Box>
   )
 }
 

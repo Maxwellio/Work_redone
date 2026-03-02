@@ -1,4 +1,10 @@
 import { useNavigate, Navigate } from 'react-router-dom'
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import { useAuth } from '../context/AuthContext'
 import { useLogin } from '../hooks/useLogin'
 import '../styles/Login.css'
@@ -24,11 +30,15 @@ function Login() {
 
   if (!sessionChecked) {
     return (
-      <div className="login-page">
-        <div className="login-card">
-          <p className="login-hint">Проверка авторизации…</p>
-        </div>
-      </div>
+      <Box className="login-page">
+        <Card className="login-card">
+          <CardContent>
+            <Typography variant="body2" color="text.secondary">
+              Проверка авторизации…
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
     )
   }
 
@@ -37,42 +47,66 @@ function Login() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <h2 className="login-title">Вход</h2>
-        <form className="login-form" onSubmit={handleSubmit}>
-          <label className="login-label">
-            Логин
-            <input
-              type="text"
-              className="login-input"
+    <Box className="login-page">
+      <Card className="login-card">
+        <CardContent>
+          <Typography variant="h6" component="h2" className="login-title">
+            Вход
+          </Typography>
+          <form className="login-form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Логин"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
               required
               disabled={submitting}
+              margin="normal"
             />
-          </label>
-          <label className="login-label">
-            Пароль
-            <input
+            <TextField
+              fullWidth
+              label="Пароль"
               type="password"
-              className="login-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
               disabled={submitting}
+              margin="normal"
             />
-          </label>
-          <p className="login-hint">Проверяйте вводимые данные</p>
-          {error && <p className="login-error" role="alert">{error}</p>}
-          <button type="submit" className="login-submit" disabled={submitting}>
-            {submitting ? 'Вход…' : 'Войти'}
-          </button>
-        </form>
-      </div>
-    </div>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Проверяйте вводимые данные
+            </Typography>
+            {error && (
+              <Typography
+                variant="body2"
+                role="alert"
+                sx={{
+                  mt: 1,
+                  p: 1,
+                  color: '#8b3a3a',
+                  bgcolor: '#faf0f0',
+                  borderRadius: 1,
+                }}
+              >
+                {error}
+              </Typography>
+            )}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={submitting}
+              sx={{ mt: 2 }}
+            >
+              {submitting ? 'Вход…' : 'Войти'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 
