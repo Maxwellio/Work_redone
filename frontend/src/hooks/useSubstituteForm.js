@@ -11,6 +11,7 @@ export function useSubstituteForm({
   loadData,
   setSelectedRowId,
   setPendingScrollToId,
+  onOpenTransitions,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -42,7 +43,12 @@ export function useSubstituteForm({
     setIsModalOpen(false)
   }
 
-  const handleSave = async (draft) => {
+  const buildSubstituteName = (source) =>
+    [source.nmSub1, source.nmSub2, source.nmSub3, source.nmSub4, source.nmSub5]
+      .filter((part) => part != null && String(part).trim() !== '')
+      .join('-')
+
+  const saveDraft = async (draft, { openTransitions = false } = {}) => {
     setSaveError(null)
     const source = draft ?? formData
     const nameFields = [source.nmSub1, source.nmSub2, source.nmSub3, source.nmSub4, source.nmSub5]
@@ -76,11 +82,20 @@ export function useSubstituteForm({
       if (id != null && id > 0) {
         setSelectedRowId(id)
         setPendingScrollToId(id)
+        if (openTransitions && typeof onOpenTransitions === 'function') {
+          onOpenTransitions({ idSubstitutePrepared: id, name: buildSubstituteName(source) })
+        }
       }
+      return id
     } catch (err) {
       setSaveError(err.message || 'Ошибка сохранения')
+      return null
     }
   }
+
+  const handleSave = async (draft) => saveDraft(draft)
+
+  const handleSaveAndOpenTransitions = async (draft) => saveDraft(draft, { openTransitions: true })
 
   return {
     isModalOpen,
@@ -91,5 +106,6 @@ export function useSubstituteForm({
     openEdit,
     close,
     handleSave,
+    handleSaveAndOpenTransitions,
   }
 }

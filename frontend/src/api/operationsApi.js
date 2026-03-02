@@ -18,3 +18,12 @@ export async function getOperations(groupId) {
   if (!res.ok) throw new Error(`getOperations failed: ${res.status}`)
   return res.json()
 }
+
+export async function getSubstituteDetails(idSubstitutePrepared) {
+  const res = await request(`/substitutes/${idSubstitutePrepared}/details`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`getSubstituteDetails failed: ${res.status}`)
+  return res.json()
+}

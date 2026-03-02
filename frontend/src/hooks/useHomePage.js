@@ -14,6 +14,11 @@ export function useHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
+  const [substituteTransitionsModal, setSubstituteTransitionsModal] = useState({
+    isOpen: false,
+    idSubstitutePrepared: null,
+    substituteName: '',
+  })
 
   const data = useHomeData({
     activeTab,
@@ -21,6 +26,18 @@ export function useHomePage() {
     showMyRecords,
     user,
   })
+
+  const openSubstituteTransitions = ({ idSubstitutePrepared, name }) => {
+    setSubstituteTransitionsModal({
+      isOpen: true,
+      idSubstitutePrepared,
+      substituteName: name || '',
+    })
+  }
+
+  const closeSubstituteTransitions = () => {
+    setSubstituteTransitionsModal((prev) => ({ ...prev, isOpen: false }))
+  }
 
   const substituteForm = useSubstituteForm({
     activeTab,
@@ -30,6 +47,7 @@ export function useHomePage() {
     loadData: data.loadData,
     setSelectedRowId: data.setSelectedRowId,
     setPendingScrollToId: data.setPendingScrollToId,
+    onOpenTransitions: openSubstituteTransitions,
   })
 
   const fittingForm = useFittingForm({
@@ -76,6 +94,20 @@ export function useHomePage() {
     else if (activeTab === 3) hydrotestForm.openEdit()
   }
 
+  const handleOpenTransitions = () => {
+    if (activeTab !== 0) return
+    if (data.selectedRowId == null) {
+      window.alert('Выберите переводник')
+      return
+    }
+    const selectedRow = data.listData.find((row) => row.idSubstitutePrepared === data.selectedRowId)
+    if (!selectedRow) return
+    openSubstituteTransitions({
+      idSubstitutePrepared: data.selectedRowId,
+      name: selectedRow.name || '',
+    })
+  }
+
   return {
     activeTab,
     setActiveTab,
@@ -86,6 +118,8 @@ export function useHomePage() {
     isTransitionsRefModalOpen,
     openTransitionsRefModal: () => setIsTransitionsRefModalOpen(true),
     closeTransitionsRefModal: () => setIsTransitionsRefModalOpen(false),
+    substituteTransitionsModal,
+    closeSubstituteTransitions,
     columns: COLUMNS[activeTab],
     data,
     actions,
@@ -95,5 +129,6 @@ export function useHomePage() {
     transitionsRef,
     handleAdd,
     handleEdit,
+    handleOpenTransitions,
   }
 }

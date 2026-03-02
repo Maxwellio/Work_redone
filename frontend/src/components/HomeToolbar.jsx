@@ -17,6 +17,8 @@ function HomeToolbar({
   onToggleMyRecords,
   onSearchChange,
 }) {
+  const transitionsLabel = activeTab === 0 ? 'Переходы по переводнику' : 'Переходы по трубе'
+
   return (
     <Box className="home-toolbar">
       {(activeTab === 0 || activeTab === 1 || activeTab === 2 || activeTab === 3) && (
@@ -30,8 +32,14 @@ function HomeToolbar({
         </>
       )}
       {activeTab !== 3 && (
-        <Button variant="contained" color="primary" size="small" onClick={onTransitions}>
-          Переходы по трубе
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          onClick={onTransitions}
+          disabled={activeTab !== 0}
+        >
+          {transitionsLabel}
         </Button>
       )}
       <Button variant="contained" color="primary" size="small" onClick={onDelete}>

@@ -26,6 +26,7 @@ function SubstituteModal({
   saveError,
   onClose,
   onSave,
+  onOpenTransitions,
 }) {
   const title = isEditMode ? 'Редактирование переводника' : 'Добавление переводника'
   const [draft, setDraft] = useState(initialFormData)
@@ -172,7 +173,9 @@ function SubstituteModal({
         </Box>
       )}
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="outlined" color="primary">Переходы при изготовлении переводника</Button>
+        <Button variant="outlined" color="primary" onClick={() => onOpenTransitions?.(draft)}>
+          Переходы при изготовлении переводника
+        </Button>
         <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)}>Ок</Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>Отмена</Button>
       </DialogActions>

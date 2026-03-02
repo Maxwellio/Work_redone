@@ -19,7 +19,7 @@ function Home() {
         showMyRecords={home.showMyRecords}
         onAdd={home.handleAdd}
         onEdit={home.handleEdit}
-        onTransitions={() => console.log('Переходы по трубе', { activeTab })}
+        onTransitions={home.handleOpenTransitions}
         onOpenTransitionsRef={home.openTransitionsRefModal}
         onDelete={actions.handleDelete}
         onCalcNorms={actions.handleCalcNorms}
@@ -55,6 +55,8 @@ function Home() {
         partyList={data.partyList}
         isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
         onCloseTransitionsRef={home.closeTransitionsRefModal}
+        substituteTransitionsModal={home.substituteTransitionsModal}
+        onCloseSubstituteTransitions={home.closeSubstituteTransitions}
         substituteForm={home.substituteForm}
         fittingForm={home.fittingForm}
         hydrotestForm={home.hydrotestForm}

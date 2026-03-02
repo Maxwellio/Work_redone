@@ -1,6 +1,7 @@
 import FittingModal from './FittingModal'
 import HydrotestModal from './HydrotestModal'
 import SubstituteModal from './SubstituteModal'
+import SubstituteTransitionsModal from './SubstituteTransitionsModal'
 import TransitionsRefModal from './TransitionsRefModal'
 
 function HomeModals({
@@ -12,6 +13,8 @@ function HomeModals({
   partyList,
   isTransitionsRefModalOpen,
   onCloseTransitionsRef,
+  substituteTransitionsModal,
+  onCloseSubstituteTransitions,
   substituteForm,
   fittingForm,
   hydrotestForm,
@@ -29,6 +32,7 @@ function HomeModals({
         saveError={substituteForm.saveError}
         onClose={substituteForm.close}
         onSave={substituteForm.handleSave}
+        onOpenTransitions={substituteForm.handleSaveAndOpenTransitions}
       />
 
       <FittingModal
@@ -66,6 +70,13 @@ function HomeModals({
         loadingOperations={transitionsRef.loadingOperations}
         errorGroups={transitionsRef.errorGroups}
         errorOperations={transitionsRef.errorOperations}
+      />
+
+      <SubstituteTransitionsModal
+        open={substituteTransitionsModal.isOpen}
+        substituteId={substituteTransitionsModal.idSubstitutePrepared}
+        substituteName={substituteTransitionsModal.substituteName}
+        onClose={onCloseSubstituteTransitions}
       />
     </>
   )
