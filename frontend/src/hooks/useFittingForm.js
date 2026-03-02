@@ -47,18 +47,16 @@ export function useFittingForm({
     setIsModalOpen(true)
   }
 
-  const close = () => setIsModalOpen(false)
-
-  const handleFormChange = (field) => (event) => {
-    const { value } = event.target
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const close = () => {
     setSaveError(null)
+    setIsModalOpen(false)
   }
 
-  const handleSave = async () => {
+  const handleSave = async (draft) => {
     setSaveError(null)
     const tip = activeTab === 1 ? 1 : 2
-    const hasNm = formData.nm != null && String(formData.nm).trim() !== ''
+    const source = draft ?? formData
+    const hasNm = source.nm != null && String(source.nm).trim() !== ''
     if (!hasNm) {
       setSaveError('Заполните хотя бы одно поле наименования')
       return
@@ -66,19 +64,19 @@ export function useFittingForm({
     const payload = {
       id: isEditMode ? selectedRowId : null,
       tip,
-      nm: formData.nm || null,
-      d: parseNum(formData.d),
-      th: tip === 1 ? parseNum(formData.th) : null,
-      l: parseNum(formData.l),
-      mass: parseNum(formData.mass),
+      nm: source.nm || null,
+      d: parseNum(source.d),
+      th: tip === 1 ? parseNum(source.th) : null,
+      l: parseNum(source.l),
+      mass: parseNum(source.mass),
       idPreform:
-        tip === 1 && formData.idPreform !== '' && formData.idPreform != null
-          ? parseNum(formData.idPreform)
+        tip === 1 && source.idPreform !== '' && source.idPreform != null
+          ? parseNum(source.idPreform)
           : null,
-      lPreform: tip === 1 ? parseNum(formData.lPreform) : null,
-      phPreform: parseNum(formData.phPreform),
-      dStan: parseNum(formData.dStan),
-      cnt: formData.cnt || null,
+      lPreform: tip === 1 ? parseNum(source.lPreform) : null,
+      phPreform: parseNum(source.phPreform),
+      dStan: parseNum(source.dStan),
+      cnt: source.cnt || null,
       ...(isEditMode ? {} : { idUserCreator: user?.userId ?? null }),
     }
     try {
@@ -102,7 +100,6 @@ export function useFittingForm({
     openAdd,
     openEdit,
     close,
-    handleFormChange,
     handleSave,
   }
 }

@@ -37,31 +37,29 @@ export function useHydrotestForm({
     setIsModalOpen(true)
   }
 
-  const close = () => setIsModalOpen(false)
-
-  const handleFormChange = (field) => (event) => {
-    const { value } = event.target
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const close = () => {
     setSaveError(null)
+    setIsModalOpen(false)
   }
 
-  const handleSave = async () => {
+  const handleSave = async (draft) => {
     setSaveError(null)
-    const hasName = formData.nh != null && String(formData.nh).trim() !== ''
+    const source = draft ?? formData
+    const hasName = source.nh != null && String(source.nh).trim() !== ''
     if (!hasName) {
       setSaveError('Заполните поле наименования')
       return
     }
     const payload = {
       id: isEditMode ? selectedRowId : null,
-      nh: formData.nh || null,
-      d: parseNum(formData.d),
-      th: parseNum(formData.th),
-      l: parseNum(formData.l),
-      testtime: parseNum(formData.testtime),
-      mass: parseNum(formData.mass),
-      l1: parseNum(formData.l1),
-      l2: parseNum(formData.l2),
+      nh: source.nh || null,
+      d: parseNum(source.d),
+      th: parseNum(source.th),
+      l: parseNum(source.l),
+      testtime: parseNum(source.testtime),
+      mass: parseNum(source.mass),
+      l1: parseNum(source.l1),
+      l2: parseNum(source.l2),
       ...(isEditMode ? {} : { idUserCreator: user?.userId ?? null }),
     }
     try {
@@ -85,7 +83,6 @@ export function useHydrotestForm({
     openAdd,
     openEdit,
     close,
-    handleFormChange,
     handleSave,
   }
 }

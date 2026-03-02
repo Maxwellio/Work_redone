@@ -28,7 +28,6 @@ function HomeModals({
         preformError={preformError}
         saveError={substituteForm.saveError}
         onClose={substituteForm.close}
-        onFormChange={substituteForm.handleFormChange}
         onSave={substituteForm.handleSave}
       />
 
@@ -42,7 +41,6 @@ function HomeModals({
         preformError={activeTab === 1 ? preformError : null}
         saveError={fittingForm.saveError}
         onClose={fittingForm.close}
-        onFormChange={fittingForm.handleFormChange}
         onSave={fittingForm.handleSave}
         tip={activeTab === 1 ? 1 : 2}
       />
@@ -54,7 +52,6 @@ function HomeModals({
         formData={hydrotestForm.formData}
         saveError={hydrotestForm.saveError}
         onClose={hydrotestForm.close}
-        onFormChange={hydrotestForm.handleFormChange}
         onSave={hydrotestForm.handleSave}
       />
 
