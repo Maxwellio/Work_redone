@@ -104,7 +104,20 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
           {error && <Box className="home-table-message home-table-message_error">{error}</Box>}
           {loading && <Box className="home-table-message">Загрузка…</Box>}
           {!loading && !error && (
-            <Table size="small" stickyHeader>
+            <Table
+              size="small"
+              stickyHeader
+              sx={{
+                '& .MuiTableRow-root:not(:last-of-type) > .MuiTableCell-root': {
+                  borderBottom: '1px solid',
+                  borderColor: 'divider',
+                },
+                '& .MuiTableCell-root:not(:last-of-type)': {
+                  borderRight: '1px solid',
+                  borderColor: 'divider',
+                },
+              }}
+            >
               <TableHead>
                 <TableRow>
                   {COLUMNS.map((col) => (

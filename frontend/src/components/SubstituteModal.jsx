@@ -16,6 +16,17 @@ import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
 
+const NUMERIC_FIELDS = new Set([
+  'dSubstituteOut',
+  'dSubstituteIn',
+  'lSubstitute',
+  'dPreformOut',
+  'dPreformIn',
+  'lPreform',
+  'ph',
+  'massPreform',
+])
+
 function SubstituteModal({
   open,
   isEditMode,
@@ -37,7 +48,18 @@ function SubstituteModal({
   }, [open, initialFormData])
 
   const handleFieldChange = (field) => (event) => {
-    const { value } = event.target
+    let { value } = event.target
+
+    if (NUMERIC_FIELDS.has(field)) {
+      if (value !== '') {
+        value = String(value).replace(',', '.')
+        value = value.replace(/[^0-9.]/g, '')
+        if (value.length > 10) {
+          value = value.slice(0, 10)
+        }
+      }
+    }
+
     setDraft((prev) => {
       const next = { ...prev, [field]: value }
       if (field === 'idPreform' && (value === '1' || value === 1)) {
@@ -99,8 +121,8 @@ function SubstituteModal({
             size="small"
             label="Длина, мм переводника"
             type="number"
-            value={draft.lSubstiute}
-            onChange={handleFieldChange('lSubstiute')}
+            value={draft.lSubstitute}
+            onChange={handleFieldChange('lSubstitute')}
           />
 
           <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Заготовка</Typography>
@@ -139,6 +161,14 @@ function SubstituteModal({
             value={draft.dPreformIn}
             onChange={handleFieldChange('dPreformIn')}
             disabled={draft.idPreform === '1' || draft.idPreform === 1}
+            sx={{
+              '& .MuiOutlinedInput-root.Mui-disabled': {
+                bgcolor: 'action.disabledBackground',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'divider',
+                },
+              },
+            }}
           />
           <TextField
             fullWidth

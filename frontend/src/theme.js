@@ -26,4 +26,19 @@ export const theme = createTheme({
   typography: {
     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
   },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& input[type=number]': {
+            MozAppearance: 'textfield',
+          },
+          '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+            WebkitAppearance: 'none',
+            margin: 0,
+          },
+        },
+      },
+    },
+  },
 })

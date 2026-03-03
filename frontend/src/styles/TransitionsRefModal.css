@@ -43,6 +43,22 @@
 
 .transitions-ref-modal__table {
   width: 100%;
+  border-collapse: collapse;
+}
+
+.transitions-ref-modal__table thead {
+  background: var(--color-sand-light);
+}
+
+.transitions-ref-modal__table th,
+.transitions-ref-modal__table td {
+  border-bottom: 1px solid var(--color-sand);
+  border-right: 1px solid var(--color-sand);
+}
+
+.transitions-ref-modal__table th:last-child,
+.transitions-ref-modal__table td:last-child {
+  border-right: none;
 }
 
 .transitions-ref-modal__column:first-child .transitions-ref-modal__table tbody tr {

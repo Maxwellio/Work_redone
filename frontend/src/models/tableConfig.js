@@ -14,7 +14,7 @@ export const COLUMNS = {
     { key: 'dPreformIn', label: 'D предформ. вн.' },
     { key: 'dSubstituteOut', label: 'D переходника нар.' },
     { key: 'dSubstituteIn', label: 'D переходника вн.' },
-    { key: 'lSubstiute', label: 'L переходника' },
+    { key: 'lSubstitute', label: 'L переходника' },
   ],
   1: [
     { key: 'idFiting', label: '№' },

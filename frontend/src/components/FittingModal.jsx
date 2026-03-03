@@ -16,6 +16,8 @@ import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
 
+const NUMERIC_FIELDS = new Set(['d', 'th', 'l', 'mass', 'lPreform', 'phPreform', 'dStan'])
+
 function FittingModal({
   open,
   isEditMode,
@@ -46,9 +48,41 @@ function FittingModal({
   }, [open, initialFormData])
 
   const handleFieldChange = (field) => (event) => {
-    const { value } = event.target
+    let { value } = event.target
+
+    if (NUMERIC_FIELDS.has(field)) {
+      if (value !== '') {
+        value = String(value).replace(',', '.')
+        value = value.replace(/[^0-9.]/g, '')
+        if (value.length > 10) {
+          value = value.slice(0, 10)
+        }
+      }
+    }
+
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
+
+  useEffect(() => {
+    if (!open || !isPatrubok) return
+    if (!Array.isArray(preformTypesFiltered) || preformTypesFiltered.length === 0) return
+
+    setDraft((prev) => {
+      const hasValidId =
+        prev.idPreform == null ||
+        prev.idPreform === '' ||
+        preformTypesFiltered.some((item) => String(item.idPreform) === String(prev.idPreform))
+
+      if (hasValidId) return prev
+
+      const preferred = preformTypesFiltered.find((item) => String(item.idPreform) === '3')
+      const fallbackId = (preferred || preformTypesFiltered[0])?.idPreform ?? ''
+
+      if (fallbackId === prev.idPreform) return prev
+
+      return { ...prev, idPreform: fallbackId }
+    })
+  }, [open, isPatrubok, preformTypesFiltered])
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>

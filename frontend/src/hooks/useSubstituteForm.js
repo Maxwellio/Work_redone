@@ -41,6 +41,7 @@ export function useSubstituteForm({
   const close = () => {
     setSaveError(null)
     setIsModalOpen(false)
+    setFormData(EMPTY_SUBSTITUTE_FORM)
   }
 
   const buildSubstituteName = (source) =>
@@ -66,7 +67,7 @@ export function useSubstituteForm({
       nmSub5: source.nmSub5 || null,
       dSubstituteOut: parseNum(source.dSubstituteOut),
       dSubstituteIn: parseNum(source.dSubstituteIn),
-      lSubstiute: parseNum(source.lSubstiute),
+      lSubstitute: parseNum(source.lSubstitute),
       idPreform: source.idPreform === '' || source.idPreform == null ? 1 : parseNum(source.idPreform),
       dPreformOut: parseNum(source.dPreformOut),
       dPreformIn: source.idPreform === '1' || source.idPreform === 1 ? null : parseNum(source.dPreformIn),

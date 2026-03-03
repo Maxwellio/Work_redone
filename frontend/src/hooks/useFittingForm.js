@@ -50,6 +50,8 @@ export function useFittingForm({
   const close = () => {
     setSaveError(null)
     setIsModalOpen(false)
+    const emptyForm = activeTab === 1 ? EMPTY_FITTING_FORM_PATRUBOK : EMPTY_FITTING_FORM_TRUBA
+    setFormData(emptyForm)
   }
 
   const handleSave = async (draft) => {

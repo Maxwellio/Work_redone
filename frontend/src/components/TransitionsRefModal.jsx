@@ -57,7 +57,7 @@ function TransitionsRefModal({
                 </Box>
               )}
               {!loadingGroups && !errorGroups && (
-                <Table size="small">
+                <Table size="small" className="transitions-ref-modal__table">
                   <TableHead>
                     <TableRow>
                       <TableCell>Группа</TableCell>
@@ -101,7 +101,7 @@ function TransitionsRefModal({
                 </Box>
               )}
               {!loadingOperations && !errorOperations && selectedGroupId != null && (
-                <Table size="small">
+                <Table size="small" className="transitions-ref-modal__table">
                   <TableHead>
                     <TableRow>
                       <TableCell>Наименование перехода</TableCell>
