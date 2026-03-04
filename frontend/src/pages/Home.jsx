@@ -21,6 +21,7 @@ function Home() {
         onEdit={home.handleEdit}
         onTransitions={home.handleOpenTransitions}
         onOpenTransitionsRef={home.openTransitionsRefModal}
+        onOpenPreformRef={home.openPreformRefModal}
         onDelete={actions.handleDelete}
         onCalcNorms={actions.handleCalcNorms}
         onPrint={actions.handlePrint}
@@ -55,6 +56,9 @@ function Home() {
         partyList={data.partyList}
         isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
         onCloseTransitionsRef={home.closeTransitionsRefModal}
+        isPreformRefModalOpen={home.isPreformRefModalOpen}
+        onClosePreformRef={home.closePreformRefModal}
+        preformRef={home.preformRef}
         substituteTransitionsModal={home.substituteTransitionsModal}
         onCloseSubstituteTransitions={home.closeSubstituteTransitions}
         substituteForm={home.substituteForm}

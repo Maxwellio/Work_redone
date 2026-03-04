@@ -6,6 +6,7 @@ import { useHomeActions } from './useHomeActions'
 import { useHomeData } from './useHomeData'
 import { useHydrotestForm } from './useHydrotestForm'
 import { useSubstituteForm } from './useSubstituteForm'
+import { usePreformRef } from './usePreformRef'
 import { useTransitionsRef } from './useTransitionsRef'
 
 export function useHomePage() {
@@ -14,6 +15,7 @@ export function useHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
+  const [isPreformRefModalOpen, setIsPreformRefModalOpen] = useState(false)
   const [substituteTransitionsModal, setSubstituteTransitionsModal] = useState({
     isOpen: false,
     idSubstitutePrepared: null,
@@ -81,6 +83,7 @@ export function useHomePage() {
   })
 
   const transitionsRef = useTransitionsRef(isTransitionsRefModalOpen)
+  const preformRef = usePreformRef(isPreformRefModalOpen)
 
   const handleAdd = () => {
     if (activeTab === 0) substituteForm.openAdd()
@@ -118,6 +121,9 @@ export function useHomePage() {
     isTransitionsRefModalOpen,
     openTransitionsRefModal: () => setIsTransitionsRefModalOpen(true),
     closeTransitionsRefModal: () => setIsTransitionsRefModalOpen(false),
+    isPreformRefModalOpen,
+    openPreformRefModal: () => setIsPreformRefModalOpen(true),
+    closePreformRefModal: () => setIsPreformRefModalOpen(false),
     substituteTransitionsModal,
     closeSubstituteTransitions,
     columns: COLUMNS[activeTab],
@@ -127,6 +133,7 @@ export function useHomePage() {
     fittingForm,
     hydrotestForm,
     transitionsRef,
+    preformRef,
     handleAdd,
     handleEdit,
     handleOpenTransitions,

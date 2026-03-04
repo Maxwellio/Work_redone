@@ -1,5 +1,7 @@
 /* Корпоративная палитра: Pantone 3015 (синий), 7504 (песочный). Стиль Apple/macOS */
 :root {
+  /* Базовый размер шрифта для удобства чтения */
+  --font-size-base: 18px;
   /* Акценты */
   --color-blue: #008eb9;
   --color-blue-dark: #006b8f;
@@ -16,6 +18,10 @@
   --radius-md: 8px;
   --radius-lg: 12px;
   --shadow-subtle: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+html {
+  font-size: var(--font-size-base);
 }
 
 * {

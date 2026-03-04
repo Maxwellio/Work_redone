@@ -43,7 +43,6 @@ function FittingModal({
   const [draft, setDraft] = useState(initialFormData)
 
   useEffect(() => {
-    if (!open) return
     setDraft({ ...initialFormData })
   }, [open, initialFormData])
 
@@ -68,10 +67,8 @@ function FittingModal({
     if (!Array.isArray(preformTypesFiltered) || preformTypesFiltered.length === 0) return
 
     setDraft((prev) => {
-      const hasValidId =
-        prev.idPreform == null ||
-        prev.idPreform === '' ||
-        preformTypesFiltered.some((item) => String(item.idPreform) === String(prev.idPreform))
+      const inList = preformTypesFiltered.some((item) => String(item.idPreform) === String(prev.idPreform))
+      const hasValidId = prev.idPreform === '' || (prev.idPreform != null && inList)
 
       if (hasValidId) return prev
 

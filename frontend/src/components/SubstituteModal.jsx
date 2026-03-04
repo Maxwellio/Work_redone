@@ -43,7 +43,6 @@ function SubstituteModal({
   const [draft, setDraft] = useState(initialFormData)
 
   useEffect(() => {
-    if (!open) return
     setDraft({ ...initialFormData })
   }, [open, initialFormData])
 

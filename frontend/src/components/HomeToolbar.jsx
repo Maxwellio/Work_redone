@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import '../styles/Home.css'
 
@@ -11,13 +14,26 @@ function HomeToolbar({
   onEdit,
   onTransitions,
   onOpenTransitionsRef,
+  onOpenPreformRef,
   onDelete,
   onCalcNorms,
   onPrint,
   onToggleMyRecords,
   onSearchChange,
 }) {
+  const [refMenuAnchor, setRefMenuAnchor] = useState(null)
   const transitionsLabel = activeTab === 0 ? 'Переходы по переводнику' : 'Переходы по трубе'
+
+  const handleRefMenuOpen = (e) => setRefMenuAnchor(e.currentTarget)
+  const handleRefMenuClose = () => setRefMenuAnchor(null)
+  const handleOpenTransitionsRef = () => {
+    handleRefMenuClose()
+    onOpenTransitionsRef()
+  }
+  const handleOpenPreformRef = () => {
+    handleRefMenuClose()
+    onOpenPreformRef()
+  }
 
   return (
     <Box className="home-toolbar">
@@ -73,9 +89,13 @@ function HomeToolbar({
         aria-label="Поиск по записям"
         sx={{ ml: 'auto', minWidth: 200 }}
       />
-      <Button variant="contained" color="primary" size="small" onClick={onOpenTransitionsRef}>
-        Справочник переходов
+      <Button variant="contained" color="primary" size="small" onClick={handleRefMenuOpen} aria-haspopup="true" aria-expanded={!!refMenuAnchor}>
+        Справочники
       </Button>
+      <Menu anchorEl={refMenuAnchor} open={!!refMenuAnchor} onClose={handleRefMenuClose}>
+        <MenuItem onClick={handleOpenTransitionsRef}>Справочник переходов</MenuItem>
+        <MenuItem onClick={handleOpenPreformRef}>Справочник заготовок</MenuItem>
+      </Menu>
     </Box>
   )
 }

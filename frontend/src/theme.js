@@ -25,6 +25,18 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
+    htmlFontSize: 18,
+    fontSize: 18,
+    h1: { fontSize: '1.75rem' },
+    h2: { fontSize: '1.5rem' },
+    h3: { fontSize: '1.25rem' },
+    h4: { fontSize: '1.125rem' },
+    h5: { fontSize: '1.0625rem' },
+    h6: { fontSize: '1rem' },
+    body1: { fontSize: '1rem' },
+    body2: { fontSize: '0.9375rem' },
+    button: { fontSize: '1rem' },
+    caption: { fontSize: '0.875rem' },
   },
   components: {
     MuiTextField: {

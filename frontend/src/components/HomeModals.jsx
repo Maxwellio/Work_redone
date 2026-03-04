@@ -1,5 +1,6 @@
 import FittingModal from './FittingModal'
 import HydrotestModal from './HydrotestModal'
+import PreformRefModal from './PreformRefModal'
 import SubstituteModal from './SubstituteModal'
 import SubstituteTransitionsModal from './SubstituteTransitionsModal'
 import TransitionsRefModal from './TransitionsRefModal'
@@ -13,6 +14,9 @@ function HomeModals({
   partyList,
   isTransitionsRefModalOpen,
   onCloseTransitionsRef,
+  isPreformRefModalOpen,
+  onClosePreformRef,
+  preformRef,
   substituteTransitionsModal,
   onCloseSubstituteTransitions,
   substituteForm,
@@ -70,6 +74,14 @@ function HomeModals({
         loadingOperations={transitionsRef.loadingOperations}
         errorGroups={transitionsRef.errorGroups}
         errorOperations={transitionsRef.errorOperations}
+      />
+
+      <PreformRefModal
+        open={isPreformRefModalOpen}
+        onClose={onClosePreformRef}
+        list={preformRef.list}
+        loading={preformRef.loading}
+        error={preformRef.error}
       />
 
       <SubstituteTransitionsModal
