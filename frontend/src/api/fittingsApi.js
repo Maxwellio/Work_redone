@@ -23,6 +23,16 @@ export async function saveFitting(payload) {
   return res.json()
 }
 
+export async function calcFitTime(id) {
+  const res = await request(`/fittings/${id}/calc-time`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчёта')
+  }
+}
+
 export async function deleteFitting(id) {
   const res = await request(`/fittings/${id}`, {
     method: 'DELETE',

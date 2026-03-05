@@ -148,6 +148,12 @@ public class MainDataController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/substitutes/{id}/calc-time")
+    public ResponseEntity<Void> calcSubTime(@PathVariable Integer id) {
+        substituteService.calcSubTime(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/fittings")
     public ResponseEntity<java.util.Map<String, Integer>> saveFitting(@RequestBody FitingSaveDto body) {
         Integer id = fitingService.saveFitting(body);
@@ -157,6 +163,12 @@ public class MainDataController {
     @DeleteMapping("/fittings/{id}")
     public ResponseEntity<Void> deleteFitting(@PathVariable Integer id) {
         fitingService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/fittings/{id}/calc-time")
+    public ResponseEntity<Void> calcFitTime(@PathVariable Integer id) {
+        fitingService.calcFitTime(id);
         return ResponseEntity.noContent().build();
     }
 

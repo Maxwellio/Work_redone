@@ -27,6 +27,9 @@ export function useFittingForm({
     setIsEditMode(false)
     const emptyForm = activeTab === 1 ? EMPTY_FITTING_FORM_PATRUBOK : EMPTY_FITTING_FORM_TRUBA
     const initialForm = { ...emptyForm }
+    if (activeTab === 1) {
+      initialForm.idPreform = '3'
+    }
     if (partyList.length > 0 && partyList[0]?.colParty) {
       initialForm.cnt = partyList[0].colParty
     }

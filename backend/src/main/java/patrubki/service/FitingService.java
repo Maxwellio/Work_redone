@@ -55,6 +55,16 @@ public class FitingService {
         });
     }
 
+    public void calcFitTime(Integer id) {
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall(
+                "call substitute.calc_fit_time(?)");
+            cs.setObject(1, id, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     public List<FitingDto> findByTipOrderByNm(int tip, String search) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         return repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam).stream()

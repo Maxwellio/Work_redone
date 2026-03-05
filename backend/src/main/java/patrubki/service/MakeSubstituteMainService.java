@@ -62,6 +62,16 @@ public class MakeSubstituteMainService {
         });
     }
 
+    public void calcSubTime(Integer id) {
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall(
+                "call substitute.calc_sub_time(?)");
+            cs.setObject(1, id, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     public List<MakeSubstituteMainDto> findAllOrderByName(String search) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         return repository.findAllOrderByName(searchParam).stream()

@@ -1,4 +1,4 @@
-import { calcHydroTime, deleteFitting, deleteHydrotest, deleteSubstitute, downloadReport } from '../api'
+import { calcFitTime, calcHydroTime, calcSubTime, deleteFitting, deleteHydrotest, deleteSubstitute, downloadReport } from '../api'
 import { getRowId } from '../utils/format'
 
 export function useHomeActions({
@@ -42,16 +42,14 @@ export function useHomeActions({
   }
 
   const handleCalcNorms = async () => {
-    if (activeTab !== 3) {
-      console.log('Расчёт норм времени', { activeTab })
-      return
-    }
     if (selectedRowId == null) {
       window.alert('Выберите запись для расчёта норм времени')
       return
     }
     try {
-      await calcHydroTime(selectedRowId)
+      if (activeTab === 0) await calcSubTime(selectedRowId)
+      else if (activeTab === 1 || activeTab === 2) await calcFitTime(selectedRowId)
+      else await calcHydroTime(selectedRowId)
       await loadData()
       setPendingScrollToId(selectedRowId)
     } catch (err) {

@@ -62,25 +62,6 @@ function FittingModal({
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
 
-  useEffect(() => {
-    if (!open || !isPatrubok) return
-    if (!Array.isArray(preformTypesFiltered) || preformTypesFiltered.length === 0) return
-
-    setDraft((prev) => {
-      const inList = preformTypesFiltered.some((item) => String(item.idPreform) === String(prev.idPreform))
-      const hasValidId = prev.idPreform === '' || (prev.idPreform != null && inList)
-
-      if (hasValidId) return prev
-
-      const preferred = preformTypesFiltered.find((item) => String(item.idPreform) === '3')
-      const fallbackId = (preferred || preformTypesFiltered[0])?.idPreform ?? ''
-
-      if (fallbackId === prev.idPreform) return prev
-
-      return { ...prev, idPreform: fallbackId }
-    })
-  }, [open, isPatrubok, preformTypesFiltered])
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

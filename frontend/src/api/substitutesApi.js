@@ -23,6 +23,16 @@ export async function saveSubstitute(payload) {
   return res.json()
 }
 
+export async function calcSubTime(id) {
+  const res = await request(`/substitutes/${id}/calc-time`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчёта')
+  }
+}
+
 export async function deleteSubstitute(id) {
   const res = await request(`/substitutes/${id}`, {
     method: 'DELETE',
