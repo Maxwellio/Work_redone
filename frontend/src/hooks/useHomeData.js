@@ -8,6 +8,7 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [listData, setListData] = useState([])
   const [loading, setLoading] = useState(false)
+  const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState(null)
   const [preformTypes, setPreformTypes] = useState([])
   const [preformError, setPreformError] = useState(null)
@@ -39,6 +40,7 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
       setListData([])
     } finally {
       setLoading(false)
+      setInitialized(true)
     }
   }, [activeTab, debouncedSearch, showMyRecords, user])
 
@@ -123,6 +125,7 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     setSelectedRowId,
     listData,
     loading,
+    initialized,
     error,
     preformError,
     preformTypesFiltered,

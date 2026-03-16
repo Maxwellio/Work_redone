@@ -30,6 +30,7 @@ function FittingModal({
   onClose,
   onSave,
   tip,
+  onOpenTransitions,
 }) {
   const isPatrubok = tip === 1
   const label = isPatrubok ? 'Патрубок' : 'Труба'
@@ -43,8 +44,22 @@ function FittingModal({
   const [draft, setDraft] = useState(initialFormData)
 
   useEffect(() => {
-    setDraft({ ...initialFormData })
-  }, [open, initialFormData])
+    // Normalize initial form data, especially idPreform for патрубок
+    const next = { ...initialFormData }
+
+    if (isPatrubok && Array.isArray(preformTypesFiltered) && preformTypesFiltered.length > 0) {
+      const allowedIds = preformTypesFiltered.map((item) => String(item.idPreform))
+      const currentId = next.idPreform != null && next.idPreform !== '' ? String(next.idPreform) : ''
+
+      if (!allowedIds.includes(currentId)) {
+        next.idPreform = allowedIds[0]
+      } else {
+        next.idPreform = currentId
+      }
+    }
+
+    setDraft(next)
+  }, [open, initialFormData, isPatrubok, preformTypesFiltered])
 
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
@@ -115,10 +130,14 @@ function FittingModal({
               <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>Заготовка</Typography>
               <FormControl fullWidth size="small">
                 <InputLabel>Наименование</InputLabel>
-                <Select value={draft.idPreform} label="Наименование" onChange={handleFieldChange('idPreform')}>
+                <Select
+                  value={draft.idPreform ?? ''}
+                  label="Наименование"
+                  onChange={handleFieldChange('idPreform')}
+                >
                   <MenuItem value="">Выберите тип</MenuItem>
                   {preformTypesFiltered.map((item) => (
-                    <MenuItem key={item.idPreform} value={item.idPreform}>
+                    <MenuItem key={item.idPreform} value={String(item.idPreform)}>
                       {item.nmPreform}
                     </MenuItem>
                   ))}
@@ -174,7 +193,9 @@ function FittingModal({
         </Box>
       )}
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="outlined" color="primary">{transitionsLabel}</Button>
+        <Button variant="outlined" color="primary" onClick={() => onOpenTransitions?.(draft)}>
+          {transitionsLabel}
+        </Button>
         <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)}>Ок</Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>Отмена</Button>
       </DialogActions>

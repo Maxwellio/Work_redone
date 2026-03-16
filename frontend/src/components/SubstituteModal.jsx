@@ -129,13 +129,13 @@ function SubstituteModal({
           <FormControl fullWidth size="small">
             <InputLabel>Наименование</InputLabel>
             <Select
-              value={draft.idPreform}
+              value={draft.idPreform ?? ''}
               label="Наименование"
               onChange={handleFieldChange('idPreform')}
             >
               <MenuItem value="">Выберите тип</MenuItem>
               {preformTypesFiltered.map((item) => (
-                <MenuItem key={item.idPreform} value={item.idPreform}>
+                <MenuItem key={item.idPreform} value={String(item.idPreform)}>
                   {item.nmPreform}
                 </MenuItem>
               ))}

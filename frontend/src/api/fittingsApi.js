@@ -42,3 +42,12 @@ export async function deleteFitting(id) {
     throw new Error(text || 'Ошибка удаления')
   }
 }
+
+export async function getFittingDetails(idFiting) {
+  const res = await request(`/fittings/${idFiting}/details`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`getFittingDetails failed: ${res.status}`)
+  return res.json()
+}

@@ -37,33 +37,36 @@ function Home() {
       <div className="home">
         <HomeTable
           columns={home.columns}
-        listData={data.listData}
-        activeTab={activeTab}
-        selectedRowId={data.selectedRowId}
-        loading={data.loading}
-        error={data.error}
-        getRowId={getRowId}
-        formatCell={formatCell}
+          listData={data.listData}
+          activeTab={activeTab}
+          selectedRowId={data.selectedRowId}
+          loading={data.loading}
+          initialized={data.initialized}
+          error={data.error}
+          getRowId={getRowId}
+          formatCell={formatCell}
           onSelectRow={data.setSelectedRowId}
         />
 
         <HomeModals
-        activeTab={activeTab}
-        selectedRowId={data.selectedRowId}
-        preformTypesFiltered={data.preformTypesFiltered}
-        preformTypesFilteredFitting={data.preformTypesFilteredFitting}
-        preformError={data.preformError}
-        partyList={data.partyList}
-        isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
-        onCloseTransitionsRef={home.closeTransitionsRefModal}
-        isPreformRefModalOpen={home.isPreformRefModalOpen}
-        onClosePreformRef={home.closePreformRefModal}
-        preformRef={home.preformRef}
-        substituteTransitionsModal={home.substituteTransitionsModal}
-        onCloseSubstituteTransitions={home.closeSubstituteTransitions}
-        substituteForm={home.substituteForm}
-        fittingForm={home.fittingForm}
-        hydrotestForm={home.hydrotestForm}
+          activeTab={activeTab}
+          selectedRowId={data.selectedRowId}
+          preformTypesFiltered={data.preformTypesFiltered}
+          preformTypesFilteredFitting={data.preformTypesFilteredFitting}
+          preformError={data.preformError}
+          partyList={data.partyList}
+          isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
+          onCloseTransitionsRef={home.closeTransitionsRefModal}
+          isPreformRefModalOpen={home.isPreformRefModalOpen}
+          onClosePreformRef={home.closePreformRefModal}
+          preformRef={home.preformRef}
+          substituteTransitionsModal={home.substituteTransitionsModal}
+          onCloseSubstituteTransitions={home.closeSubstituteTransitions}
+          fittingTransitionsModal={home.fittingTransitionsModal}
+          onCloseFittingTransitions={home.closeFittingTransitions}
+          substituteForm={home.substituteForm}
+          fittingForm={home.fittingForm}
+          hydrotestForm={home.hydrotestForm}
           transitionsRef={home.transitionsRef}
         />
       </div>

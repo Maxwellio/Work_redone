@@ -3,6 +3,7 @@ import HydrotestModal from './HydrotestModal'
 import PreformRefModal from './PreformRefModal'
 import SubstituteModal from './SubstituteModal'
 import SubstituteTransitionsModal from './SubstituteTransitionsModal'
+import FittingTransitionsModal from './FittingTransitionsModal'
 import TransitionsRefModal from './TransitionsRefModal'
 
 function HomeModals({
@@ -19,6 +20,8 @@ function HomeModals({
   preformRef,
   substituteTransitionsModal,
   onCloseSubstituteTransitions,
+  fittingTransitionsModal,
+  onCloseFittingTransitions,
   substituteForm,
   fittingForm,
   hydrotestForm,
@@ -51,6 +54,7 @@ function HomeModals({
         onClose={fittingForm.close}
         onSave={fittingForm.handleSave}
         tip={activeTab === 1 ? 1 : 2}
+        onOpenTransitions={fittingForm.handleOpenTransitions}
       />
 
       <HydrotestModal
@@ -89,6 +93,14 @@ function HomeModals({
         substituteId={substituteTransitionsModal.idSubstitutePrepared}
         substituteName={substituteTransitionsModal.substituteName}
         onClose={onCloseSubstituteTransitions}
+      />
+
+      <FittingTransitionsModal
+        open={fittingTransitionsModal.isOpen}
+        fittingId={fittingTransitionsModal.idFiting}
+        fittingName={fittingTransitionsModal.fittingName}
+        tip={fittingTransitionsModal.tip}
+        onClose={onCloseFittingTransitions}
       />
     </>
   )

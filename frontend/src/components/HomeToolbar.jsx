@@ -53,7 +53,6 @@ function HomeToolbar({
           color="primary"
           size="small"
           onClick={onTransitions}
-          disabled={activeTab !== 0}
         >
           {transitionsLabel}
         </Button>

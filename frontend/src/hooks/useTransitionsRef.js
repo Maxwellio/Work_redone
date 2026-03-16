@@ -5,6 +5,7 @@ export function useTransitionsRef(open) {
   const openEffectHasRun = useRef(false)
   const [groups, setGroups] = useState([])
   const [operations, setOperations] = useState([])
+  const [operationsByGroup, setOperationsByGroup] = useState({})
   const [selectedGroupIdState, setSelectedGroupIdState] = useState(null)
   const [loadingGroups, setLoadingGroups] = useState(false)
   const [loadingOperations, setLoadingOperations] = useState(false)
@@ -33,19 +34,34 @@ export function useTransitionsRef(open) {
       setOperations([])
       return
     }
+
+    const cached = operationsByGroup[selectedGroupIdState]
+    if (cached) {
+      setOperations(cached)
+      setLoadingOperations(false)
+      setErrorOperations(null)
+      return
+    }
+
     setLoadingOperations(true)
     setErrorOperations(null)
     getOperations(selectedGroupIdState)
-      .then((data) => setOperations(Array.isArray(data) ? data : []))
-      .catch((err) => setErrorOperations(err.message || 'Ошибка загрузки операций'))
+      .then((data) => {
+        const safeData = Array.isArray(data) ? data : []
+        setOperations(safeData)
+        setOperationsByGroup((prev) => ({
+          ...prev,
+          [selectedGroupIdState]: safeData,
+        }))
+      })
+      .catch((err) => {
+        setErrorOperations(err.message || 'Ошибка загрузки операций')
+        setOperations([])
+      })
       .finally(() => setLoadingOperations(false))
-  }, [open, selectedGroupIdState])
+  }, [open, selectedGroupIdState, operationsByGroup])
 
   const setSelectedGroupId = useCallback((id) => {
-    if (id != null) {
-      setOperations([])
-      setLoadingOperations(true)
-    }
     setSelectedGroupIdState(id)
   }, [])
 

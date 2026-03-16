@@ -21,6 +21,12 @@ export function useHomePage() {
     idSubstitutePrepared: null,
     substituteName: '',
   })
+  const [fittingTransitionsModal, setFittingTransitionsModal] = useState({
+    isOpen: false,
+    idFiting: null,
+    fittingName: '',
+    tip: null,
+  })
 
   const data = useHomeData({
     activeTab,
@@ -39,6 +45,19 @@ export function useHomePage() {
 
   const closeSubstituteTransitions = () => {
     setSubstituteTransitionsModal((prev) => ({ ...prev, isOpen: false }))
+  }
+
+  const openFittingTransitions = ({ idFiting, name, tip }) => {
+    setFittingTransitionsModal({
+      isOpen: true,
+      idFiting,
+      fittingName: name || '',
+      tip: tip ?? null,
+    })
+  }
+
+  const closeFittingTransitions = () => {
+    setFittingTransitionsModal((prev) => ({ ...prev, isOpen: false }))
   }
 
   const substituteForm = useSubstituteForm({
@@ -61,6 +80,7 @@ export function useHomePage() {
     loadData: data.loadData,
     setSelectedRowId: data.setSelectedRowId,
     setPendingScrollToId: data.setPendingScrollToId,
+    onOpenTransitions: openFittingTransitions,
   })
 
   const hydrotestForm = useHydrotestForm({
@@ -98,17 +118,34 @@ export function useHomePage() {
   }
 
   const handleOpenTransitions = () => {
-    if (activeTab !== 0) return
-    if (data.selectedRowId == null) {
-      window.alert('Выберите переводник')
+    if (activeTab === 0) {
+      if (data.selectedRowId == null) {
+        window.alert('Выберите переводник')
+        return
+      }
+      const selectedRow = data.listData.find((row) => row.idSubstitutePrepared === data.selectedRowId)
+      if (!selectedRow) return
+      openSubstituteTransitions({
+        idSubstitutePrepared: data.selectedRowId,
+        name: selectedRow.name || '',
+      })
       return
     }
-    const selectedRow = data.listData.find((row) => row.idSubstitutePrepared === data.selectedRowId)
-    if (!selectedRow) return
-    openSubstituteTransitions({
-      idSubstitutePrepared: data.selectedRowId,
-      name: selectedRow.name || '',
-    })
+
+    if (activeTab === 1 || activeTab === 2) {
+      if (data.selectedRowId == null) {
+        window.alert('Выберите трубу/патрубок')
+        return
+      }
+      const selectedRow = data.listData.find((row) => row.idFiting === data.selectedRowId)
+      if (!selectedRow) return
+      const tip = selectedRow.tip ?? (activeTab === 1 ? 1 : 2)
+      openFittingTransitions({
+        idFiting: data.selectedRowId,
+        name: selectedRow.nm || '',
+        tip,
+      })
+    }
   }
 
   return {
@@ -126,6 +163,8 @@ export function useHomePage() {
     closePreformRefModal: () => setIsPreformRefModalOpen(false),
     substituteTransitionsModal,
     closeSubstituteTransitions,
+    fittingTransitionsModal,
+    closeFittingTransitions,
     columns: COLUMNS[activeTab],
     data,
     actions,

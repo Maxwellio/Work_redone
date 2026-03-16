@@ -16,6 +16,7 @@ export function useFittingForm({
   loadData,
   setSelectedRowId,
   setPendingScrollToId,
+  onOpenTransitions,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -46,7 +47,14 @@ export function useFittingForm({
     if (!selectedRow) return
     setSaveError(null)
     setIsEditMode(true)
-    setFormData(mapFittingToForm(selectedRow))
+    const mapped = mapFittingToForm(selectedRow)
+    if (activeTab === 1) {
+      const id = mapped.idPreform
+      if (id !== '3' && id !== '4') {
+        mapped.idPreform = '3'
+      }
+    }
+    setFormData(mapped)
     setIsModalOpen(true)
   }
 
@@ -55,6 +63,18 @@ export function useFittingForm({
     setIsModalOpen(false)
     const emptyForm = activeTab === 1 ? EMPTY_FITTING_FORM_PATRUBOK : EMPTY_FITTING_FORM_TRUBA
     setFormData(emptyForm)
+  }
+
+  const handleOpenTransitions = () => {
+    if (onOpenTransitions == null) return
+    const tip = activeTab === 1 ? 1 : 2
+    const selectedRow = listData.find((row) => getRowId(row, activeTab) === selectedRowId)
+    if (!selectedRow) return
+    onOpenTransitions({
+      idFiting: selectedRow.idFiting,
+      name: selectedRow.nm || '',
+      tip,
+    })
   }
 
   const handleSave = async (draft) => {
@@ -106,5 +126,6 @@ export function useFittingForm({
     openEdit,
     close,
     handleSave,
+    handleOpenTransitions,
   }
 }
