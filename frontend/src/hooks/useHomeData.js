@@ -10,6 +10,9 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
   const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState(null)
+  const [displayedListData, setDisplayedListData] = useState([])
+  const [displayedActiveTab, setDisplayedActiveTab] = useState(0)
+  const [displayedInitialized, setDisplayedInitialized] = useState(false)
   const [preformTypes, setPreformTypes] = useState([])
   const [preformError, setPreformError] = useState(null)
   const [partyList, setPartyList] = useState([])
@@ -25,16 +28,18 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     setError(null)
     try {
       const userId = showMyRecords && user?.userId ? user.userId : null
+      let data
       if (activeTab === 0) {
-        const data = await getSubstitutes(debouncedSearch, userId)
-        setListData(data)
+        data = await getSubstitutes(debouncedSearch, userId)
       } else if (activeTab === 1 || activeTab === 2) {
-        const data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId)
-        setListData(data)
+        data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId)
       } else {
-        const data = await getHydrotests(debouncedSearch, userId)
-        setListData(data)
+        data = await getHydrotests(debouncedSearch, userId)
       }
+      setListData(data)
+      setDisplayedListData(data)
+      setDisplayedActiveTab(activeTab)
+      setDisplayedInitialized(true)
     } catch (err) {
       setError(err.message || 'Ошибка загрузки')
       setListData([])
@@ -127,6 +132,9 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     loading,
     initialized,
     error,
+    displayedListData,
+    displayedActiveTab,
+    displayedInitialized,
     preformError,
     preformTypesFiltered,
     preformTypesFilteredFitting,

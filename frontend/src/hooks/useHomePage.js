@@ -166,6 +166,7 @@ export function useHomePage() {
     fittingTransitionsModal,
     closeFittingTransitions,
     columns: COLUMNS[activeTab],
+    displayedColumns: COLUMNS[data.displayedActiveTab],
     data,
     actions,
     substituteForm,

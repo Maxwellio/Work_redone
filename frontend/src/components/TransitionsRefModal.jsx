@@ -21,9 +21,9 @@ function TransitionsRefModal({
   groups,
   operations,
   selectedGroupId,
+  displayedGroupId,
   onSelectGroup,
   loadingGroups,
-  loadingOperations,
   errorGroups,
   errorOperations,
 }) {
@@ -85,14 +85,9 @@ function TransitionsRefModal({
               Операции
             </Typography>
             <TableContainer className="transitions-ref-modal__table-wrap">
-              {selectedGroupId == null && !loadingOperations && (
+              {selectedGroupId == null && (
                 <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
                   Выберите группу слева
-                </Box>
-              )}
-              {loadingOperations && (
-                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                  Загрузка…
                 </Box>
               )}
               {errorOperations && (
@@ -100,7 +95,7 @@ function TransitionsRefModal({
                   {errorOperations}
                 </Box>
               )}
-              {!loadingOperations && !errorOperations && selectedGroupId != null && (
+              {selectedGroupId != null && !errorOperations && displayedGroupId != null && (
                 <Table size="small" className="transitions-ref-modal__table">
                   <TableHead>
                     <TableRow>

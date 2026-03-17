@@ -36,12 +36,11 @@ function Home() {
     <Layout chrome={chrome}>
       <div className="home">
         <HomeTable
-          columns={home.columns}
-          listData={data.listData}
-          activeTab={activeTab}
+          columns={home.displayedColumns}
+          listData={data.displayedListData}
+          activeTab={data.displayedActiveTab}
           selectedRowId={data.selectedRowId}
-          loading={data.loading}
-          initialized={data.initialized}
+          initialized={data.displayedInitialized}
           error={data.error}
           getRowId={getRowId}
           formatCell={formatCell}
