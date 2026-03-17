@@ -57,6 +57,13 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose })
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [selectedRowKey, setSelectedRowKey] = useState(null)
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedRowKey(null)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open || fittingId == null) return
@@ -90,6 +97,7 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose })
 
   const titleName = fittingName ? ` ${fittingName}` : ''
   const tipLabel = tip === 1 ? 'патрубку' : 'трубе'
+  const emptyMessage = tip === 1 ? 'Нет переходов для выбранного патрубка' : 'Нет переходов для выбранной трубы'
 
   return (
     <Dialog
@@ -135,18 +143,26 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose })
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rowsSorted.map((row) => (
-                  <TableRow key={row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`}>
-                    {COLUMNS.map((col) => (
-                      <TableCell key={col.key}>{formatCell(row[col.key])}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {rowsSorted.map((row) => {
+                  const rowKey = row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
+                  return (
+                    <TableRow
+                      key={rowKey}
+                      selected={selectedRowKey === rowKey}
+                      onClick={() => setSelectedRowKey(rowKey)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      {COLUMNS.map((col) => (
+                        <TableCell key={col.key}>{formatCell(row[col.key])}</TableCell>
+                      ))}
+                    </TableRow>
+                  )
+                })}
                 {!rowsSorted.length && (
                   <TableRow>
                     <TableCell colSpan={COLUMNS.length}>
                       <Typography variant="body2" color="text.secondary">
-                        Нет переходов для выбранной трубы/патрубка
+                        {emptyMessage}
                       </Typography>
                     </TableCell>
                   </TableRow>

@@ -74,10 +74,8 @@ function HomeModals({
         operations={transitionsRef.operations}
         selectedGroupId={transitionsRef.selectedGroupId}
         onSelectGroup={transitionsRef.setSelectedGroupId}
-        loadingGroups={transitionsRef.loadingGroups}
-        loadingOperations={transitionsRef.loadingOperations}
-        errorGroups={transitionsRef.errorGroups}
-        errorOperations={transitionsRef.errorOperations}
+        loadingRefData={transitionsRef.loadingRefData}
+        errorRefData={transitionsRef.errorRefData}
       />
 
       <PreformRefModal

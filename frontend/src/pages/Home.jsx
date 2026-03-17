@@ -28,7 +28,7 @@ function Home() {
         onToggleMyRecords={home.toggleMyRecords}
         onSearchChange={home.setSearchQuery}
       />
-      <HomeTabs activeTab={activeTab} onChange={home.setActiveTab} />
+      <HomeTabs activeTab={activeTab} onChange={home.handleTabChange} />
     </>
   )
 
@@ -41,7 +41,6 @@ function Home() {
           activeTab={activeTab}
           selectedRowId={data.selectedRowId}
           loading={data.loading}
-          initialized={data.initialized}
           error={data.error}
           getRowId={getRowId}
           formatCell={formatCell}

@@ -105,6 +105,12 @@ export function useHomePage() {
   const transitionsRef = useTransitionsRef(isTransitionsRefModalOpen)
   const preformRef = usePreformRef(isPreformRefModalOpen)
 
+  const handleTabChange = (nextTab) => {
+    if (nextTab === activeTab) return
+    data.beginLoading()
+    setActiveTab(nextTab)
+  }
+
   const handleAdd = () => {
     if (activeTab === 0) substituteForm.openAdd()
     else if (activeTab === 1 || activeTab === 2) fittingForm.openAdd()
@@ -134,7 +140,11 @@ export function useHomePage() {
 
     if (activeTab === 1 || activeTab === 2) {
       if (data.selectedRowId == null) {
-        window.alert('Выберите трубу/патрубок')
+        if (activeTab === 1) {
+          window.alert('Выберите патрубок')
+        } else if (activeTab === 2) {
+          window.alert('Выберите трубу')
+        }
         return
       }
       const selectedRow = data.listData.find((row) => row.idFiting === data.selectedRowId)
@@ -151,6 +161,7 @@ export function useHomePage() {
   return {
     activeTab,
     setActiveTab,
+    handleTabChange,
     searchQuery,
     setSearchQuery,
     showMyRecords,

@@ -57,6 +57,13 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [selectedRowKey, setSelectedRowKey] = useState(null)
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedRowKey(null)
+    }
+  }, [open])
 
   useEffect(() => {
     if (!open || substituteId == null) return
@@ -126,13 +133,21 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rowsSorted.map((row) => (
-                  <TableRow key={row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`}>
-                    {COLUMNS.map((col) => (
-                      <TableCell key={col.key}>{formatCell(row[col.key])}</TableCell>
-                    ))}
-                  </TableRow>
-                ))}
+                {rowsSorted.map((row) => {
+                  const rowKey = row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
+                  return (
+                    <TableRow
+                      key={rowKey}
+                      selected={selectedRowKey === rowKey}
+                      onClick={() => setSelectedRowKey(rowKey)}
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      {COLUMNS.map((col) => (
+                        <TableCell key={col.key}>{formatCell(row[col.key])}</TableCell>
+                      ))}
+                    </TableRow>
+                  )
+                })}
                 {!rowsSorted.length && (
                   <TableRow>
                     <TableCell colSpan={COLUMNS.length}>

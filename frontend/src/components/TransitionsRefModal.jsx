@@ -22,10 +22,8 @@ function TransitionsRefModal({
   operations,
   selectedGroupId,
   onSelectGroup,
-  loadingGroups,
-  loadingOperations,
-  errorGroups,
-  errorOperations,
+  loadingRefData,
+  errorRefData,
 }) {
   const formatCell = (value) => (value == null ? '—' : String(value))
   const groupsSorted = [...groups].sort((a, b) => (a.idGroupOperations ?? 0) - (b.idGroupOperations ?? 0))
@@ -46,17 +44,17 @@ function TransitionsRefModal({
               Группа
             </Typography>
             <TableContainer className="transitions-ref-modal__table-wrap">
-              {loadingGroups && (
+              {loadingRefData && (
                 <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
                   Загрузка…
                 </Box>
               )}
-              {errorGroups && (
+              {errorRefData && (
                 <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
-                  {errorGroups}
+                  {errorRefData}
                 </Box>
               )}
-              {!loadingGroups && !errorGroups && (
+              {!loadingRefData && !errorRefData && (
                 <Table size="small" className="transitions-ref-modal__table">
                   <TableHead>
                     <TableRow>
@@ -85,22 +83,17 @@ function TransitionsRefModal({
               Операции
             </Typography>
             <TableContainer className="transitions-ref-modal__table-wrap">
-              {selectedGroupId == null && !loadingOperations && (
-                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                  Выберите группу слева
-                </Box>
-              )}
-              {loadingOperations && (
+              {loadingRefData && (
                 <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
                   Загрузка…
                 </Box>
               )}
-              {errorOperations && (
-                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
-                  {errorOperations}
+              {!loadingRefData && selectedGroupId == null && (
+                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                  Выберите группу слева
                 </Box>
               )}
-              {!loadingOperations && !errorOperations && selectedGroupId != null && (
+              {!loadingRefData && !errorRefData && selectedGroupId != null && (
                 <Table size="small" className="transitions-ref-modal__table">
                   <TableHead>
                     <TableRow>

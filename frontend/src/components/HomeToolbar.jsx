@@ -22,7 +22,7 @@ function HomeToolbar({
   onSearchChange,
 }) {
   const [refMenuAnchor, setRefMenuAnchor] = useState(null)
-  const transitionsLabel = activeTab === 0 ? 'Переходы по переводнику' : 'Переходы по трубе'
+  const transitionsLabel = 'Переходы'
 
   const handleRefMenuOpen = (e) => setRefMenuAnchor(e.currentTarget)
   const handleRefMenuClose = () => setRefMenuAnchor(null)

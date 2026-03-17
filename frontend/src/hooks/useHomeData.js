@@ -8,12 +8,17 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [listData, setListData] = useState([])
   const [loading, setLoading] = useState(false)
-  const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState(null)
   const [preformTypes, setPreformTypes] = useState([])
   const [preformError, setPreformError] = useState(null)
   const [partyList, setPartyList] = useState([])
   const [pendingScrollToId, setPendingScrollToId] = useState(null)
+
+  const beginLoading = () => {
+    setLoading(true)
+    setError(null)
+    setSelectedRowId(null)
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), DEBOUNCE_MS)
@@ -21,6 +26,8 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
   }, [searchQuery])
 
   const loadData = useCallback(async () => {
+    const requestId = Symbol('home-data-request')
+    let isCurrent = true
     setLoading(true)
     setError(null)
     try {
@@ -36,16 +43,21 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
         setListData(data)
       }
     } catch (err) {
+      if (!isCurrent) return
       setError(err.message || 'Ошибка загрузки')
       setListData([])
     } finally {
+      if (!isCurrent) return
       setLoading(false)
-      setInitialized(true)
+    }
+    return () => {
+      isCurrent = false
     }
   }, [activeTab, debouncedSearch, showMyRecords, user])
 
   useEffect(() => {
-    loadData()
+    const cleanup = loadData()
+    return typeof cleanup === 'function' ? cleanup : undefined
   }, [loadData])
 
   useEffect(() => {
@@ -125,13 +137,13 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     setSelectedRowId,
     listData,
     loading,
-    initialized,
     error,
     preformError,
     preformTypesFiltered,
     preformTypesFilteredFitting,
     partyList,
     loadData,
+    beginLoading,
     pendingScrollToId,
     setPendingScrollToId,
   }

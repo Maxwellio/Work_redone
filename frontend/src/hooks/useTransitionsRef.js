@@ -2,82 +2,68 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { getOperationGroups, getOperations } from '../api'
 
 export function useTransitionsRef(open) {
-  const openEffectHasRun = useRef(false)
   const [groups, setGroups] = useState([])
-  const [operations, setOperations] = useState([])
   const [operationsByGroup, setOperationsByGroup] = useState({})
-  const [selectedGroupIdState, setSelectedGroupIdState] = useState(null)
-  const [loadingGroups, setLoadingGroups] = useState(false)
-  const [loadingOperations, setLoadingOperations] = useState(false)
-  const [errorGroups, setErrorGroups] = useState(null)
-  const [errorOperations, setErrorOperations] = useState(null)
+  const [selectedGroupId, setSelectedGroupId] = useState(null)
+  const [loadingRefData, setLoadingRefData] = useState(false)
+  const [errorRefData, setErrorRefData] = useState(null)
 
   useEffect(() => {
     if (!open) {
-      openEffectHasRun.current = false
       return
     }
-    setLoadingGroups(true)
-    setErrorGroups(null)
+    let isMounted = true
+    setLoadingRefData(true)
+    setErrorRefData(null)
     setGroups([])
-    setSelectedGroupIdState(null)
-    setOperations([])
+    setOperationsByGroup({})
+    setSelectedGroupId(null)
+
     getOperationGroups()
-      .then((data) => setGroups(Array.isArray(data) ? data : []))
-      .catch((err) => setErrorGroups(err.message || 'Ошибка загрузки групп'))
-      .finally(() => setLoadingGroups(false))
-    openEffectHasRun.current = true
-  }, [open])
-
-  useEffect(() => {
-    if (!open || selectedGroupIdState == null) {
-      setOperations([])
-      return
-    }
-
-    const cached = operationsByGroup[selectedGroupIdState]
-    if (cached) {
-      setOperations(cached)
-      setLoadingOperations(false)
-      setErrorOperations(null)
-      return
-    }
-
-    setLoadingOperations(true)
-    setErrorOperations(null)
-    getOperations(selectedGroupIdState)
-      .then((data) => {
-        const safeData = Array.isArray(data) ? data : []
-        setOperations(safeData)
-        setOperationsByGroup((prev) => ({
-          ...prev,
-          [selectedGroupIdState]: safeData,
-        }))
+      .then(async (data) => {
+        if (!isMounted) return
+        const groupsSafe = Array.isArray(data) ? data : []
+        setGroups(groupsSafe)
+        if (!groupsSafe.length) return
+        const operationsEntries = await Promise.all(
+          groupsSafe.map(async (g) => {
+            try {
+              const ops = await getOperations(g.idGroupOperations)
+              return [g.idGroupOperations, Array.isArray(ops) ? ops : []]
+            } catch {
+              return [g.idGroupOperations, []]
+            }
+          })
+        )
+        if (!isMounted) return
+        const map = operationsEntries.reduce((acc, [id, ops]) => {
+          acc[id] = ops
+          return acc
+        }, {})
+        setOperationsByGroup(map)
       })
       .catch((err) => {
-        setErrorOperations(err.message || 'Ошибка загрузки операций')
-        setOperations([])
+        if (!isMounted) return
+        setErrorRefData(err.message || 'Ошибка загрузки переходов')
       })
-      .finally(() => setLoadingOperations(false))
-  }, [open, selectedGroupIdState, operationsByGroup])
+      .finally(() => {
+        if (!isMounted) return
+        setLoadingRefData(false)
+      })
 
-  const setSelectedGroupId = useCallback((id) => {
-    setSelectedGroupIdState(id)
-  }, [])
+    return () => {
+      isMounted = false
+    }
+  }, [open])
 
-  const selectedGroupId =
-    open && !openEffectHasRun.current ? null : selectedGroupIdState
-  const operationsEffective =
-    open && !openEffectHasRun.current ? [] : operations
+  const operations = selectedGroupId == null ? [] : (operationsByGroup[selectedGroupId] || [])
 
   return {
     groups,
-    operations: operationsEffective,
+    operations,
     selectedGroupId,
     setSelectedGroupId,
-    loadingGroups,
-    loadingOperations,
-    errorGroups,
-    errorOperations,
+    loadingRefData,
+    errorRefData,
   }
 }

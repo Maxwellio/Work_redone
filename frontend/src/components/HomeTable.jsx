@@ -13,7 +13,6 @@ function HomeTable({
   activeTab,
   selectedRowId,
   loading,
-  initialized,
   error,
   getRowId,
   formatCell,
@@ -27,7 +26,10 @@ function HomeTable({
       {loading && (
         <Box className="home-table-message">Загрузка…</Box>
       )}
-      {!loading && !error && initialized && (
+      {!loading && error && (
+        <Box className="home-table-message home-table-message_error">{error}</Box>
+      )}
+      {!loading && !error && (
         <Table size="small" stickyHeader className="home-table">
           <TableHead>
             <TableRow>
