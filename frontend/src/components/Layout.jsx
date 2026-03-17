@@ -1,14 +1,38 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import { useAuth } from '../context/AuthContext'
+import ChangePasswordDialog from './ChangePasswordDialog'
 import '../styles/Layout.css'
 
 function Layout({ children, chrome }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null)
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
+
+  const isUserMenuOpen = Boolean(userMenuAnchorEl)
+
+  const handleUserClick = (event) => {
+    setUserMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchorEl(null)
+  }
+
+  const handleOpenChangePassword = () => {
+    setIsChangePasswordOpen(true)
+  }
+
+  const handleCloseChangePassword = () => {
+    setIsChangePasswordOpen(false)
+  }
 
   async function handleLogout() {
     await logout()
@@ -25,9 +49,36 @@ function Layout({ children, chrome }) {
             </Typography>
             {user && (
               <>
-                <Typography variant="body2" sx={{ opacity: 0.9, mr: 1 }}>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={handleUserClick}
+                  sx={{ textTransform: 'none', mr: 1, opacity: 0.9 }}
+                >
                   {user.username}
-                </Typography>
+                </Button>
+                <Menu
+                  anchorEl={userMenuAnchorEl}
+                  open={isUserMenuOpen}
+                  onClose={handleUserMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      handleUserMenuClose()
+                      handleOpenChangePassword()
+                    }}
+                  >
+                    Сменить пароль
+                  </MenuItem>
+                </Menu>
                 <Button
                   color="inherit"
                   variant="outlined"
@@ -44,6 +95,14 @@ function Layout({ children, chrome }) {
             )}
           </Toolbar>
         </AppBar>
+        <ChangePasswordDialog
+          open={isChangePasswordOpen}
+          onClose={handleCloseChangePassword}
+          onSubmit={() => {
+            // функционал смены пароля будет добавлен позже
+            handleCloseChangePassword()
+          }}
+        />
         {chrome}
       </div>
       <main className="layout-main">
