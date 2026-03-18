@@ -135,12 +135,17 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
               <TableBody>
                 {rowsSorted.map((row) => {
                   const rowKey = row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
+                  const isSelected = selectedRowKey === rowKey
                   return (
                     <TableRow
                       key={rowKey}
-                      selected={selectedRowKey === rowKey}
-                      onClick={() => setSelectedRowKey(rowKey)}
-                      sx={{ cursor: 'pointer' }}
+                      selected={isSelected}
+                      onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
+                      sx={{
+                        cursor: 'pointer',
+                        // Hover-подсветка как на `Home` (включая выбранную строку).
+                        '&:hover': { background: 'var(--color-sand-light)' },
+                      }}
                     >
                       {COLUMNS.map((col) => (
                         <TableCell key={col.key}>{formatCell(row[col.key])}</TableCell>

@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
+import { EMPTY_SUBSTITUTE_FORM } from '../models/forms'
 
 const NUMERIC_FIELDS = new Set([
   'dSubstituteOut',
@@ -40,10 +41,29 @@ function SubstituteModal({
   onOpenTransitions,
 }) {
   const title = isEditMode ? 'Редактирование переводника' : 'Добавление переводника'
-  const [draft, setDraft] = useState(initialFormData)
+
+  const normalizeDraft = (data) => ({
+    nmSub1: data?.nmSub1 ?? EMPTY_SUBSTITUTE_FORM.nmSub1,
+    nmSub2: data?.nmSub2 ?? EMPTY_SUBSTITUTE_FORM.nmSub2,
+    nmSub3: data?.nmSub3 ?? EMPTY_SUBSTITUTE_FORM.nmSub3,
+    nmSub4: data?.nmSub4 ?? EMPTY_SUBSTITUTE_FORM.nmSub4,
+    nmSub5: data?.nmSub5 ?? EMPTY_SUBSTITUTE_FORM.nmSub5,
+    dSubstituteOut: data?.dSubstituteOut ?? EMPTY_SUBSTITUTE_FORM.dSubstituteOut,
+    dSubstituteIn: data?.dSubstituteIn ?? EMPTY_SUBSTITUTE_FORM.dSubstituteIn,
+    lSubstitute: data?.lSubstitute ?? EMPTY_SUBSTITUTE_FORM.lSubstitute,
+    idPreform: data?.idPreform ?? EMPTY_SUBSTITUTE_FORM.idPreform,
+    dPreformOut: data?.dPreformOut ?? EMPTY_SUBSTITUTE_FORM.dPreformOut,
+    dPreformIn: data?.dPreformIn ?? EMPTY_SUBSTITUTE_FORM.dPreformIn,
+    lPreform: data?.lPreform ?? EMPTY_SUBSTITUTE_FORM.lPreform,
+    ph: data?.ph ?? EMPTY_SUBSTITUTE_FORM.ph,
+    massPreform: data?.massPreform ?? EMPTY_SUBSTITUTE_FORM.massPreform,
+  })
+
+  // Keep all inputs controlled from the first render (avoid uncontrolled->controlled warnings)
+  const [draft, setDraft] = useState(() => normalizeDraft(initialFormData))
 
   useEffect(() => {
-    setDraft({ ...initialFormData })
+    setDraft(normalizeDraft(initialFormData))
   }, [open, initialFormData])
 
   const handleFieldChange = (field) => (event) => {
@@ -159,7 +179,7 @@ function SubstituteModal({
             type="number"
             value={draft.dPreformIn}
             onChange={handleFieldChange('dPreformIn')}
-            disabled={draft.idPreform === '1' || draft.idPreform === 1}
+            disabled={String(draft.idPreform ?? '') === '1'}
             sx={{
               '& .MuiOutlinedInput-root.Mui-disabled': {
                 bgcolor: 'action.disabledBackground',
