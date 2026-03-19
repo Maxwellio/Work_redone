@@ -87,15 +87,15 @@ function SubstituteModal({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography sx={{ minWidth: 100 }}>Наименование</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <TextField size="small" value={draft.nmSub1} onChange={handleFieldChange('nmSub1')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub1 ?? ''} onChange={handleFieldChange('nmSub1')} sx={{ width: 96, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub2} onChange={handleFieldChange('nmSub2')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub2 ?? ''} onChange={handleFieldChange('nmSub2')} sx={{ width: 96, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub3} onChange={handleFieldChange('nmSub3')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub3 ?? ''} onChange={handleFieldChange('nmSub3')} sx={{ width: 96, minWidth: 64 }} />
               <Typography color="text.secondary">/</Typography>
-              <TextField size="small" value={draft.nmSub4} onChange={handleFieldChange('nmSub4')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub4 ?? ''} onChange={handleFieldChange('nmSub4')} sx={{ width: 96, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub5} onChange={handleFieldChange('nmSub5')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub5 ?? ''} onChange={handleFieldChange('nmSub5')} sx={{ width: 96, minWidth: 64 }} />
             </Box>
           </Box>
 
@@ -104,7 +104,7 @@ function SubstituteModal({
             size="small"
             label="Диаметр наружный переводника, мм"
             type="number"
-            value={draft.dSubstituteOut}
+            value={draft.dSubstituteOut ?? ''}
             onChange={handleFieldChange('dSubstituteOut')}
           />
           <TextField
@@ -112,7 +112,7 @@ function SubstituteModal({
             size="small"
             label="Диаметр внутренний переводника, мм"
             type="number"
-            value={draft.dSubstituteIn}
+            value={draft.dSubstituteIn ?? ''}
             onChange={handleFieldChange('dSubstituteIn')}
           />
           <TextField
@@ -120,7 +120,7 @@ function SubstituteModal({
             size="small"
             label="Длина, мм переводника"
             type="number"
-            value={draft.lSubstitute}
+            value={draft.lSubstitute ?? ''}
             onChange={handleFieldChange('lSubstitute')}
           />
 
@@ -149,7 +149,7 @@ function SubstituteModal({
             size="small"
             label="Диаметр наружный заготовки, мм"
             type="number"
-            value={draft.dPreformOut}
+            value={draft.dPreformOut ?? ''}
             onChange={handleFieldChange('dPreformOut')}
           />
           <TextField
@@ -157,7 +157,7 @@ function SubstituteModal({
             size="small"
             label="Диаметр внутренний заготовки, мм"
             type="number"
-            value={draft.dPreformIn}
+            value={draft.dPreformIn ?? ''}
             onChange={handleFieldChange('dPreformIn')}
             disabled={draft.idPreform === '1' || draft.idPreform === 1}
             sx={{
@@ -174,7 +174,7 @@ function SubstituteModal({
             size="small"
             label="Длина, мм заготовки"
             type="number"
-            value={draft.lPreform}
+            value={draft.lPreform ?? ''}
             onChange={handleFieldChange('lPreform')}
           />
           <TextField
@@ -182,7 +182,7 @@ function SubstituteModal({
             size="small"
             label="Коэф. жесткости, ГПа"
             type="number"
-            value={draft.ph}
+            value={draft.ph ?? ''}
             onChange={handleFieldChange('ph')}
           />
           <TextField
@@ -190,7 +190,7 @@ function SubstituteModal({
             size="small"
             label="Масса заготовки"
             type="number"
-            value={draft.massPreform}
+            value={draft.massPreform ?? ''}
             onChange={handleFieldChange('massPreform')}
           />
         </Stack>
