@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -24,10 +25,20 @@ function TransitionsRefModal({
   onSelectGroup,
   loadingRefData,
   errorRefData,
+  onOk,
 }) {
   const formatCell = (value) => (value == null ? '—' : String(value))
   const groupsSorted = [...groups].sort((a, b) => (a.idGroupOperations ?? 0) - (b.idGroupOperations ?? 0))
   const operationsSorted = [...operations].sort((a, b) => (a.idOperations ?? 0) - (b.idOperations ?? 0))
+  const [selectedOperationId, setSelectedOperationId] = useState(null)
+
+  useEffect(() => {
+    if (!open) setSelectedOperationId(null)
+  }, [open])
+
+  useEffect(() => {
+    setSelectedOperationId(null)
+  }, [selectedGroupId])
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
@@ -103,7 +114,15 @@ function TransitionsRefModal({
                   </TableHead>
                   <TableBody>
                     {operationsSorted.map((op) => (
-                      <TableRow key={op.idOperations}>
+                      <TableRow
+                        key={op.idOperations}
+                        selected={selectedOperationId === op.idOperations}
+                        onClick={() => setSelectedOperationId(op.idOperations)}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': { background: 'var(--color-sand-light)' },
+                        }}
+                      >
                         <TableCell>{formatCell(op.nmOperations)}</TableCell>
                         <TableCell>{formatCell(op.tk)}</TableCell>
                       </TableRow>
@@ -117,6 +136,14 @@ function TransitionsRefModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={selectedOperationId == null}
+          onClick={() => onOk?.(selectedOperationId)}
+        >
+          ОК
+        </Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
           Закрыть
         </Button>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { COLUMNS } from '../models/tableConfig'
 import { useFittingForm } from './useFittingForm'
@@ -15,6 +15,12 @@ export function useHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
+  const [transitionsRefContext, setTransitionsRefContext] = useState({
+    ownerType: null, // 'substitute' | 'fitting' | null
+    tip: null, // for fitting: 1 = patrubok, 2 = tube
+    mode: null, // 'add' | 'edit' | null
+    transitionRecordId: null, // id записи, которая будет редактироваться (для future)
+  })
   const [isPreformRefModalOpen, setIsPreformRefModalOpen] = useState(false)
   const [substituteTransitionsModal, setSubstituteTransitionsModal] = useState({
     isOpen: false,
@@ -102,7 +108,23 @@ export function useHomePage() {
     setPendingScrollToId: data.setPendingScrollToId,
   })
 
-  const transitionsRef = useTransitionsRef(isTransitionsRefModalOpen)
+  const disallowedGroupIds = useMemo(() => {
+    if (transitionsRefContext.ownerType === 'substitute') {
+      // У переводников нет группы 16
+      return [16]
+    }
+
+    if (transitionsRefContext.ownerType === 'fitting') {
+      // tip: 1 = патрубки, 2 = трубы
+      if (transitionsRefContext.tip === 1) return [2, 4, 13, 14]
+      if (transitionsRefContext.tip === 2) return [1, 2, 3, 4, 13, 14]
+    }
+
+    // В открытии из меню показываем все группы
+    return []
+  }, [transitionsRefContext.ownerType, transitionsRefContext.tip])
+
+  const transitionsRef = useTransitionsRef(isTransitionsRefModalOpen, disallowedGroupIds)
   const preformRef = usePreformRef(isPreformRefModalOpen)
 
   const handleTabChange = (nextTab) => {
@@ -158,6 +180,26 @@ export function useHomePage() {
     }
   }
 
+  const openTransitionsRefModal = (ctx = {}) => {
+    setTransitionsRefContext({
+      ownerType: ctx.ownerType ?? null,
+      tip: ctx.tip ?? null,
+      mode: ctx.mode ?? null,
+      transitionRecordId: ctx.transitionRecordId ?? null,
+    })
+    setIsTransitionsRefModalOpen(true)
+  }
+
+  const closeTransitionsRefModal = () => {
+    setIsTransitionsRefModalOpen(false)
+    setTransitionsRefContext({
+      ownerType: null,
+      tip: null,
+      mode: null,
+      transitionRecordId: null,
+    })
+  }
+
   return {
     activeTab,
     setActiveTab,
@@ -167,8 +209,8 @@ export function useHomePage() {
     showMyRecords,
     toggleMyRecords: () => setShowMyRecords((prev) => !prev),
     isTransitionsRefModalOpen,
-    openTransitionsRefModal: () => setIsTransitionsRefModalOpen(true),
-    closeTransitionsRefModal: () => setIsTransitionsRefModalOpen(false),
+    openTransitionsRefModal,
+    closeTransitionsRefModal,
     isPreformRefModalOpen,
     openPreformRefModal: () => setIsPreformRefModalOpen(true),
     closePreformRefModal: () => setIsPreformRefModalOpen(false),

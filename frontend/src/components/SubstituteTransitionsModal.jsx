@@ -53,7 +53,9 @@ const mapRow = (row) => {
   }
 }
 
-function SubstituteTransitionsModal({ open, substituteId, substituteName, onClose }) {
+const getRowKey = (row) => row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
+
+function SubstituteTransitionsModal({ open, substituteId, substituteName, onClose, onOpenTransitionsRefModal }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -134,7 +136,7 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
               </TableHead>
               <TableBody>
                 {rowsSorted.map((row) => {
-                  const rowKey = row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
+                  const rowKey = getRowKey(row)
                   const isSelected = selectedRowKey === rowKey
                   return (
                     <TableRow
@@ -169,8 +171,38 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="contained" color="primary">Добавить переход</Button>
-        <Button variant="contained" color="primary">Изменить переход</Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            onOpenTransitionsRefModal?.({
+              ownerType: 'substitute',
+              mode: 'add',
+              transitionRecordId: null,
+            })
+          }
+        >
+          Добавить переход
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            if (!selectedRowKey) {
+              window.alert('Выберите переход')
+              return
+            }
+            const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+            if (!selectedRow) return
+            onOpenTransitionsRefModal?.({
+              ownerType: 'substitute',
+              mode: 'edit',
+              transitionRecordId: selectedRow.idMakeSubstitute ?? selectedRow.idOperations ?? null,
+            })
+          }}
+        >
+          Изменить переход
+        </Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
           Закрыть
         </Button>

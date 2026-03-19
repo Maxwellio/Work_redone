@@ -15,6 +15,7 @@ function HomeModals({
   partyList,
   isTransitionsRefModalOpen,
   onCloseTransitionsRef,
+  onOpenTransitionsRefModal,
   isPreformRefModalOpen,
   onClosePreformRef,
   preformRef,
@@ -91,6 +92,7 @@ function HomeModals({
         substituteId={substituteTransitionsModal.idSubstitutePrepared}
         substituteName={substituteTransitionsModal.substituteName}
         onClose={onCloseSubstituteTransitions}
+        onOpenTransitionsRefModal={onOpenTransitionsRefModal}
       />
 
       <FittingTransitionsModal
@@ -99,6 +101,7 @@ function HomeModals({
         fittingName={fittingTransitionsModal.fittingName}
         tip={fittingTransitionsModal.tip}
         onClose={onCloseFittingTransitions}
+        onOpenTransitionsRefModal={onOpenTransitionsRefModal}
       />
     </>
   )

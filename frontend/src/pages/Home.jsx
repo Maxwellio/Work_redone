@@ -56,6 +56,7 @@ function Home() {
           partyList={data.partyList}
           isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
           onCloseTransitionsRef={home.closeTransitionsRefModal}
+          onOpenTransitionsRefModal={home.openTransitionsRefModal}
           isPreformRefModalOpen={home.isPreformRefModalOpen}
           onClosePreformRef={home.closePreformRefModal}
           preformRef={home.preformRef}

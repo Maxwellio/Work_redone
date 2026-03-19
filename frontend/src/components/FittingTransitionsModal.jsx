@@ -53,7 +53,9 @@ const mapRow = (row) => {
   }
 }
 
-function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose }) {
+const getRowKey = (row) => row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
+
+function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose, onOpenTransitionsRefModal }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -144,7 +146,7 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose })
               </TableHead>
               <TableBody>
                 {rowsSorted.map((row) => {
-                  const rowKey = row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
+                  const rowKey = getRowKey(row)
                   const isSelected = selectedRowKey === rowKey
                   return (
                     <TableRow
@@ -179,10 +181,38 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose })
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="contained" color="primary">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            onOpenTransitionsRefModal?.({
+              ownerType: 'fitting',
+              tip,
+              mode: 'add',
+              transitionRecordId: null,
+            })
+          }
+        >
           Добавить переход
         </Button>
-        <Button variant="contained" color="primary">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            if (!selectedRowKey) {
+              window.alert('Выберите переход')
+              return
+            }
+            const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+            if (!selectedRow) return
+            onOpenTransitionsRefModal?.({
+              ownerType: 'fitting',
+              tip,
+              mode: 'edit',
+              transitionRecordId: selectedRow.idFitingDetail ?? selectedRow.idOperations ?? null,
+            })
+          }}
+        >
           Изменить переход
         </Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
