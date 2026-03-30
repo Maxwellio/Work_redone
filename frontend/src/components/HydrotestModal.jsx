@@ -12,6 +12,8 @@ import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
 
+const NUMERIC_FIELDS = new Set(['d', 'th', 'l', 'testtime', 'mass', 'l1', 'l2'])
+
 function HydrotestModal({
   open,
   isEditMode,
@@ -32,7 +34,20 @@ function HydrotestModal({
   }, [open, initialFormData])
 
   const handleFieldChange = (field) => (event) => {
-    const { value } = event.target
+    let { value } = event.target
+
+    if (field === 'nh') {
+      value = String(value).slice(0, 255)
+    } else if (NUMERIC_FIELDS.has(field)) {
+      if (value !== '') {
+        value = String(value).replace(',', '.')
+        value = value.replace(/[^0-9.]/g, '')
+        if (value.length > 7) {
+          value = value.slice(0, 7)
+        }
+      }
+    }
+
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -58,6 +73,7 @@ function HydrotestModal({
             label="Наименование"
             value={draft.nh}
             onChange={handleFieldChange('nh')}
+            inputProps={{ maxLength: 255 }}
           />
           <TextField
             fullWidth
