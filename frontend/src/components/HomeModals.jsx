@@ -5,6 +5,8 @@ import SubstituteModal from './SubstituteModal'
 import SubstituteTransitionsModal from './SubstituteTransitionsModal'
 import FittingTransitionsModal from './FittingTransitionsModal'
 import TransitionsRefModal from './TransitionsRefModal'
+import TransitionSmallFormModal from './TransitionSmallFormModal'
+import TransitionLargeFormModal from './TransitionLargeFormModal'
 
 function HomeModals({
   activeTab,
@@ -16,6 +18,11 @@ function HomeModals({
   isTransitionsRefModalOpen,
   onCloseTransitionsRef,
   onOpenTransitionsRefModal,
+  onTransitionsRefOk,
+  transitionSmallForm,
+  onCloseTransitionSmallForm,
+  transitionLargeForm,
+  onCloseTransitionLargeForm,
   isPreformRefModalOpen,
   onClosePreformRef,
   preformRef,
@@ -77,6 +84,23 @@ function HomeModals({
         onSelectGroup={transitionsRef.setSelectedGroupId}
         loadingRefData={transitionsRef.loadingRefData}
         errorRefData={transitionsRef.errorRefData}
+        onOk={onTransitionsRefOk}
+      />
+
+      <TransitionSmallFormModal
+        open={transitionSmallForm.open}
+        onClose={onCloseTransitionSmallForm}
+        isEditMode={transitionSmallForm.isEditMode}
+        idOperations={transitionSmallForm.idOperations}
+        nmOperations={transitionSmallForm.nmOperations}
+      />
+
+      <TransitionLargeFormModal
+        open={transitionLargeForm.open}
+        onClose={onCloseTransitionLargeForm}
+        isEditMode={transitionLargeForm.isEditMode}
+        idOperations={transitionLargeForm.idOperations}
+        nmOperations={transitionLargeForm.nmOperations}
       />
 
       <PreformRefModal

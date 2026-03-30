@@ -8,6 +8,7 @@ import { useHydrotestForm } from './useHydrotestForm'
 import { useSubstituteForm } from './useSubstituteForm'
 import { usePreformRef } from './usePreformRef'
 import { useTransitionsRef } from './useTransitionsRef'
+import { isSmallFormOperationId, isLargeFormOperationId } from '../utils/operationCategory'
 
 export function useHomePage() {
   const { user } = useAuth()
@@ -32,6 +33,28 @@ export function useHomePage() {
     idFiting: null,
     fittingName: '',
     tip: null,
+  })
+  const [transitionSmallForm, setTransitionSmallForm] = useState({
+    open: false,
+    idOperations: null,
+    nmOperations: '',
+    isEditMode: false,
+    ownerType: null,
+    tip: null,
+    idSubstitutePrepared: null,
+    idFiting: null,
+    transitionRecordId: null,
+  })
+  const [transitionLargeForm, setTransitionLargeForm] = useState({
+    open: false,
+    idOperations: null,
+    nmOperations: '',
+    isEditMode: false,
+    ownerType: null,
+    tip: null,
+    idSubstitutePrepared: null,
+    idFiting: null,
+    transitionRecordId: null,
   })
 
   const data = useHomeData({
@@ -200,6 +223,81 @@ export function useHomePage() {
     })
   }
 
+  const closeTransitionSmallForm = () => {
+    setTransitionSmallForm({
+      open: false,
+      idOperations: null,
+      nmOperations: '',
+      isEditMode: false,
+      ownerType: null,
+      tip: null,
+      idSubstitutePrepared: null,
+      idFiting: null,
+      transitionRecordId: null,
+    })
+  }
+
+  const closeTransitionLargeForm = () => {
+    setTransitionLargeForm({
+      open: false,
+      idOperations: null,
+      nmOperations: '',
+      isEditMode: false,
+      ownerType: null,
+      tip: null,
+      idSubstitutePrepared: null,
+      idFiting: null,
+      transitionRecordId: null,
+    })
+  }
+
+  const handleTransitionsRefOk = (selectedOperationId) => {
+    const op = transitionsRef.operations.find((o) => o.idOperations === selectedOperationId)
+    const modeEdit = transitionsRefContext.mode === 'edit'
+    const ctx = { ...transitionsRefContext }
+
+    setIsTransitionsRefModalOpen(false)
+    setTransitionsRefContext({
+      ownerType: null,
+      tip: null,
+      mode: null,
+      transitionRecordId: null,
+    })
+
+    const ownerType = ctx.ownerType
+    const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
+    const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
+    const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+
+    const payload = {
+      open: true,
+      idOperations: selectedOperationId,
+      nmOperations: op?.nmOperations ?? '',
+      isEditMode: modeEdit,
+      ownerType,
+      tip,
+      idSubstitutePrepared,
+      idFiting,
+      transitionRecordId: ctx.transitionRecordId,
+    }
+
+    if (isSmallFormOperationId(selectedOperationId)) {
+      setTimeout(() => {
+        setTransitionSmallForm(payload)
+      }, 0)
+      return
+    }
+
+    if (isLargeFormOperationId(selectedOperationId)) {
+      setTimeout(() => {
+        setTransitionLargeForm(payload)
+      }, 0)
+      return
+    }
+
+    window.alert('Для выбранной операции предусмотрена другая форма (пока не реализована).')
+  }
+
   return {
     activeTab,
     setActiveTab,
@@ -211,6 +309,11 @@ export function useHomePage() {
     isTransitionsRefModalOpen,
     openTransitionsRefModal,
     closeTransitionsRefModal,
+    transitionSmallForm,
+    closeTransitionSmallForm,
+    transitionLargeForm,
+    closeTransitionLargeForm,
+    handleTransitionsRefOk,
     isPreformRefModalOpen,
     openPreformRefModal: () => setIsPreformRefModalOpen(true),
     closePreformRefModal: () => setIsPreformRefModalOpen(false),
