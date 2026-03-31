@@ -9,7 +9,9 @@ import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import InputAdornment from '@mui/material/InputAdornment'
 import Close from '@mui/icons-material/Close'
+import Calculate from '@mui/icons-material/Calculate'
 
 const NUMERIC_FIELDS = new Set([
   'd',
@@ -19,11 +21,7 @@ const NUMERIC_FIELDS = new Set([
   'i',
   's',
   'n',
-  'vRez',
-  'tMach',
-  'tVp',
   'seqNumOper',
-  'tSum',
 ])
 
 const emptyDraft = () => ({
@@ -41,14 +39,31 @@ const emptyDraft = () => ({
   tSum: '',
 })
 
-function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmOperations }) {
+function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmOperations, initialValues }) {
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
   const [draft, setDraft] = useState(emptyDraft)
 
   useEffect(() => {
     if (!open) return
+    if (isEditMode && initialValues) {
+      setDraft({
+        d: initialValues.d ?? '',
+        l: initialValues.l ?? '',
+        valueMeas: initialValues.valueMeas ?? '',
+        depthCut: initialValues.depthCut ?? '',
+        i: initialValues.i ?? '',
+        s: initialValues.s ?? '',
+        n: initialValues.n ?? '',
+        vRez: initialValues.vRez ?? '',
+        tMach: initialValues.tMach ?? '',
+        tVp: initialValues.tVp ?? '',
+        seqNumOper: initialValues.seqNumOper ?? '',
+        tSum: initialValues.tSum ?? '',
+      })
+      return
+    }
     setDraft(emptyDraft())
-  }, [open, idOperations])
+  }, [open, idOperations, isEditMode, initialValues])
 
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
@@ -83,20 +98,55 @@ function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmO
         )}
       </Box>
       <DialogContent dividers>
-        <Stack spacing={2}>
-          <TextField fullWidth size="small" label="Длина наруж, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
-          <TextField fullWidth size="small" label="Длина, мм" type="number" value={draft.l} onChange={handleFieldChange('l')} />
-          <TextField fullWidth size="small" label="Измер велич, мм" type="number" value={draft.valueMeas} onChange={handleFieldChange('valueMeas')} />
-          <TextField fullWidth size="small" label="Глубина резания, мм" type="number" value={draft.depthCut} onChange={handleFieldChange('depthCut')} />
-          <TextField fullWidth size="small" label="Число проходов" type="number" value={draft.i} onChange={handleFieldChange('i')} />
-          <TextField fullWidth size="small" label="Подача, мм/об" type="number" value={draft.s} onChange={handleFieldChange('s')} />
-          <TextField fullWidth size="small" label="Обороты шп., об/мин" type="number" value={draft.n} onChange={handleFieldChange('n')} />
-          <TextField fullWidth size="small" label="Vрез, м/мин" type="number" value={draft.vRez} onChange={handleFieldChange('vRez')} />
-          <TextField fullWidth size="small" label="Tмаш, мин" type="number" value={draft.tMach} onChange={handleFieldChange('tMach')} />
-          <TextField fullWidth size="small" label="Твсп, мин" type="number" value={draft.tVp} onChange={handleFieldChange('tVp')} />
-          <TextField fullWidth size="small" label="Порядковый номер операции" type="number" value={draft.seqNumOper} onChange={handleFieldChange('seqNumOper')} />
-          <TextField fullWidth size="small" label="Норма времени, мин" type="number" value={draft.tSum} onChange={handleFieldChange('tSum')} />
-        </Stack>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            gap: 2,
+            alignItems: 'start',
+          }}
+        >
+          <Stack spacing={2}>
+            <TextField fullWidth size="small" label="Длина наруж, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
+            <TextField fullWidth size="small" label="Длина, мм" type="number" value={draft.l} onChange={handleFieldChange('l')} />
+            <TextField fullWidth size="small" label="Измер велич, мм" type="number" value={draft.valueMeas} onChange={handleFieldChange('valueMeas')} />
+            <TextField fullWidth size="small" label="Глубина резания, мм" type="number" value={draft.depthCut} onChange={handleFieldChange('depthCut')} />
+            <TextField fullWidth size="small" label="Число проходов" type="number" value={draft.i} onChange={handleFieldChange('i')} />
+            <TextField fullWidth size="small" label="Подача, мм/об" type="number" value={draft.s} onChange={handleFieldChange('s')} />
+            <TextField fullWidth size="small" label="Обороты шп., об/мин" type="number" value={draft.n} onChange={handleFieldChange('n')} />
+          </Stack>
+
+          <Stack spacing={2}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Tмаш, мин"
+              type="number"
+              value={draft.tMach}
+              disabled
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton edge="end" aria-label="Расчёт" size="small" onClick={() => {}}>
+                      <Calculate fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField fullWidth size="small" label="Vрез, м/мин" type="number" value={draft.vRez} disabled />
+            <TextField fullWidth size="small" label="Твсп, мин" type="number" value={draft.tVp} disabled />
+            <TextField fullWidth size="small" label="Норма времени, мин" type="number" value={draft.tSum} disabled />
+            <TextField
+              fullWidth
+              size="small"
+              label="Порядковый номер операции"
+              type="number"
+              value={draft.seqNumOper}
+              onChange={handleFieldChange('seqNumOper')}
+            />
+          </Stack>
+        </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button variant="contained" color="primary" onClick={onClose}>

@@ -22,6 +22,9 @@ export function useHomePage() {
     tip: null, // for fitting: 1 = patrubok, 2 = tube
     mode: null, // 'add' | 'edit' | null
     transitionRecordId: null, // id записи, которая будет редактироваться (для future)
+    selectedOperationId: null,
+    selectedOperationName: '',
+    transitionDraft: null,
   })
   const [isPreformRefModalOpen, setIsPreformRefModalOpen] = useState(false)
   const [substituteTransitionsModal, setSubstituteTransitionsModal] = useState({
@@ -45,6 +48,7 @@ export function useHomePage() {
     idSubstitutePrepared: null,
     idFiting: null,
     transitionRecordId: null,
+    initialValues: null,
   })
   const [transitionLargeForm, setTransitionLargeForm] = useState({
     open: false,
@@ -56,6 +60,7 @@ export function useHomePage() {
     idSubstitutePrepared: null,
     idFiting: null,
     transitionRecordId: null,
+    initialValues: null,
   })
 
   const data = useHomeData({
@@ -157,6 +162,9 @@ export function useHomePage() {
       tip: null,
       mode: null,
       transitionRecordId: null,
+      selectedOperationId: null,
+      selectedOperationName: '',
+      transitionDraft: null,
     })
   }
 
@@ -214,6 +222,48 @@ export function useHomePage() {
   }
 
   const openTransitionsRefModal = (ctx = {}) => {
+    if (ctx.mode === 'edit') {
+      const selectedOperationId = ctx.selectedOperationId ?? null
+      const selectedOperationName = ctx.selectedOperationName ?? ''
+      const ownerType = ctx.ownerType ?? null
+      const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
+      const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
+      const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+      const payload = {
+        open: true,
+        idOperations: selectedOperationId,
+        nmOperations: selectedOperationName,
+        isEditMode: true,
+        ownerType,
+        tip,
+        idSubstitutePrepared,
+        idFiting,
+        transitionRecordId: ctx.transitionRecordId ?? null,
+        initialValues: ctx.transitionDraft ?? null,
+      }
+
+      setIsTransitionsRefModalOpen(false)
+      setResetTransitionsRefContextOnClose(false)
+      clearTransitionsRefContext()
+
+      if (isSmallFormOperationId(selectedOperationId)) {
+        setTimeout(() => {
+          setTransitionSmallForm(payload)
+        }, 0)
+        return
+      }
+
+      if (isLargeFormOperationId(selectedOperationId)) {
+        setTimeout(() => {
+          setTransitionLargeForm(payload)
+        }, 0)
+        return
+      }
+
+      window.alert('Для выбранной операции предусмотрена другая форма (пока не реализована).')
+      return
+    }
+
     transitionsRef.beginLoadingRef()
     setResetTransitionsRefContextOnClose(false)
     setTransitionsRefContext({
@@ -221,6 +271,9 @@ export function useHomePage() {
       tip: ctx.tip ?? null,
       mode: ctx.mode ?? null,
       transitionRecordId: ctx.transitionRecordId ?? null,
+      selectedOperationId: ctx.selectedOperationId ?? null,
+      selectedOperationName: ctx.selectedOperationName ?? '',
+      transitionDraft: ctx.transitionDraft ?? null,
     })
     setIsTransitionsRefModalOpen(true)
   }
@@ -241,6 +294,7 @@ export function useHomePage() {
       idSubstitutePrepared: null,
       idFiting: null,
       transitionRecordId: null,
+      initialValues: null,
     })
   }
 
@@ -255,6 +309,7 @@ export function useHomePage() {
       idSubstitutePrepared: null,
       idFiting: null,
       transitionRecordId: null,
+      initialValues: null,
     })
   }
 
@@ -281,6 +336,7 @@ export function useHomePage() {
       idSubstitutePrepared,
       idFiting,
       transitionRecordId: ctx.transitionRecordId,
+      initialValues: null,
     }
 
     if (isSmallFormOperationId(selectedOperationId)) {

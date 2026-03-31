@@ -13,7 +13,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
 
-const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'tVp', 'seqNumOper'])
+const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'seqNumOper'])
 
 function TransitionSmallFormModal({
   open,
@@ -21,6 +21,7 @@ function TransitionSmallFormModal({
   isEditMode,
   idOperations,
   nmOperations,
+  initialValues,
 }) {
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
   const [draft, setDraft] = useState({
@@ -32,8 +33,17 @@ function TransitionSmallFormModal({
 
   useEffect(() => {
     if (!open) return
+    if (isEditMode && initialValues) {
+      setDraft({
+        masCur: initialValues.masCur ?? '',
+        lCur: initialValues.lCur ?? '',
+        tVp: initialValues.tVp ?? '',
+        seqNumOper: initialValues.seqNumOper ?? '',
+      })
+      return
+    }
     setDraft({ masCur: '', lCur: '', tVp: '', seqNumOper: '' })
-  }, [open, idOperations])
+  }, [open, idOperations, isEditMode, initialValues])
 
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
@@ -91,7 +101,7 @@ function TransitionSmallFormModal({
             label="Норма времени, мин"
             type="number"
             value={draft.tVp}
-            onChange={handleFieldChange('tVp')}
+            disabled
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">

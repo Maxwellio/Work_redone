@@ -95,6 +95,7 @@ function HomeModals({
         isEditMode={transitionSmallForm.isEditMode}
         idOperations={transitionSmallForm.idOperations}
         nmOperations={transitionSmallForm.nmOperations}
+        initialValues={transitionSmallForm.initialValues}
       />
 
       <TransitionLargeFormModal
@@ -103,6 +104,7 @@ function HomeModals({
         isEditMode={transitionLargeForm.isEditMode}
         idOperations={transitionLargeForm.idOperations}
         nmOperations={transitionLargeForm.nmOperations}
+        initialValues={transitionLargeForm.initialValues}
       />
 
       <PreformRefModal

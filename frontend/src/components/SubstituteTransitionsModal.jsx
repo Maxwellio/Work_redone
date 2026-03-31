@@ -197,6 +197,24 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
             onOpenTransitionsRefModal?.({
               ownerType: 'substitute',
               mode: 'edit',
+              selectedOperationId: selectedRow.idOperations ?? null,
+              selectedOperationName: selectedRow.nmOperations ?? '',
+              transitionDraft: {
+                masCur: selectedRow.masCur ?? '',
+                lCur: selectedRow.lCur ?? '',
+                tVp: selectedRow.tVp ?? '',
+                seqNumOper: selectedRow.seqNumOper ?? '',
+                d: selectedRow.d ?? '',
+                l: selectedRow.l ?? '',
+                valueMeas: selectedRow.valueMeas ?? '',
+                depthCut: selectedRow.depthCut ?? '',
+                i: selectedRow.i ?? '',
+                s: selectedRow.s ?? '',
+                n: selectedRow.n ?? '',
+                vRez: selectedRow.vRez ?? '',
+                tMach: selectedRow.tMach ?? '',
+                tSum: selectedRow.tSum ?? '',
+              },
               transitionRecordId: selectedRow.idMakeSubstitute ?? selectedRow.idOperations ?? null,
             })
           }}
