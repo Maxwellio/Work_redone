@@ -56,6 +56,7 @@ function Home() {
           partyList={data.partyList}
           isTransitionsRefModalOpen={home.isTransitionsRefModalOpen}
           onCloseTransitionsRef={home.closeTransitionsRefModal}
+          onTransitionsRefExited={home.handleTransitionsRefModalExited}
           onOpenTransitionsRefModal={home.openTransitionsRefModal}
           onTransitionsRefOk={home.handleTransitionsRefOk}
           transitionSmallForm={home.transitionSmallForm}

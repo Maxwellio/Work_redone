@@ -10,16 +10,20 @@ export function useTransitionsRef(open, disallowedGroupIds = []) {
 
   const disallowedGroupIdSet = useMemo(() => new Set((disallowedGroupIds || []).map(String)), [disallowedGroupIds])
 
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-    let isMounted = true
+  const beginLoadingRef = () => {
     setLoadingRefData(true)
     setErrorRefData(null)
     setGroups([])
     setOperationsByGroup({})
     setSelectedGroupId(null)
+  }
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+    let isMounted = true
+    beginLoadingRef()
 
     getOperationGroups()
       .then(async (data) => {
@@ -87,6 +91,7 @@ export function useTransitionsRef(open, disallowedGroupIds = []) {
     operations,
     selectedGroupId,
     setSelectedGroupId,
+    beginLoadingRef,
     loadingRefData,
     errorRefData,
   }

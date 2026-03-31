@@ -19,6 +19,7 @@ import '../styles/TransitionsRefModal.css'
 function TransitionsRefModal({
   open,
   onClose,
+  onExited,
   groups,
   operations,
   selectedGroupId,
@@ -41,7 +42,14 @@ function TransitionsRefModal({
   }, [selectedGroupId])
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}
+      TransitionProps={{ onExited }}
+    >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Справочник переходов
         <IconButton onClick={onClose} aria-label="Закрыть" size="small">
@@ -60,7 +68,7 @@ function TransitionsRefModal({
                   Загрузка…
                 </Box>
               )}
-              {errorRefData && (
+              {!loadingRefData && errorRefData && (
                 <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
                   {errorRefData}
                 </Box>
@@ -99,7 +107,12 @@ function TransitionsRefModal({
                   Загрузка…
                 </Box>
               )}
-              {!loadingRefData && selectedGroupId == null && (
+              {!loadingRefData && errorRefData && (
+                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+                  {errorRefData}
+                </Box>
+              )}
+              {!loadingRefData && !errorRefData && selectedGroupId == null && (
                 <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
                   Выберите группу слева
                 </Box>

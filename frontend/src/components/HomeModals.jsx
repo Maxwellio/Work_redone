@@ -17,6 +17,7 @@ function HomeModals({
   partyList,
   isTransitionsRefModalOpen,
   onCloseTransitionsRef,
+  onTransitionsRefExited,
   onOpenTransitionsRefModal,
   onTransitionsRefOk,
   transitionSmallForm,
@@ -78,6 +79,7 @@ function HomeModals({
       <TransitionsRefModal
         open={isTransitionsRefModalOpen}
         onClose={onCloseTransitionsRef}
+        onExited={onTransitionsRefExited}
         groups={transitionsRef.groups}
         operations={transitionsRef.operations}
         selectedGroupId={transitionsRef.selectedGroupId}

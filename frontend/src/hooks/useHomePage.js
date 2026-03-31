@@ -16,6 +16,7 @@ export function useHomePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
+  const [resetTransitionsRefContextOnClose, setResetTransitionsRefContextOnClose] = useState(false)
   const [transitionsRefContext, setTransitionsRefContext] = useState({
     ownerType: null, // 'substitute' | 'fitting' | null
     tip: null, // for fitting: 1 = patrubok, 2 = tube
@@ -150,6 +151,15 @@ export function useHomePage() {
   const transitionsRef = useTransitionsRef(isTransitionsRefModalOpen, disallowedGroupIds)
   const preformRef = usePreformRef(isPreformRefModalOpen)
 
+  const clearTransitionsRefContext = () => {
+    setTransitionsRefContext({
+      ownerType: null,
+      tip: null,
+      mode: null,
+      transitionRecordId: null,
+    })
+  }
+
   const handleTabChange = (nextTab) => {
     if (nextTab === activeTab) return
     data.beginLoading()
@@ -204,6 +214,8 @@ export function useHomePage() {
   }
 
   const openTransitionsRefModal = (ctx = {}) => {
+    transitionsRef.beginLoadingRef()
+    setResetTransitionsRefContextOnClose(false)
     setTransitionsRefContext({
       ownerType: ctx.ownerType ?? null,
       tip: ctx.tip ?? null,
@@ -215,12 +227,7 @@ export function useHomePage() {
 
   const closeTransitionsRefModal = () => {
     setIsTransitionsRefModalOpen(false)
-    setTransitionsRefContext({
-      ownerType: null,
-      tip: null,
-      mode: null,
-      transitionRecordId: null,
-    })
+    setResetTransitionsRefContextOnClose(true)
   }
 
   const closeTransitionSmallForm = () => {
@@ -257,12 +264,7 @@ export function useHomePage() {
     const ctx = { ...transitionsRefContext }
 
     setIsTransitionsRefModalOpen(false)
-    setTransitionsRefContext({
-      ownerType: null,
-      tip: null,
-      mode: null,
-      transitionRecordId: null,
-    })
+    setResetTransitionsRefContextOnClose(true)
 
     const ownerType = ctx.ownerType
     const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
@@ -298,6 +300,12 @@ export function useHomePage() {
     window.alert('Для выбранной операции предусмотрена другая форма (пока не реализована).')
   }
 
+  const handleTransitionsRefModalExited = () => {
+    if (!resetTransitionsRefContextOnClose) return
+    clearTransitionsRefContext()
+    setResetTransitionsRefContextOnClose(false)
+  }
+
   return {
     activeTab,
     setActiveTab,
@@ -309,6 +317,7 @@ export function useHomePage() {
     isTransitionsRefModalOpen,
     openTransitionsRefModal,
     closeTransitionsRefModal,
+    handleTransitionsRefModalExited,
     transitionSmallForm,
     closeTransitionSmallForm,
     transitionLargeForm,
