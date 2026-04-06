@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
+import { getSubstituteDetails } from '../api/operationsApi'
+import { getFittingDetails } from '../api/fittingsApi'
 import { COLUMNS } from '../models/tableConfig'
 import { useFittingForm } from './useFittingForm'
 import { useHomeActions } from './useHomeActions'
@@ -21,6 +23,16 @@ function parseIntOrNull(v) {
   const n = parseNum(v)
   if (n == null) return null
   return Math.round(n)
+}
+
+/** Следующий порядковый номер операции: max(seqNumOper) + 1, или 1 если переходов нет. */
+function computeNextSeqNumOper(rows) {
+  const nums = (Array.isArray(rows) ? rows : [])
+    .map((r) => r.seqNumOper)
+    .map((v) => (v == null || v === '' ? NaN : Number(v)))
+    .filter((n) => Number.isFinite(n))
+  const maxSeq = nums.length ? Math.max(...nums) : 0
+  return maxSeq + 1
 }
 
 export function useHomePage() {
@@ -327,7 +339,7 @@ export function useHomePage() {
     })
   }
 
-  const handleTransitionsRefOk = (selectedOperationId) => {
+  const handleTransitionsRefOk = async (selectedOperationId) => {
     const op = transitionsRef.operations.find((o) => o.idOperations === selectedOperationId)
     const modeEdit = transitionsRefContext.mode === 'edit'
     const ctx = { ...transitionsRefContext }
@@ -340,6 +352,23 @@ export function useHomePage() {
     const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
     const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
 
+    let initialValues = null
+    if (!modeEdit) {
+      try {
+        let list = []
+        if (ownerType === 'substitute' && idSubstitutePrepared != null) {
+          list = await getSubstituteDetails(idSubstitutePrepared)
+        } else if (ownerType === 'fitting' && idFiting != null) {
+          list = await getFittingDetails(idFiting)
+        }
+        const nextSeq = computeNextSeqNumOper(list)
+        initialValues = { seqNumOper: String(nextSeq) }
+      } catch (e) {
+        console.error('Не удалось загрузить переходы для автонумерации', e)
+        initialValues = null
+      }
+    }
+
     const payload = {
       open: true,
       idOperations: selectedOperationId,
@@ -350,7 +379,7 @@ export function useHomePage() {
       idSubstitutePrepared,
       idFiting,
       transitionRecordId: ctx.transitionRecordId,
-      initialValues: null,
+      initialValues: modeEdit ? null : initialValues,
     }
 
     if (isSmallFormOperationId(selectedOperationId)) {

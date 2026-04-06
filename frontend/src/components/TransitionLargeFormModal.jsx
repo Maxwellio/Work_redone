@@ -73,7 +73,10 @@ function TransitionLargeFormModal({
       })
       return
     }
-    setDraft(emptyDraft())
+    setDraft({
+      ...emptyDraft(),
+      seqNumOper: initialValues?.seqNumOper != null ? String(initialValues.seqNumOper) : '',
+    })
   }, [open, idOperations, isEditMode, initialValues])
 
   const handleFieldChange = (field) => (event) => {

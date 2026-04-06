@@ -46,7 +46,12 @@ function TransitionSmallFormModal({
       })
       return
     }
-    setDraft({ masCur: '', lCur: '', tVp: '', seqNumOper: '' })
+    setDraft({
+      masCur: '',
+      lCur: '',
+      tVp: '',
+      seqNumOper: initialValues?.seqNumOper != null ? String(initialValues.seqNumOper) : '',
+    })
   }, [open, idOperations, isEditMode, initialValues])
 
   const handleFieldChange = (field) => (event) => {
