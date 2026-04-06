@@ -86,7 +86,10 @@ function TransitionsRefModal({
                         key={g.idGroupOperations}
                         selected={selectedGroupId === g.idGroupOperations}
                         onClick={() => onSelectGroup(selectedGroupId === g.idGroupOperations ? null : g.idGroupOperations)}
-                        sx={{ cursor: 'pointer' }}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': { background: 'var(--color-sand-light)' },
+                        }}
                       >
                         <TableCell>{formatCell(g.nmGroupOperations)}</TableCell>
                       </TableRow>

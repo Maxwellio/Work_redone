@@ -5,9 +5,25 @@ import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
+import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
+
+const passwordRulesTooltipContent = (
+  <Box sx={{ maxWidth: 280, py: 0.25 }}>
+    <Typography variant="caption" color="inherit" display="block" sx={{ mb: 0.5, fontWeight: 600 }}>
+      Пароль должен:
+    </Typography>
+    <Typography variant="caption" color="inherit" display="block" component="span">
+      • иметь минимум 6 символов
+      <br />• содержать хотя бы 1 заглавную (A-Z)
+      <br />• содержать хотя бы 1 строчную (a-z)
+      <br />• содержать хотя бы 1 цифру (0-9)
+    </Typography>
+  </Box>
+)
 
 function ChangePasswordForm({ onSubmit, onCancel }) {
   const [currentPassword, setCurrentPassword] = useState('')
@@ -17,8 +33,6 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
-
-  const [showPasswordRules, setShowPasswordRules] = useState(false)
 
   const newPasswordMissingCriteria = []
   if (newPassword.length < 6) newPasswordMissingCriteria.push('минимум 6 символов')
@@ -81,32 +95,26 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
           }}
         />
 
-        <Typography
-          variant="body2"
-          sx={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            color: 'primary.main',
-            textDecoration: 'underline',
-          }}
-          onClick={() => setShowPasswordRules((v) => !v)}
-        >
-          Правила надежного пароля
-        </Typography>
-
-        {showPasswordRules && (
-          <Box>
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
-              Пароль должен:
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              • иметь минимум 6 символов
-              <br />• содержать хотя бы 1 заглавную (A-Z)
-              <br />• содержать хотя бы 1 строчную (a-z)
-              <br />• содержать хотя бы 1 цифру (0-9)
+        <Tooltip title={passwordRulesTooltipContent} placement="top" arrow enterTouchDelay={0}>
+          <Box
+            component="span"
+            tabIndex={0}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.5,
+              cursor: 'help',
+              color: 'text.secondary',
+              alignSelf: 'flex-start',
+            }}
+            aria-label="Требования к паролю"
+          >
+            <InfoOutlined sx={{ fontSize: '1rem', opacity: 0.85 }} aria-hidden />
+            <Typography variant="caption" color="inherit" component="span">
+              Требования к паролю
             </Typography>
           </Box>
-        )}
+        </Tooltip>
 
         <TextField
           label="Новый пароль"
