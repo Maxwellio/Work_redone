@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import { COLUMNS } from '../models/tableConfig'
 import { useFittingForm } from './useFittingForm'
 import { useHomeActions } from './useHomeActions'
@@ -9,6 +10,18 @@ import { useSubstituteForm } from './useSubstituteForm'
 import { usePreformRef } from './usePreformRef'
 import { useTransitionsRef } from './useTransitionsRef'
 import { isSmallFormOperationId, isLargeFormOperationId } from '../utils/operationCategory'
+
+function parseNum(v) {
+  if (v === '' || v == null) return null
+  const n = Number(String(v).replace(',', '.'))
+  return Number.isFinite(n) ? n : null
+}
+
+function parseIntOrNull(v) {
+  const n = parseNum(v)
+  if (n == null) return null
+  return Math.round(n)
+}
 
 export function useHomePage() {
   const { user } = useAuth()
@@ -62,6 +75,7 @@ export function useHomePage() {
     transitionRecordId: null,
     initialValues: null,
   })
+  const [transitionsListRefreshKey, setTransitionsListRefreshKey] = useState(0)
 
   const data = useHomeData({
     activeTab,
@@ -362,6 +376,102 @@ export function useHomePage() {
     setResetTransitionsRefContextOnClose(false)
   }
 
+  const handleSaveTransitionSmall = async (draft) => {
+    const s = transitionSmallForm
+    if (!s.ownerType || s.idOperations == null) {
+      throw new Error('Недостаточно данных для сохранения')
+    }
+    const idUserCreator = s.isEditMode ? null : user?.userId ?? null
+    const emptyGeom = {
+      d: null,
+      l: null,
+      valueMeas: null,
+      i: null,
+      depthCut: null,
+      n: null,
+      s: null,
+    }
+
+    if (s.ownerType === 'substitute') {
+      if (s.idSubstitutePrepared == null) {
+        throw new Error('Не выбран переводник')
+      }
+      await saveSubstituteDetail({
+        id: s.isEditMode ? s.transitionRecordId : null,
+        idSubstitutePrepared: s.idSubstitutePrepared,
+        idOperations: s.idOperations,
+        ...emptyGeom,
+        masCur: parseNum(draft.masCur),
+        lCur: parseNum(draft.lCur),
+        seqNumOper: parseIntOrNull(draft.seqNumOper),
+        idUserCreator,
+      })
+    } else if (s.ownerType === 'fitting') {
+      if (s.idFiting == null) {
+        throw new Error('Не выбрана деталь')
+      }
+      await saveFittingDetail({
+        id: s.isEditMode ? s.transitionRecordId : null,
+        idFiting: s.idFiting,
+        idOperations: s.idOperations,
+        ...emptyGeom,
+        masCur: parseNum(draft.masCur),
+        lCur: parseNum(draft.lCur),
+        seqNumOper: parseIntOrNull(draft.seqNumOper),
+        idUserCreator,
+      })
+    }
+
+    setTransitionsListRefreshKey((k) => k + 1)
+    closeTransitionSmallForm()
+  }
+
+  const handleSaveTransitionLarge = async (draft) => {
+    const s = transitionLargeForm
+    if (!s.ownerType || s.idOperations == null) {
+      throw new Error('Недостаточно данных для сохранения')
+    }
+    const idUserCreator = s.isEditMode ? null : user?.userId ?? null
+    const payloadBase = {
+      d: parseNum(draft.d),
+      l: parseNum(draft.l),
+      valueMeas: parseNum(draft.valueMeas),
+      i: parseIntOrNull(draft.i),
+      depthCut: parseNum(draft.depthCut),
+      n: parseNum(draft.n),
+      s: parseNum(draft.s),
+      masCur: null,
+      lCur: null,
+      seqNumOper: parseIntOrNull(draft.seqNumOper),
+      idUserCreator,
+    }
+
+    if (s.ownerType === 'substitute') {
+      if (s.idSubstitutePrepared == null) {
+        throw new Error('Не выбран переводник')
+      }
+      await saveSubstituteDetail({
+        id: s.isEditMode ? s.transitionRecordId : null,
+        idSubstitutePrepared: s.idSubstitutePrepared,
+        idOperations: s.idOperations,
+        ...payloadBase,
+      })
+    } else if (s.ownerType === 'fitting') {
+      if (s.idFiting == null) {
+        throw new Error('Не выбрана деталь')
+      }
+      await saveFittingDetail({
+        id: s.isEditMode ? s.transitionRecordId : null,
+        idFiting: s.idFiting,
+        idOperations: s.idOperations,
+        ...payloadBase,
+      })
+    }
+
+    setTransitionsListRefreshKey((k) => k + 1)
+    closeTransitionLargeForm()
+  }
+
   return {
     activeTab,
     setActiveTab,
@@ -379,6 +489,9 @@ export function useHomePage() {
     transitionLargeForm,
     closeTransitionLargeForm,
     handleTransitionsRefOk,
+    handleSaveTransitionSmall,
+    handleSaveTransitionLarge,
+    transitionsListRefreshKey,
     isPreformRefModalOpen,
     openPreformRefModal: () => setIsPreformRefModalOpen(true),
     closePreformRefModal: () => setIsPreformRefModalOpen(false),

@@ -39,12 +39,23 @@ const emptyDraft = () => ({
   tSum: '',
 })
 
-function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmOperations, initialValues }) {
+function TransitionLargeFormModal({
+  open,
+  onClose,
+  isEditMode,
+  idOperations,
+  nmOperations,
+  initialValues,
+  onSave,
+}) {
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
+  const [saveError, setSaveError] = useState(null)
+  const [saving, setSaving] = useState(false)
   const [draft, setDraft] = useState(emptyDraft)
 
   useEffect(() => {
     if (!open) return
+    setSaveError(null)
     if (isEditMode && initialValues) {
       setDraft({
         d: initialValues.d ?? '',
@@ -79,11 +90,27 @@ function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmO
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
 
+  const handleOk = async () => {
+    setSaveError(null)
+    if (typeof onSave === 'function') {
+      setSaving(true)
+      try {
+        await onSave(draft)
+      } catch (err) {
+        setSaveError(err.message || 'Ошибка сохранения')
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
+    onClose()
+  }
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {title}
-        <IconButton onClick={onClose} aria-label="Закрыть" size="small">
+        <IconButton onClick={onClose} aria-label="Закрыть" size="small" disabled={saving}>
           <Close />
         </IconButton>
       </DialogTitle>
@@ -98,6 +125,11 @@ function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmO
         )}
       </Box>
       <DialogContent dividers>
+        {saveError && (
+          <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+            {saveError}
+          </Typography>
+        )}
         <Box
           sx={{
             display: 'grid',
@@ -149,10 +181,10 @@ function TransitionLargeFormModal({ open, onClose, isEditMode, idOperations, nmO
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="contained" color="primary" onClick={onClose}>
+        <Button variant="contained" color="primary" onClick={handleOk} disabled={saving}>
           ОК
         </Button>
-        <Button variant="outlined" color="inherit" onClick={onClose}>
+        <Button variant="outlined" color="inherit" onClick={onClose} disabled={saving}>
           Отменить
         </Button>
       </DialogActions>

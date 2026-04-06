@@ -1,6 +1,7 @@
 package patrubki.service;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -10,9 +11,10 @@ import patrubki.entity.MakeSubstituteDetail;
 import patrubki.entity.MakeSubstituteMain;
 import patrubki.entity.OperationStructureSpr;
 import patrubki.repository.MakeSubstituteDetailRepository;
-import patrubki.repository.MakeSubstituteMainRepository;
-import patrubki.repository.OperationStructureSprRepository;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.Types;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,15 +22,12 @@ import java.util.stream.Collectors;
 public class MakeSubstituteDetailService {
 
     private final MakeSubstituteDetailRepository repository;
-    private final MakeSubstituteMainRepository makeSubstituteMainRepository;
-    private final OperationStructureSprRepository operationStructureSprRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     public MakeSubstituteDetailService(MakeSubstituteDetailRepository repository,
-                                       MakeSubstituteMainRepository makeSubstituteMainRepository,
-                                       OperationStructureSprRepository operationStructureSprRepository) {
+                                       JdbcTemplate jdbcTemplate) {
         this.repository = repository;
-        this.makeSubstituteMainRepository = makeSubstituteMainRepository;
-        this.operationStructureSprRepository = operationStructureSprRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -40,15 +39,27 @@ public class MakeSubstituteDetailService {
 
     @Transactional
     public Integer save(MakeSubstituteDetailSaveDto dto) {
-        MakeSubstituteDetail entity;
-        if (dto.getId() != null && repository.existsById(dto.getId())) {
-            entity = repository.getReferenceById(dto.getId());
-        } else {
-            entity = new MakeSubstituteDetail();
-        }
-        mapSaveDtoToEntity(dto, entity);
-        entity = repository.save(entity);
-        return entity.getIdMakeSubstitute();
+        return jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall(
+                "call substitute.add_edit_substitute_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            cs.registerOutParameter(1, Types.INTEGER);
+            cs.setObject(1, dto.getId(), Types.INTEGER);
+            cs.setObject(2, dto.getIdSubstitutePrepared(), Types.INTEGER);
+            cs.setObject(3, dto.getIdOperations(), Types.INTEGER);
+            cs.setObject(4, dto.getD(), Types.NUMERIC);
+            cs.setObject(5, dto.getL(), Types.NUMERIC);
+            cs.setObject(6, dto.getValueMeas(), Types.NUMERIC);
+            cs.setObject(7, dto.getI(), Types.INTEGER);
+            cs.setObject(8, dto.getDepthCut(), Types.NUMERIC);
+            cs.setObject(9, dto.getN(), Types.NUMERIC);
+            cs.setObject(10, dto.getS(), Types.NUMERIC);
+            cs.setObject(11, dto.getMasCur(), Types.NUMERIC);
+            cs.setObject(12, dto.getLCur(), Types.NUMERIC);
+            cs.setObject(13, dto.getSeqNumOper(), Types.INTEGER);
+            cs.setObject(14, dto.getIdUserCreator(), Types.INTEGER);
+            cs.execute();
+            return extractId(cs.getObject(1), dto.getId());
+        });
     }
 
     @Transactional
@@ -59,32 +70,11 @@ public class MakeSubstituteDetailService {
         repository.deleteById(id);
     }
 
-    private void mapSaveDtoToEntity(MakeSubstituteDetailSaveDto dto, MakeSubstituteDetail entity) {
-        if (dto.getIdOperations() != null) {
-            entity.setIdOperations(operationStructureSprRepository.getReferenceById(dto.getIdOperations()));
-        } else {
-            entity.setIdOperations(null);
+    private static Integer extractId(Object rawId, Integer fallbackId) {
+        if (rawId instanceof Number) {
+            return ((Number) rawId).intValue();
         }
-        if (dto.getIdSubstitutePrepared() != null) {
-            entity.setIdSubstitutePrepared(makeSubstituteMainRepository.getReferenceById(dto.getIdSubstitutePrepared()));
-        } else {
-            entity.setIdSubstitutePrepared(null);
-        }
-        entity.setSeqNumOper(dto.getSeqNumOper());
-        entity.setD(dto.getD());
-        entity.setL(dto.getL());
-        entity.setValueMeas(dto.getValueMeas());
-        entity.setI(dto.getI());
-        entity.setDepthCut(dto.getDepthCut());
-        entity.setN(dto.getN());
-        entity.setS(dto.getS());
-        entity.setTMach(dto.getTMach());
-        entity.setTVp(dto.getTVp());
-        entity.setVRez(dto.getVRez());
-        entity.setMasCur(dto.getMasCur());
-        entity.setLCur(dto.getLCur());
-        entity.setTVpNbdt(dto.getTVpNbdt());
-        entity.setIdUserCreator(dto.getIdUserCreator());
+        return fallbackId != null ? fallbackId : 0;
     }
 
     private MakeSubstituteDetailDto toDto(MakeSubstituteDetail e) {

@@ -49,11 +49,14 @@ patrubki\dto\PreformTypDto.class
 patrubki\service\package-info.class
 patrubki\service\FitingDetailNtkService.class
 patrubki\dto\FitingDetailSaveDto.class
+patrubki\PatrubkiApplication.class
 patrubki\dto\FitingDetailDto.class
 patrubki\service\PreformTypService.class
 patrubki\service\NtkService.class
 patrubki\dto\IdNtkRequestDto.class
+patrubki\controller\HealthController.class
 patrubki\controller\AuthController.class
+patrubki\config\SecurityConfig.class
 patrubki\repository\MakeSubstituteMainRepository.class
 patrubki\config\CorsConfig.class
 patrubki\service\MakeSubstituteDetailService.class

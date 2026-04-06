@@ -22,8 +22,11 @@ function HomeModals({
   onTransitionsRefOk,
   transitionSmallForm,
   onCloseTransitionSmallForm,
+  onSaveTransitionSmall,
   transitionLargeForm,
   onCloseTransitionLargeForm,
+  onSaveTransitionLarge,
+  transitionsListRefreshKey,
   isPreformRefModalOpen,
   onClosePreformRef,
   preformRef,
@@ -96,6 +99,7 @@ function HomeModals({
         idOperations={transitionSmallForm.idOperations}
         nmOperations={transitionSmallForm.nmOperations}
         initialValues={transitionSmallForm.initialValues}
+        onSave={onSaveTransitionSmall}
       />
 
       <TransitionLargeFormModal
@@ -105,6 +109,7 @@ function HomeModals({
         idOperations={transitionLargeForm.idOperations}
         nmOperations={transitionLargeForm.nmOperations}
         initialValues={transitionLargeForm.initialValues}
+        onSave={onSaveTransitionLarge}
       />
 
       <PreformRefModal
@@ -121,6 +126,7 @@ function HomeModals({
         substituteName={substituteTransitionsModal.substituteName}
         onClose={onCloseSubstituteTransitions}
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
+        transitionsListRefreshKey={transitionsListRefreshKey}
       />
 
       <FittingTransitionsModal
@@ -130,6 +136,7 @@ function HomeModals({
         tip={fittingTransitionsModal.tip}
         onClose={onCloseFittingTransitions}
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
+        transitionsListRefreshKey={transitionsListRefreshKey}
       />
     </>
   )

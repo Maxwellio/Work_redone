@@ -55,7 +55,15 @@ const mapRow = (row) => {
 
 const getRowKey = (row) => row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
 
-function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose, onOpenTransitionsRefModal }) {
+function FittingTransitionsModal({
+  open,
+  fittingId,
+  fittingName,
+  tip,
+  onClose,
+  onOpenTransitionsRefModal,
+  transitionsListRefreshKey = 0,
+}) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -90,7 +98,7 @@ function FittingTransitionsModal({ open, fittingId, fittingName, tip, onClose, o
     return () => {
       isMounted = false
     }
-  }, [open, fittingId])
+  }, [open, fittingId, transitionsListRefreshKey])
 
   const rowsSorted = useMemo(
     () => [...rows].sort((a, b) => (a.seqNumOper ?? 0) - (b.seqNumOper ?? 0)),

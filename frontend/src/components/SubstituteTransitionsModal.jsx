@@ -55,7 +55,14 @@ const mapRow = (row) => {
 
 const getRowKey = (row) => row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
 
-function SubstituteTransitionsModal({ open, substituteId, substituteName, onClose, onOpenTransitionsRefModal }) {
+function SubstituteTransitionsModal({
+  open,
+  substituteId,
+  substituteName,
+  onClose,
+  onOpenTransitionsRefModal,
+  transitionsListRefreshKey = 0,
+}) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -90,7 +97,7 @@ function SubstituteTransitionsModal({ open, substituteId, substituteName, onClos
     return () => {
       isMounted = false
     }
-  }, [open, substituteId])
+  }, [open, substituteId, transitionsListRefreshKey])
 
   const rowsSorted = useMemo(
     () => [...rows].sort((a, b) => (a.seqNumOper ?? 0) - (b.seqNumOper ?? 0)),
