@@ -1,7 +1,9 @@
 package patrubki.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 public class FitingDetailSaveDto {
 
@@ -55,6 +57,9 @@ public class FitingDetailSaveDto {
 
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
+
+    @JsonProperty("idNtk")
+    private List<Integer> idNtk;
 
     public Integer getId() {
         return id;
@@ -190,5 +195,13 @@ public class FitingDetailSaveDto {
 
     public void setIdUserCreator(Integer idUserCreator) {
         this.idUserCreator = idUserCreator;
+    }
+
+    public List<Integer> getIdNtk() {
+        return idNtk;
+    }
+
+    public void setIdNtk(List<Integer> idNtk) {
+        this.idNtk = idNtk;
     }
 }

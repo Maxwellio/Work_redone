@@ -496,11 +496,17 @@ export function useHomePage() {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
+      const idNtk = Array.isArray(draft.idNtk)
+        ? draft.idNtk
+            .map((n) => (typeof n === 'number' ? n : parseInt(String(n), 10)))
+            .filter((n) => Number.isInteger(n))
+        : []
       await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
         idOperations: s.idOperations,
         ...payloadBase,
+        idNtk,
       })
     }
 

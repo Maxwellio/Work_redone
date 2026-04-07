@@ -16,7 +16,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
-import { getNtkForTransition } from '../api/fittingsApi'
+import { getFittingDetailNtk, getNtkForTransition } from '../api/fittingsApi'
 
 const NUMERIC_FIELDS = new Set([
   'd',
@@ -55,6 +55,7 @@ function TransitionLargeFormModal({
   ownerType = null,
   tip = null,
   dStan = null,
+  transitionRecordId = null,
 }) {
   const showNtkPanel = ownerType === 'fitting' && (tip === 1 || tip === 2)
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
@@ -65,6 +66,7 @@ function TransitionLargeFormModal({
   const [ntkLoading, setNtkLoading] = useState(false)
   const [ntkError, setNtkError] = useState(null)
   const [checkedNtkIds, setCheckedNtkIds] = useState(() => new Set())
+  const [ntkLinksError, setNtkLinksError] = useState(null)
 
   useEffect(() => {
     if (!open) return
@@ -95,8 +97,34 @@ function TransitionLargeFormModal({
   useEffect(() => {
     if (!open) {
       setCheckedNtkIds(new Set())
+      setNtkLinksError(null)
     }
   }, [open])
+
+  useEffect(() => {
+    if (!open || !showNtkPanel || !isEditMode || transitionRecordId == null) {
+      return
+    }
+    let cancelled = false
+    setNtkLinksError(null)
+    getFittingDetailNtk(transitionRecordId)
+      .then((rows) => {
+        if (cancelled) return
+        const ids = new Set(
+          (Array.isArray(rows) ? rows : [])
+            .map((r) => r.idNtk)
+            .filter((id) => id != null && Number.isInteger(Number(id)))
+            .map((id) => Number(id))
+        )
+        setCheckedNtkIds(ids)
+      })
+      .catch((err) => {
+        if (!cancelled) setNtkLinksError(err.message || 'Не удалось загрузить отмеченные НТК')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open, showNtkPanel, isEditMode, transitionRecordId])
 
   useEffect(() => {
     if (!open || !showNtkPanel || dStan == null) {
@@ -124,11 +152,13 @@ function TransitionLargeFormModal({
   }, [open, showNtkPanel, dStan])
 
   const handleNtkToggle = useCallback((idNtk) => {
-    if (idNtk == null) return
+    if (idNtk == null || idNtk === '') return
+    const id = typeof idNtk === 'number' ? idNtk : parseInt(String(idNtk), 10)
+    if (!Number.isInteger(id)) return
     setCheckedNtkIds((prev) => {
       const next = new Set(prev)
-      if (next.has(idNtk)) next.delete(idNtk)
-      else next.add(idNtk)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
       return next
     })
   }, [])
@@ -152,7 +182,11 @@ function TransitionLargeFormModal({
     if (typeof onSave === 'function') {
       setSaving(true)
       try {
-        await onSave(draft)
+        const payload =
+          showNtkPanel && ownerType === 'fitting'
+            ? { ...draft, idNtk: Array.from(checkedNtkIds) }
+            : draft
+        await onSave(payload)
       } catch (err) {
         setSaveError(err.message || 'Ошибка сохранения')
       } finally {
@@ -232,6 +266,11 @@ function TransitionLargeFormModal({
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
         НТК
       </Typography>
+      {ntkLinksError && (
+        <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+          {ntkLinksError}
+        </Typography>
+      )}
       {dStan == null && (
         <Typography variant="body2" color="text.secondary">
           Нет станочного диаметра (dStan) для детали — список недоступен.
@@ -250,8 +289,10 @@ function TransitionLargeFormModal({
       {dStan != null && !ntkLoading && !ntkError && (
         <List dense disablePadding>
           {ntkRows.map((row) => {
-            const id = row.idNtk
-            const key = id != null ? String(id) : row.nm
+            const rawId = row.idNtk
+            const id =
+              rawId != null && rawId !== '' ? parseInt(String(rawId), 10) : null
+            const key = id != null && Number.isInteger(id) ? String(id) : row.nm
             const label = row.nm ?? '—'
             return (
               <ListItem key={key} disableGutters sx={{ py: 0 }}>
@@ -259,8 +300,8 @@ function TransitionLargeFormModal({
                   control={
                     <Checkbox
                       size="small"
-                      checked={id != null && checkedNtkIds.has(id)}
-                      onChange={() => handleNtkToggle(id)}
+                      checked={id != null && Number.isInteger(id) && checkedNtkIds.has(id)}
+                      onChange={() => handleNtkToggle(rawId)}
                     />
                   }
                   label={label}

@@ -52,6 +52,19 @@ export async function getFittingDetails(idFiting) {
   return res.json()
 }
 
+/** Связанные NTK для записи перехода (id_fiting_detail). */
+export async function getFittingDetailNtk(idFitingDetail) {
+  if (idFitingDetail == null) {
+    return []
+  }
+  const res = await request(`/fitting-details/${idFitingDetail}/ntk`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`getFittingDetailNtk failed: ${res.status}`)
+  return res.json()
+}
+
 /** Список NTK для панели большой формы перехода (труба/патрубок), по станочному диаметру. */
 export async function getNtkForTransition(dStan) {
   if (dStan == null || dStan === '') {

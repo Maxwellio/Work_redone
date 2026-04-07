@@ -16,6 +16,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,8 +57,9 @@ public class FitingDetailService {
             cs.setObject(11, dto.getMasCur(), Types.NUMERIC);
             cs.setObject(12, dto.getLCur(), Types.NUMERIC);
             cs.setObject(13, dto.getSeqNumOper(), Types.INTEGER);
-            java.sql.Array emptyNtk = conn.createArrayOf("integer", new Integer[0]);
-            cs.setArray(14, emptyNtk);
+            Integer[] ntkIds = toDistinctIntegerArray(dto.getIdNtk());
+            java.sql.Array ntkArray = conn.createArrayOf("integer", ntkIds);
+            cs.setArray(14, ntkArray);
             cs.setObject(15, dto.getIdUserCreator(), Types.INTEGER);
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
@@ -70,6 +72,16 @@ public class FitingDetailService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         repository.deleteById(id);
+    }
+
+    private static Integer[] toDistinctIntegerArray(List<Integer> idNtk) {
+        if (idNtk == null || idNtk.isEmpty()) {
+            return new Integer[0];
+        }
+        return idNtk.stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toArray(Integer[]::new);
     }
 
     private static Integer extractId(Object rawId, Integer fallbackId) {
