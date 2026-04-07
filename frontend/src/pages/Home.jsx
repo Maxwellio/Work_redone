@@ -67,6 +67,7 @@ function Home() {
           onCloseTransitionLargeForm={home.closeTransitionLargeForm}
           onSaveTransitionLarge={home.handleSaveTransitionLarge}
           transitionsListRefreshKey={home.transitionsListRefreshKey}
+          onTransitionsListChange={home.refreshTransitionsList}
           isPreformRefModalOpen={home.isPreformRefModalOpen}
           onClosePreformRef={home.closePreformRefModal}
           preformRef={home.preformRef}

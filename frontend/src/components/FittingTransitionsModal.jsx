@@ -15,6 +15,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
 import { getFittingDetails } from '../api'
+import { deleteFittingDetail } from '../api/transitionDetailsApi'
 import '../styles/Home.css'
 
 const COLUMNS = [
@@ -62,12 +63,14 @@ function FittingTransitionsModal({
   tip,
   onClose,
   onOpenTransitionsRefModal,
+  onTransitionsListChange,
   transitionsListRefreshKey = 0,
 }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedRowKey, setSelectedRowKey] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -108,6 +111,31 @@ function FittingTransitionsModal({
   const titleName = fittingName ? ` ${fittingName}` : ''
   const tipLabel = tip === 1 ? 'патрубку' : 'трубе'
   const emptyMessage = tip === 1 ? 'Нет переходов для выбранного патрубка' : 'Нет переходов для выбранной трубы'
+
+  const handleDeleteTransition = async () => {
+    if (!selectedRowKey) {
+      window.alert('Выберите переход')
+      return
+    }
+    const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+    if (!selectedRow) return
+    const pk = selectedRow.idFitingDetail
+    if (pk == null || pk <= 0) {
+      window.alert('Нельзя удалить: отсутствует идентификатор записи')
+      return
+    }
+    if (!window.confirm('Удалить выбранный переход?')) return
+    setDeleting(true)
+    try {
+      await deleteFittingDetail(pk)
+      setSelectedRowKey(null)
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка удаления')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <Dialog
@@ -192,6 +220,7 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
+          disabled={deleting}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'fitting',
@@ -206,6 +235,7 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
+          disabled={deleting}
           onClick={() => {
             if (!selectedRowKey) {
               window.alert('Выберите переход')
@@ -241,7 +271,21 @@ function FittingTransitionsModal({
         >
           Изменить переход
         </Button>
-        <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
+        <Button
+          variant="outlined"
+          color="error"
+          disabled={deleting}
+          onClick={handleDeleteTransition}
+        >
+          Удалить переход
+        </Button>
+        <Button
+          variant="outlined"
+          color="inherit"
+          startIcon={<Close />}
+          disabled={deleting}
+          onClick={onClose}
+        >
           Закрыть
         </Button>
       </DialogActions>

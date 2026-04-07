@@ -516,6 +516,8 @@ export function useHomePage() {
     closeTransitionLargeForm()
   }
 
+  const refreshTransitionsList = () => setTransitionsListRefreshKey((k) => k + 1)
+
   return {
     activeTab,
     setActiveTab,
@@ -536,6 +538,7 @@ export function useHomePage() {
     transitionsRefContext,
     handleSaveTransitionSmall,
     handleSaveTransitionLarge,
+    refreshTransitionsList,
     transitionsListRefreshKey,
     isPreformRefModalOpen,
     openPreformRefModal: () => setIsPreformRefModalOpen(true),

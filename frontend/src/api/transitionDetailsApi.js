@@ -8,6 +8,13 @@ async function handleSaveResponse(res) {
   return res.json()
 }
 
+async function handleDeleteResponse(res) {
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка удаления')
+  }
+}
+
 /**
  * @param {object} payload — поля MakeSubstituteDetailSaveDto; id для редактирования
  */
@@ -46,4 +53,20 @@ export async function saveFittingDetail(payload) {
     body: JSON.stringify(body),
   })
   return handleSaveResponse(res)
+}
+
+export async function deleteSubstituteDetail(id) {
+  const res = await request(`/substitute-details/${id}`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  })
+  await handleDeleteResponse(res)
+}
+
+export async function deleteFittingDetail(id) {
+  const res = await request(`/fitting-details/${id}`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  })
+  await handleDeleteResponse(res)
 }

@@ -15,6 +15,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
 import { getSubstituteDetails } from '../api'
+import { deleteSubstituteDetail } from '../api/transitionDetailsApi'
 import '../styles/Home.css'
 
 const COLUMNS = [
@@ -61,12 +62,14 @@ function SubstituteTransitionsModal({
   substituteName,
   onClose,
   onOpenTransitionsRefModal,
+  onTransitionsListChange,
   transitionsListRefreshKey = 0,
 }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedRowKey, setSelectedRowKey] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -105,6 +108,31 @@ function SubstituteTransitionsModal({
   )
 
   const titleName = substituteName ? ` ${substituteName}` : ''
+
+  const handleDeleteTransition = async () => {
+    if (!selectedRowKey) {
+      window.alert('Выберите переход')
+      return
+    }
+    const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+    if (!selectedRow) return
+    const pk = selectedRow.idMakeSubstitute
+    if (pk == null || pk <= 0) {
+      window.alert('Нельзя удалить: отсутствует идентификатор записи')
+      return
+    }
+    if (!window.confirm('Удалить выбранный переход?')) return
+    setDeleting(true)
+    try {
+      await deleteSubstituteDetail(pk)
+      setSelectedRowKey(null)
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка удаления')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
@@ -181,6 +209,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
+          disabled={deleting}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'substitute',
@@ -194,6 +223,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
+          disabled={deleting}
           onClick={() => {
             if (!selectedRowKey) {
               window.alert('Выберите переход')
@@ -228,7 +258,21 @@ function SubstituteTransitionsModal({
         >
           Изменить переход
         </Button>
-        <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
+        <Button
+          variant="outlined"
+          color="error"
+          disabled={deleting}
+          onClick={handleDeleteTransition}
+        >
+          Удалить переход
+        </Button>
+        <Button
+          variant="outlined"
+          color="inherit"
+          startIcon={<Close />}
+          disabled={deleting}
+          onClick={onClose}
+        >
           Закрыть
         </Button>
       </DialogActions>

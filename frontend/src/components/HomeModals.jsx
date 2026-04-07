@@ -28,6 +28,7 @@ function HomeModals({
   onCloseTransitionLargeForm,
   onSaveTransitionLarge,
   transitionsListRefreshKey,
+  onTransitionsListChange,
   isPreformRefModalOpen,
   onClosePreformRef,
   preformRef,
@@ -133,6 +134,7 @@ function HomeModals({
         onClose={onCloseSubstituteTransitions}
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
+        onTransitionsListChange={onTransitionsListChange}
       />
 
       <FittingTransitionsModal
@@ -143,6 +145,7 @@ function HomeModals({
         onClose={onCloseFittingTransitions}
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
+        onTransitionsListChange={onTransitionsListChange}
       />
     </>
   )
