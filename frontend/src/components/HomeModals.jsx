@@ -20,6 +20,7 @@ function HomeModals({
   onTransitionsRefExited,
   onOpenTransitionsRefModal,
   onTransitionsRefOk,
+  transitionsRefContext,
   transitionSmallForm,
   onCloseTransitionSmallForm,
   onSaveTransitionSmall,
@@ -90,6 +91,7 @@ function HomeModals({
         loadingRefData={transitionsRef.loadingRefData}
         errorRefData={transitionsRef.errorRefData}
         onOk={onTransitionsRefOk}
+        showOkButton={Boolean(transitionsRefContext?.ownerType)}
       />
 
       <TransitionSmallFormModal

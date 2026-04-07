@@ -59,6 +59,7 @@ function Home() {
           onTransitionsRefExited={home.handleTransitionsRefModalExited}
           onOpenTransitionsRefModal={home.openTransitionsRefModal}
           onTransitionsRefOk={home.handleTransitionsRefOk}
+          transitionsRefContext={home.transitionsRefContext}
           transitionSmallForm={home.transitionSmallForm}
           onCloseTransitionSmallForm={home.closeTransitionSmallForm}
           onSaveTransitionSmall={home.handleSaveTransitionSmall}

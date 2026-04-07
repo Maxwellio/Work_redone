@@ -346,6 +346,8 @@ export function useHomePage() {
   }
 
   const handleTransitionsRefOk = async (selectedOperationId) => {
+    if (!transitionsRefContext.ownerType) return
+
     const op = transitionsRef.operations.find((o) => o.idOperations === selectedOperationId)
     const modeEdit = transitionsRefContext.mode === 'edit'
     const ctx = { ...transitionsRefContext }
@@ -531,6 +533,7 @@ export function useHomePage() {
     transitionLargeForm,
     closeTransitionLargeForm,
     handleTransitionsRefOk,
+    transitionsRefContext,
     handleSaveTransitionSmall,
     handleSaveTransitionLarge,
     transitionsListRefreshKey,

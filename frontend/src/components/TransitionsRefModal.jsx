@@ -27,6 +27,7 @@ function TransitionsRefModal({
   loadingRefData,
   errorRefData,
   onOk,
+  showOkButton = true,
 }) {
   const formatCell = (value) => (value == null ? '—' : String(value))
   const groupsSorted = [...groups].sort((a, b) => (a.idGroupOperations ?? 0) - (b.idGroupOperations ?? 0))
@@ -152,14 +153,16 @@ function TransitionsRefModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={selectedOperationId == null}
-          onClick={() => onOk?.(selectedOperationId)}
-        >
-          ОК
-        </Button>
+        {showOkButton && (
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={selectedOperationId == null}
+            onClick={() => onOk?.(selectedOperationId)}
+          >
+            ОК
+          </Button>
+        )}
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>
           Закрыть
         </Button>
