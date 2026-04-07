@@ -20,6 +20,7 @@ import patrubki.dto.MakeSubstituteDetailDto;
 import patrubki.dto.MakeSubstituteDetailSaveDto;
 import patrubki.dto.MakeSubstituteMainDto;
 import patrubki.dto.NtkDto;
+import patrubki.dto.NtkTransitionRowDto;
 import patrubki.dto.OperationStructureGroupDto;
 import patrubki.dto.OperationStructureSprDto;
 import patrubki.dto.PartyDto;
@@ -39,6 +40,8 @@ import patrubki.service.OperationStructureSprService;
 import patrubki.service.PartyService;
 import patrubki.service.PreformTypService;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -193,6 +196,15 @@ public class MainDataController {
     @GetMapping("/ntk")
     public ResponseEntity<List<NtkDto>> getNtk() {
         return ResponseEntity.ok(ntkService.findAllOrderByIdNtk());
+    }
+
+    @GetMapping("/ntk/for-transition")
+    public ResponseEntity<List<NtkTransitionRowDto>> getNtkForTransition(
+            @RequestParam(required = false) BigDecimal dStan) {
+        if (dStan == null) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+        return ResponseEntity.ok(ntkService.findForTransitionPanel(dStan));
     }
 
     @GetMapping("/fittings/{idFiting}/details")

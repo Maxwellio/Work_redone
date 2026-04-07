@@ -51,3 +51,17 @@ export async function getFittingDetails(idFiting) {
   if (!res.ok) throw new Error(`getFittingDetails failed: ${res.status}`)
   return res.json()
 }
+
+/** Список NTK для панели большой формы перехода (труба/патрубок), по станочному диаметру. */
+export async function getNtkForTransition(dStan) {
+  if (dStan == null || dStan === '') {
+    return []
+  }
+  const query = buildQuery({ dStan })
+  const res = await request(`/ntk/for-transition${query}`, {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  })
+  if (!res.ok) throw new Error(`getNtkForTransition failed: ${res.status}`)
+  return res.json()
+}

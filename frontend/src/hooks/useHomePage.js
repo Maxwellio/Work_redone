@@ -62,6 +62,7 @@ export function useHomePage() {
     idFiting: null,
     fittingName: '',
     tip: null,
+    dStan: null,
   })
   const [transitionSmallForm, setTransitionSmallForm] = useState({
     open: false,
@@ -86,6 +87,7 @@ export function useHomePage() {
     idFiting: null,
     transitionRecordId: null,
     initialValues: null,
+    dStan: null,
   })
   const [transitionsListRefreshKey, setTransitionsListRefreshKey] = useState(0)
 
@@ -108,12 +110,13 @@ export function useHomePage() {
     setSubstituteTransitionsModal((prev) => ({ ...prev, isOpen: false }))
   }
 
-  const openFittingTransitions = ({ idFiting, name, tip }) => {
+  const openFittingTransitions = ({ idFiting, name, tip, dStan }) => {
     setFittingTransitionsModal({
       isOpen: true,
       idFiting,
       fittingName: name || '',
       tip: tip ?? null,
+      dStan: dStan ?? null,
     })
   }
 
@@ -243,6 +246,7 @@ export function useHomePage() {
         idFiting: data.selectedRowId,
         name: selectedRow.nm || '',
         tip,
+        dStan: parseNum(selectedRow.dStan),
       })
     }
   }
@@ -255,7 +259,8 @@ export function useHomePage() {
       const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
       const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
       const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
-      const payload = {
+      const dStan = ownerType === 'fitting' ? fittingTransitionsModal.dStan ?? null : null
+      const payloadBase = {
         open: true,
         idOperations: selectedOperationId,
         nmOperations: selectedOperationName,
@@ -274,14 +279,14 @@ export function useHomePage() {
 
       if (isSmallFormOperationId(selectedOperationId)) {
         setTimeout(() => {
-          setTransitionSmallForm(payload)
+          setTransitionSmallForm(payloadBase)
         }, 0)
         return
       }
 
       if (isLargeFormOperationId(selectedOperationId)) {
         setTimeout(() => {
-          setTransitionLargeForm(payload)
+          setTransitionLargeForm({ ...payloadBase, dStan })
         }, 0)
         return
       }
@@ -336,6 +341,7 @@ export function useHomePage() {
       idFiting: null,
       transitionRecordId: null,
       initialValues: null,
+      dStan: null,
     })
   }
 
@@ -351,6 +357,7 @@ export function useHomePage() {
     const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
     const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
     const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+    const dStan = ownerType === 'fitting' ? fittingTransitionsModal.dStan ?? null : null
 
     let initialValues = null
     if (!modeEdit) {
@@ -369,7 +376,7 @@ export function useHomePage() {
       }
     }
 
-    const payload = {
+    const payloadBase = {
       open: true,
       idOperations: selectedOperationId,
       nmOperations: op?.nmOperations ?? '',
@@ -384,14 +391,14 @@ export function useHomePage() {
 
     if (isSmallFormOperationId(selectedOperationId)) {
       setTimeout(() => {
-        setTransitionSmallForm(payload)
+        setTransitionSmallForm(payloadBase)
       }, 0)
       return
     }
 
     if (isLargeFormOperationId(selectedOperationId)) {
       setTimeout(() => {
-        setTransitionLargeForm(payload)
+        setTransitionLargeForm({ ...payloadBase, dStan })
       }, 0)
       return
     }

@@ -65,15 +65,21 @@ export function useFittingForm({
     setFormData(emptyForm)
   }
 
-  const handleOpenTransitions = () => {
+  const handleOpenTransitions = (draft) => {
     if (onOpenTransitions == null) return
     const tip = activeTab === 1 ? 1 : 2
     const selectedRow = listData.find((row) => getRowId(row, activeTab) === selectedRowId)
     if (!selectedRow) return
+    const dStan = draft != null ? parseNum(draft.dStan) : parseNum(selectedRow.dStan)
+    const name =
+      draft != null && draft.nm != null && String(draft.nm).trim() !== ''
+        ? String(draft.nm)
+        : selectedRow.nm || ''
     onOpenTransitions({
       idFiting: selectedRow.idFiting,
-      name: selectedRow.nm || '',
+      name,
       tip,
+      dStan,
     })
   }
 

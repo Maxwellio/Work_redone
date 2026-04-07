@@ -68,5 +68,6 @@ patrubki\entity\Party.class
 patrubki\repository\UserRepository.class
 patrubki\entity\OperationStructureGroup.class
 patrubki\dto\CurrentUserDto.class
+patrubki\dto\NtkTransitionRowDto.class
 patrubki\dto\HydrotestDto.class
 patrubki\dto\NtkDto.class

@@ -110,6 +110,9 @@ function HomeModals({
         nmOperations={transitionLargeForm.nmOperations}
         initialValues={transitionLargeForm.initialValues}
         onSave={onSaveTransitionLarge}
+        ownerType={transitionLargeForm.ownerType}
+        tip={transitionLargeForm.tip}
+        dStan={transitionLargeForm.dStan}
       />
 
       <PreformRefModal
