@@ -60,6 +60,7 @@ C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\service\MakeSubsti
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\entity\UserEntity.java
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\controller\AuthController.java
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\PatrubkiApplication.java
+C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\dto\NtkTransitionRowDto.java
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\security\UserDetailsServiceImpl.java
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\entity\OperationStructureSpr.java
 C:\WORK\substitute\Work_redone\backend\src\main\java\patrubki\entity\OperationStructureGroup.java

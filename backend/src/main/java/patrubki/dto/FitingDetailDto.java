@@ -44,19 +44,15 @@ public class FitingDetailDto {
     @JsonProperty("s")
     private BigDecimal s;
 
-    @JsonProperty("tMach")
     private BigDecimal tMach;
 
-    @JsonProperty("tVp")
     private BigDecimal tVp;
 
-    @JsonProperty("vRez")
     private BigDecimal vRez;
 
     @JsonProperty("masCur")
     private BigDecimal masCur;
 
-    @JsonProperty("lCur")
     private BigDecimal lCur;
 
     @JsonProperty("idUserCreator")
@@ -166,6 +162,7 @@ public class FitingDetailDto {
         this.s = s;
     }
 
+    @JsonProperty("tMach")
     public BigDecimal getTMach() {
         return tMach;
     }
@@ -174,6 +171,7 @@ public class FitingDetailDto {
         this.tMach = tMach;
     }
 
+    @JsonProperty("tVp")
     public BigDecimal getTVp() {
         return tVp;
     }
@@ -182,6 +180,7 @@ public class FitingDetailDto {
         this.tVp = tVp;
     }
 
+    @JsonProperty("vRez")
     public BigDecimal getVRez() {
         return vRez;
     }
@@ -198,6 +197,7 @@ public class FitingDetailDto {
         this.masCur = masCur;
     }
 
+    @JsonProperty("lCur")
     public BigDecimal getLCur() {
         return lCur;
     }

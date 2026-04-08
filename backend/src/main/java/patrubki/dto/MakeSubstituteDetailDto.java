@@ -41,22 +41,17 @@ public class MakeSubstituteDetailDto {
     @JsonProperty("s")
     private BigDecimal s;
 
-    @JsonProperty("tMach")
     private BigDecimal tMach;
 
-    @JsonProperty("tVp")
     private BigDecimal tVp;
 
-    @JsonProperty("vRez")
     private BigDecimal vRez;
 
     @JsonProperty("masCur")
     private BigDecimal masCur;
 
-    @JsonProperty("lCur")
     private BigDecimal lCur;
 
-    @JsonProperty("tVpNbdt")
     private BigDecimal tVpNbdt;
 
     @JsonProperty("idUserCreator")
@@ -158,6 +153,7 @@ public class MakeSubstituteDetailDto {
         this.s = s;
     }
 
+    @JsonProperty("tMach")
     public BigDecimal getTMach() {
         return tMach;
     }
@@ -166,6 +162,7 @@ public class MakeSubstituteDetailDto {
         this.tMach = tMach;
     }
 
+    @JsonProperty("tVp")
     public BigDecimal getTVp() {
         return tVp;
     }
@@ -174,6 +171,7 @@ public class MakeSubstituteDetailDto {
         this.tVp = tVp;
     }
 
+    @JsonProperty("vRez")
     public BigDecimal getVRez() {
         return vRez;
     }
@@ -190,6 +188,7 @@ public class MakeSubstituteDetailDto {
         this.masCur = masCur;
     }
 
+    @JsonProperty("lCur")
     public BigDecimal getLCur() {
         return lCur;
     }
@@ -198,6 +197,7 @@ public class MakeSubstituteDetailDto {
         this.lCur = lCur;
     }
 
+    @JsonProperty("tVpNbdt")
     public BigDecimal getTVpNbdt() {
         return tVpNbdt;
     }
