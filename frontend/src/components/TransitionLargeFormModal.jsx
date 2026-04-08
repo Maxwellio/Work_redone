@@ -55,6 +55,7 @@ function TransitionLargeFormModal({
   ownerType = null,
   tip = null,
   dStan = null,
+  idFiting = null,
   transitionRecordId = null,
 }) {
   const showNtkPanel = ownerType === 'fitting' && (tip === 1 || tip === 2)
@@ -126,8 +127,12 @@ function TransitionLargeFormModal({
     }
   }, [open, showNtkPanel, isEditMode, transitionRecordId])
 
+  const hasNtkCatalogKey =
+    (dStan != null && dStan !== '') || (idFiting != null && idFiting !== '')
+  const canLoadNtkCatalog = showNtkPanel && hasNtkCatalogKey
+
   useEffect(() => {
-    if (!open || !showNtkPanel || dStan == null) {
+    if (!open || !canLoadNtkCatalog) {
       setNtkRows([])
       setNtkError(null)
       setNtkLoading(false)
@@ -136,7 +141,7 @@ function TransitionLargeFormModal({
     let cancelled = false
     setNtkLoading(true)
     setNtkError(null)
-    getNtkForTransition(dStan)
+    getNtkForTransition({ dStan, idFiting })
       .then((rows) => {
         if (!cancelled) setNtkRows(Array.isArray(rows) ? rows : [])
       })
@@ -149,7 +154,7 @@ function TransitionLargeFormModal({
     return () => {
       cancelled = true
     }
-  }, [open, showNtkPanel, dStan])
+  }, [open, canLoadNtkCatalog, dStan, idFiting])
 
   const handleNtkToggle = useCallback((idNtk) => {
     if (idNtk == null || idNtk === '') return
@@ -271,22 +276,22 @@ function TransitionLargeFormModal({
           {ntkLinksError}
         </Typography>
       )}
-      {dStan == null && (
+      {!hasNtkCatalogKey && (
         <Typography variant="body2" color="text.secondary">
-          Нет станочного диаметра (dStan) для детали — список недоступен.
+          Нет станочного диаметра (dStan) и не выбрана деталь — список НТК недоступен.
         </Typography>
       )}
-      {dStan != null && ntkLoading && (
+      {hasNtkCatalogKey && ntkLoading && (
         <Typography variant="body2" color="text.secondary">
           Загрузка…
         </Typography>
       )}
-      {dStan != null && ntkError && (
+      {hasNtkCatalogKey && ntkError && (
         <Typography variant="body2" color="error">
           {ntkError}
         </Typography>
       )}
-      {dStan != null && !ntkLoading && !ntkError && (
+      {hasNtkCatalogKey && !ntkLoading && !ntkError && (
         <List dense disablePadding>
           {ntkRows.map((row) => {
             const rawId = row.idNtk

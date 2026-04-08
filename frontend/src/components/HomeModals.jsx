@@ -116,6 +116,7 @@ function HomeModals({
         ownerType={transitionLargeForm.ownerType}
         tip={transitionLargeForm.tip}
         dStan={transitionLargeForm.dStan}
+        idFiting={transitionLargeForm.idFiting}
         transitionRecordId={transitionLargeForm.transitionRecordId}
       />
 

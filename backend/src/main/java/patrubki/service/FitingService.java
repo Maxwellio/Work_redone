@@ -86,6 +86,14 @@ public class FitingService {
         repository.deleteById(id);
     }
 
+    /** Станочный диаметр для фитинга; null если запись не найдена. */
+    public BigDecimal getDStanByIdFiting(Integer idFiting) {
+        if (idFiting == null) {
+            return null;
+        }
+        return repository.findById(idFiting).map(Fiting::getDStan).orElse(null);
+    }
+
     private FitingDto toDto(Fiting e) {
         FitingDto dto = new FitingDto();
         dto.setIdFiting(e.getIdFiting());

@@ -65,12 +65,17 @@ export async function getFittingDetailNtk(idFitingDetail) {
   return res.json()
 }
 
-/** Список NTK для панели большой формы перехода (труба/патрубок), по станочному диаметру. */
-export async function getNtkForTransition(dStan) {
-  if (dStan == null || dStan === '') {
+/**
+ * Список NTK для панели большой формы перехода (труба/патрубок).
+ * Достаточно передать `idFiting` (dStan возьмётся на сервере) или `dStan`, или оба.
+ */
+export async function getNtkForTransition({ dStan, idFiting } = {}) {
+  const hasId = idFiting != null && idFiting !== ''
+  const hasD = dStan != null && dStan !== ''
+  if (!hasId && !hasD) {
     return []
   }
-  const query = buildQuery({ dStan })
+  const query = buildQuery({ dStan: hasD ? dStan : undefined, idFiting: hasId ? idFiting : undefined })
   const res = await request(`/ntk/for-transition${query}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },
