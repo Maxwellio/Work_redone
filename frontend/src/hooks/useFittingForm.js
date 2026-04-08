@@ -65,32 +65,14 @@ export function useFittingForm({
     setFormData(emptyForm)
   }
 
-  const handleOpenTransitions = (draft) => {
-    if (onOpenTransitions == null) return
-    const tip = activeTab === 1 ? 1 : 2
-    const selectedRow = listData.find((row) => getRowId(row, activeTab) === selectedRowId)
-    if (!selectedRow) return
-    const dStan = draft != null ? parseNum(draft.dStan) : parseNum(selectedRow.dStan)
-    const name =
-      draft != null && draft.nm != null && String(draft.nm).trim() !== ''
-        ? String(draft.nm)
-        : selectedRow.nm || ''
-    onOpenTransitions({
-      idFiting: selectedRow.idFiting,
-      name,
-      tip,
-      dStan,
-    })
-  }
-
-  const handleSave = async (draft) => {
+  const saveDraft = async (draft, { openTransitions = false } = {}) => {
     setSaveError(null)
     const tip = activeTab === 1 ? 1 : 2
     const source = draft ?? formData
     const hasNm = source.nm != null && String(source.nm).trim() !== ''
     if (!hasNm) {
       setSaveError('Заполните хотя бы одно поле наименования')
-      return
+      return null
     }
     const payload = {
       id: isEditMode ? selectedRowId : null,
@@ -117,11 +99,24 @@ export function useFittingForm({
       if (id != null && id > 0) {
         setSelectedRowId(id)
         setPendingScrollToId(id)
+        if (openTransitions && typeof onOpenTransitions === 'function') {
+          onOpenTransitions({
+            idFiting: id,
+            name: source.nm || '',
+            tip,
+          })
+        }
       }
+      return id
     } catch (err) {
       setSaveError(err.message || 'Ошибка сохранения')
+      return null
     }
   }
+
+  const handleSave = async (draft) => saveDraft(draft)
+
+  const handleSaveAndOpenTransitions = async (draft) => saveDraft(draft, { openTransitions: true })
 
   return {
     isModalOpen,
@@ -132,6 +127,6 @@ export function useFittingForm({
     openEdit,
     close,
     handleSave,
-    handleOpenTransitions,
+    handleSaveAndOpenTransitions,
   }
 }

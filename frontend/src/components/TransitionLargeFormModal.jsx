@@ -54,7 +54,6 @@ function TransitionLargeFormModal({
   onSave,
   ownerType = null,
   tip = null,
-  dStan = null,
   idFiting = null,
   transitionRecordId = null,
 }) {
@@ -127,8 +126,7 @@ function TransitionLargeFormModal({
     }
   }, [open, showNtkPanel, isEditMode, transitionRecordId])
 
-  const hasNtkCatalogKey =
-    (dStan != null && dStan !== '') || (idFiting != null && idFiting !== '')
+  const hasNtkCatalogKey = idFiting != null && idFiting !== ''
   const canLoadNtkCatalog = showNtkPanel && hasNtkCatalogKey
 
   useEffect(() => {
@@ -141,7 +139,7 @@ function TransitionLargeFormModal({
     let cancelled = false
     setNtkLoading(true)
     setNtkError(null)
-    getNtkForTransition({ dStan, idFiting })
+    getNtkForTransition(idFiting)
       .then((rows) => {
         if (!cancelled) setNtkRows(Array.isArray(rows) ? rows : [])
       })
@@ -154,7 +152,7 @@ function TransitionLargeFormModal({
     return () => {
       cancelled = true
     }
-  }, [open, canLoadNtkCatalog, dStan, idFiting])
+  }, [open, canLoadNtkCatalog, idFiting])
 
   const handleNtkToggle = useCallback((idNtk) => {
     if (idNtk == null || idNtk === '') return
@@ -278,7 +276,7 @@ function TransitionLargeFormModal({
       )}
       {!hasNtkCatalogKey && (
         <Typography variant="body2" color="text.secondary">
-          Нет станочного диаметра (dStan) и не выбрана деталь — список НТК недоступен.
+          Не выбрана деталь — список НТК недоступен.
         </Typography>
       )}
       {hasNtkCatalogKey && ntkLoading && (

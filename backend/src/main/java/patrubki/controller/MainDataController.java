@@ -200,12 +200,11 @@ public class MainDataController {
 
     @GetMapping("/ntk/for-transition")
     public ResponseEntity<List<NtkTransitionRowDto>> getNtkForTransition(
-            @RequestParam(required = false) BigDecimal dStan,
             @RequestParam(required = false) Integer idFiting) {
-        BigDecimal pDStan = dStan;
-        if (idFiting != null) {
-            pDStan = fitingService.getDStanByIdFiting(idFiting);
+        if (idFiting == null) {
+            return ResponseEntity.ok(Collections.emptyList());
         }
+        BigDecimal pDStan = fitingService.getDStanByIdFiting(idFiting);
         if (pDStan == null) {
             return ResponseEntity.ok(Collections.emptyList());
         }

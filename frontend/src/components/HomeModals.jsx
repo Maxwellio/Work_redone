@@ -68,7 +68,7 @@ function HomeModals({
         onClose={fittingForm.close}
         onSave={fittingForm.handleSave}
         tip={activeTab === 1 ? 1 : 2}
-        onOpenTransitions={fittingForm.handleOpenTransitions}
+        onOpenTransitions={fittingForm.handleSaveAndOpenTransitions}
       />
 
       <HydrotestModal
@@ -115,7 +115,6 @@ function HomeModals({
         onSave={onSaveTransitionLarge}
         ownerType={transitionLargeForm.ownerType}
         tip={transitionLargeForm.tip}
-        dStan={transitionLargeForm.dStan}
         idFiting={transitionLargeForm.idFiting}
         transitionRecordId={transitionLargeForm.transitionRecordId}
       />
