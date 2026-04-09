@@ -58,8 +58,21 @@ function FittingModal({
       }
     }
 
+    if (
+      open &&
+      !isEditMode &&
+      Array.isArray(partyList) &&
+      partyList.length > 0 &&
+      partyList[0]?.colParty != null
+    ) {
+      const cntEmpty = next.cnt === '' || next.cnt == null
+      if (cntEmpty) {
+        next.cnt = partyList[0].colParty
+      }
+    }
+
     setDraft(next)
-  }, [open, initialFormData, isPatrubok, preformTypesFiltered])
+  }, [open, initialFormData, isEditMode, isPatrubok, partyList, preformTypesFiltered])
 
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target

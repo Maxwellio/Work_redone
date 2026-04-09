@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import { getSubstituteDetails } from '../api/operationsApi'
@@ -143,6 +143,17 @@ export function useHomePage() {
     setPendingScrollToId: data.setPendingScrollToId,
     onOpenTransitions: openFittingTransitions,
   })
+
+  useEffect(() => {
+    if (!substituteForm.isModalOpen || activeTab !== 0) return
+    void data.ensurePreformLoaded()
+  }, [substituteForm.isModalOpen, activeTab, data.ensurePreformLoaded])
+
+  useEffect(() => {
+    if (!fittingForm.isModalOpen || (activeTab !== 1 && activeTab !== 2)) return
+    void data.ensurePreformLoaded()
+    void data.ensurePartyLoaded()
+  }, [fittingForm.isModalOpen, activeTab, data.ensurePreformLoaded, data.ensurePartyLoaded])
 
   const hydrotestForm = useHydrotestForm({
     activeTab,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getPreformTypes } from '../api'
+import { ensurePreformTypes } from '../api/staticReferenceCache'
 
 export function usePreformRef(open) {
   const [list, setList] = useState([])
@@ -10,10 +10,11 @@ export function usePreformRef(open) {
     if (!open) return
     setLoading(true)
     setError(null)
-    setList([])
-    getPreformTypes()
-      .then((data) => setList(Array.isArray(data) ? data : []))
-      .catch((err) => setError(err.message || 'Ошибка загрузки типов заготовок'))
+    ensurePreformTypes()
+      .then((r) => {
+        setList(r.data)
+        if (!r.ok) setError(r.error || 'Ошибка загрузки типов заготовок')
+      })
       .finally(() => setLoading(false))
   }, [open])
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { getFittings, getHydrotests, getParty, getPreformTypes, getSubstitutes } from '../api'
+import { getFittings, getHydrotests, getSubstitutes } from '../api'
+import { ensureParty, ensurePreformTypes } from '../api/staticReferenceCache'
 
 const DEBOUNCE_MS = 350
 
@@ -60,41 +61,17 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     return typeof cleanup === 'function' ? cleanup : undefined
   }, [loadData])
 
-  useEffect(() => {
-    if (activeTab !== 0 && activeTab !== 1 && activeTab !== 2) return
-    let isMounted = true
-    setPreformError(null)
-    getPreformTypes()
-      .then((data) => {
-        if (!isMounted) return
-        setPreformTypes(Array.isArray(data) ? data : [])
-      })
-      .catch((err) => {
-        if (!isMounted) return
-        setPreformError(err.message || 'Ошибка загрузки типов заготовок')
-        setPreformTypes([])
-      })
-    return () => {
-      isMounted = false
-    }
-  }, [activeTab])
+  const ensurePreformLoaded = useCallback(async () => {
+    const r = await ensurePreformTypes()
+    setPreformTypes(r.data)
+    if (r.ok) setPreformError(null)
+    else setPreformError(r.error ?? 'Ошибка загрузки типов заготовок')
+  }, [])
 
-  useEffect(() => {
-    if (activeTab !== 1 && activeTab !== 2) return
-    let isMounted = true
-    getParty()
-      .then((data) => {
-        if (!isMounted) return
-        setPartyList(Array.isArray(data) ? data : [])
-      })
-      .catch(() => {
-        if (!isMounted) return
-        setPartyList([])
-      })
-    return () => {
-      isMounted = false
-    }
-  }, [activeTab])
+  const ensurePartyLoaded = useCallback(async () => {
+    const r = await ensureParty()
+    setPartyList(r.data)
+  }, [])
 
   useEffect(() => {
     setSelectedRowId(null)
@@ -142,6 +119,8 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     preformTypesFiltered,
     preformTypesFilteredFitting,
     partyList,
+    ensurePreformLoaded,
+    ensurePartyLoaded,
     loadData,
     beginLoading,
     pendingScrollToId,
