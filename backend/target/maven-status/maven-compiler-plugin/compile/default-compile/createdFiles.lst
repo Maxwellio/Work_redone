@@ -66,6 +66,7 @@ patrubki\entity\Hydrotest.class
 patrubki\repository\PreformTypRepository.class
 patrubki\entity\Party.class
 patrubki\repository\UserRepository.class
+patrubki\controller\SpaForwardController.class
 patrubki\entity\OperationStructureGroup.class
 patrubki\dto\CurrentUserDto.class
 patrubki\dto\NtkTransitionRowDto.class
