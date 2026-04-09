@@ -255,7 +255,7 @@ function TransitionLargeFormModal({
   const ntkPanel = showNtkPanel ? (
     <Box
       sx={{
-        flex: { md: '1 1 0' },
+        flex: { md: '1.5 1 0' },
         minWidth: 0,
         borderTop: { xs: 1, md: 0 },
         borderLeft: { md: 1 },
@@ -327,7 +327,7 @@ function TransitionLargeFormModal({
     <Dialog
       open={open}
       onClose={saving ? undefined : onClose}
-      maxWidth={showNtkPanel ? 'lg' : 'md'}
+      maxWidth={showNtkPanel ? 'xl' : 'md'}
       fullWidth
       PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}
     >
@@ -361,7 +361,7 @@ function TransitionLargeFormModal({
             alignItems: 'stretch',
           }}
         >
-          <Box sx={{ flex: showNtkPanel ? { md: '2 1 0' } : 1, minWidth: 0 }}>{formGrid}</Box>
+          <Box sx={{ flex: showNtkPanel ? { md: '1 1 0' } : 1, minWidth: 0 }}>{formGrid}</Box>
           {ntkPanel}
         </Box>
       </DialogContent>
