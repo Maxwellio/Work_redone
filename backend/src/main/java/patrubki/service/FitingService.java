@@ -7,6 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.FitingDto;
 import patrubki.dto.FitingSaveDto;
 import patrubki.entity.Fiting;
+import patrubki.repository.FitingDetailRepository;
 import patrubki.repository.FitingRepository;
 import patrubki.repository.PreformTypRepository;
 
@@ -14,20 +15,26 @@ import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class FitingService {
 
     private final FitingRepository repository;
+    private final FitingDetailRepository detailRepository;
     private final PreformTypRepository preformTypRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public FitingService(FitingRepository repository,
+                         FitingDetailRepository detailRepository,
                          PreformTypRepository preformTypRepository,
                          JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.detailRepository = detailRepository;
         this.preformTypRepository = preformTypRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -67,16 +74,32 @@ public class FitingService {
 
     public List<FitingDto> findByTipOrderByNm(int tip, String search) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam).stream()
-                .map(this::toDto)
+        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam);
+        Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
+        return fits.stream()
+                .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
                 .collect(Collectors.toList());
     }
 
     public List<FitingDto> findByTipOrderByNm(int tip, String search, Integer userId) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId).stream()
-                .map(this::toDto)
+        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId);
+        Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
+        return fits.stream()
+                .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
                 .collect(Collectors.toList());
+    }
+
+    private Map<Integer, Long> transitionCountsByFitingId(List<Fiting> fits) {
+        List<Integer> ids = fits.stream().map(Fiting::getIdFiting).collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, Long> map = new HashMap<>();
+        for (Object[] row : detailRepository.countGroupedByFitingId(ids)) {
+            map.put((Integer) row[0], ((Number) row[1]).longValue());
+        }
+        return map;
     }
 
     public void deleteById(Integer id) {
@@ -94,9 +117,10 @@ public class FitingService {
         return repository.findById(idFiting).map(Fiting::getDStan).orElse(null);
     }
 
-    private FitingDto toDto(Fiting e) {
+    private FitingDto toDto(Fiting e, long transitionCount) {
         FitingDto dto = new FitingDto();
         dto.setIdFiting(e.getIdFiting());
+        dto.setTransitionCount(transitionCount);
         dto.setIdPreform(e.getIdPreform());
         dto.setNm(e.getNm());
         dto.setTip(e.getTip());

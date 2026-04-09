@@ -62,6 +62,9 @@ public class MakeSubstituteMainDto {
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 
+    @JsonProperty("transitionCount")
+    private long transitionCount;
+
     public Integer getIdSubstitutePrepared() {
         return idSubstitutePrepared;
     }
@@ -212,5 +215,13 @@ public class MakeSubstituteMainDto {
 
     public void setIdUserCreator(Integer idUserCreator) {
         this.idUserCreator = idUserCreator;
+    }
+
+    public long getTransitionCount() {
+        return transitionCount;
+    }
+
+    public void setTransitionCount(long transitionCount) {
+        this.transitionCount = transitionCount;
     }
 }

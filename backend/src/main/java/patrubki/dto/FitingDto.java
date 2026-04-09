@@ -50,6 +50,9 @@ public class FitingDto {
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 
+    @JsonProperty("transitionCount")
+    private long transitionCount;
+
     public Integer getIdFiting() {
         return idFiting;
     }
@@ -168,5 +171,13 @@ public class FitingDto {
 
     public void setIdUserCreator(Integer idUserCreator) {
         this.idUserCreator = idUserCreator;
+    }
+
+    public long getTransitionCount() {
+        return transitionCount;
+    }
+
+    public void setTransitionCount(long transitionCount) {
+        this.transitionCount = transitionCount;
     }
 }

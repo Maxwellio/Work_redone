@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.MakeSubstituteMainDto;
 import patrubki.dto.SubstituteSaveDto;
 import patrubki.entity.MakeSubstituteMain;
+import patrubki.repository.MakeSubstituteDetailRepository;
 import patrubki.repository.MakeSubstituteMainRepository;
 import patrubki.repository.PreformTypRepository;
 
@@ -16,7 +17,10 @@ import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,13 +29,16 @@ public class MakeSubstituteMainService {
     private static final Logger log = LoggerFactory.getLogger(MakeSubstituteMainService.class);
 
     private final MakeSubstituteMainRepository repository;
+    private final MakeSubstituteDetailRepository detailRepository;
     private final PreformTypRepository preformTypRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public MakeSubstituteMainService(MakeSubstituteMainRepository repository,
+                                     MakeSubstituteDetailRepository detailRepository,
                                      PreformTypRepository preformTypRepository,
                                      JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.detailRepository = detailRepository;
         this.preformTypRepository = preformTypRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -74,16 +81,32 @@ public class MakeSubstituteMainService {
 
     public List<MakeSubstituteMainDto> findAllOrderByName(String search) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findAllOrderByName(searchParam).stream()
-                .map(this::toDto)
+        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam);
+        Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
+        return mains.stream()
+                .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
                 .collect(Collectors.toList());
     }
 
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, Integer userId) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findAllOrderByName(searchParam, userId).stream()
-                .map(this::toDto)
+        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, userId);
+        Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
+        return mains.stream()
+                .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
                 .collect(Collectors.toList());
+    }
+
+    private Map<Integer, Long> transitionCountsBySubstitutePreparedId(List<MakeSubstituteMain> mains) {
+        List<Integer> ids = mains.stream().map(MakeSubstituteMain::getIdSubstitutePrepared).collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, Long> map = new HashMap<>();
+        for (Object[] row : detailRepository.countGroupedBySubstitutePreparedId(ids)) {
+            map.put((Integer) row[0], ((Number) row[1]).longValue());
+        }
+        return map;
     }
 
     public void deleteById(Integer id) {
@@ -102,9 +125,10 @@ public class MakeSubstituteMainService {
         return s1 + " - " + s2 + " - " + s3 + " x " + s4 + " - " + s5;
     }
 
-    private MakeSubstituteMainDto toDto(MakeSubstituteMain e) {
+    private MakeSubstituteMainDto toDto(MakeSubstituteMain e, long transitionCount) {
         MakeSubstituteMainDto dto = new MakeSubstituteMainDto();
         dto.setIdSubstitutePrepared(e.getIdSubstitutePrepared());
+        dto.setTransitionCount(transitionCount);
         dto.setIdPreform(e.getIdPreform());
         dto.setName(buildName(e));
         dto.setDPreformOut(e.getDPreformOut());

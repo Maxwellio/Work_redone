@@ -15,6 +15,7 @@ export const COLUMNS = {
     { key: 'dSubstituteOut', label: 'D переходника нар.' },
     { key: 'dSubstituteIn', label: 'D переходника вн.' },
     { key: 'lSubstitute', label: 'L переходника' },
+    { key: 'transitionCount', label: 'Переходов' },
   ],
   1: [
     { key: 'idFiting', label: '№' },
@@ -23,6 +24,7 @@ export const COLUMNS = {
     { key: 'th', label: 'Толщ.' },
     { key: 'mass', label: 'Масса' },
     { key: 'l', label: 'L' },
+    { key: 'transitionCount', label: 'Переходов' },
   ],
   2: [
     { key: 'idFiting', label: '№' },
@@ -31,6 +33,7 @@ export const COLUMNS = {
     { key: 'th', label: 'Толщ.' },
     { key: 'mass', label: 'Масса' },
     { key: 'l', label: 'L' },
+    { key: 'transitionCount', label: 'Переходов' },
   ],
   3: [
     { key: 'idHydrotest', label: '№' },
