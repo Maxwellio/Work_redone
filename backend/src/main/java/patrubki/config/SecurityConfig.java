@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
             )
             .formLogin(form -> form
+                .loginPage("/login")
                 .loginProcessingUrl("/api/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
