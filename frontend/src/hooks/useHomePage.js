@@ -477,6 +477,7 @@ export function useHomePage() {
     const payloadBase = {
       d: parseNum(draft.d),
       l: parseNum(draft.l),
+      irazm: parseNum(draft.irazm),
       valueMeas: parseNum(draft.valueMeas),
       i: parseIntOrNull(draft.i),
       depthCut: parseNum(draft.depthCut),

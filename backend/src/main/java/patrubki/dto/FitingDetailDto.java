@@ -23,6 +23,9 @@ public class FitingDetailDto {
     @JsonProperty("l")
     private BigDecimal l;
 
+    @JsonProperty("irazm")
+    private BigDecimal irazm;
+
     @JsonProperty("valueMeas")
     private BigDecimal valueMeas;
 
@@ -104,6 +107,14 @@ public class FitingDetailDto {
 
     public void setL(BigDecimal l) {
         this.l = l;
+    }
+
+    public BigDecimal getIrazm() {
+        return irazm;
+    }
+
+    public void setIrazm(BigDecimal irazm) {
+        this.irazm = irazm;
     }
 
     public BigDecimal getValueMeas() {

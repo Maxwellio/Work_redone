@@ -21,6 +21,7 @@ import { getFittingDetailNtk, getNtkForTransition } from '../api/fittingsApi'
 const NUMERIC_FIELDS = new Set([
   'd',
   'l',
+  'irazm',
   'valueMeas',
   'depthCut',
   'i',
@@ -32,6 +33,7 @@ const NUMERIC_FIELDS = new Set([
 const emptyDraft = () => ({
   d: '',
   l: '',
+  irazm: '',
   valueMeas: '',
   depthCut: '',
   i: '',
@@ -75,6 +77,7 @@ function TransitionLargeFormModal({
       setDraft({
         d: initialValues.d ?? '',
         l: initialValues.l ?? '',
+        irazm: initialValues.irazm ?? '',
         valueMeas: initialValues.valueMeas ?? '',
         depthCut: initialValues.depthCut ?? '',
         i: initialValues.i ?? '',
@@ -212,6 +215,7 @@ function TransitionLargeFormModal({
       <Stack spacing={2}>
         <TextField fullWidth size="small" label="Длина наруж, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
         <TextField fullWidth size="small" label="Длина, мм" type="number" value={draft.l} onChange={handleFieldChange('l')} />
+        <TextField fullWidth size="small" label="Измеряемый размер, мм" type="number" value={draft.irazm} onChange={handleFieldChange('irazm')} />
         <TextField fullWidth size="small" label="Измер велич, мм" type="number" value={draft.valueMeas} onChange={handleFieldChange('valueMeas')} />
         <TextField fullWidth size="small" label="Глубина резания, мм" type="number" value={draft.depthCut} onChange={handleFieldChange('depthCut')} />
         <TextField fullWidth size="small" label="Число проходов" type="number" value={draft.i} onChange={handleFieldChange('i')} />

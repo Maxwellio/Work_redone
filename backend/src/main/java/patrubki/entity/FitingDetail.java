@@ -33,6 +33,9 @@ public class FitingDetail {
     @Column(name = "l", precision = 19, scale = 2)
     private BigDecimal l;
 
+    @Column(name = "irazm", precision = 19, scale = 2)
+    private BigDecimal irazm;
+
     @Column(name = "value_meas", precision = 19, scale = 2)
     private BigDecimal valueMeas;
 
@@ -108,6 +111,14 @@ public class FitingDetail {
 
     public void setL(BigDecimal l) {
         this.l = l;
+    }
+
+    public BigDecimal getIrazm() {
+        return irazm;
+    }
+
+    public void setIrazm(BigDecimal irazm) {
+        this.irazm = irazm;
     }
 
     public BigDecimal getValueMeas() {

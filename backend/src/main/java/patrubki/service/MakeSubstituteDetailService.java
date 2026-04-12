@@ -41,7 +41,7 @@ public class MakeSubstituteDetailService {
     public Integer save(MakeSubstituteDetailSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_substitute_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "call substitute.add_edit_substitute_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setObject(2, dto.getIdSubstitutePrepared(), Types.INTEGER);
@@ -57,6 +57,7 @@ public class MakeSubstituteDetailService {
             cs.setObject(12, dto.getLCur(), Types.NUMERIC);
             cs.setObject(13, dto.getSeqNumOper(), Types.INTEGER);
             cs.setObject(14, dto.getIdUserCreator(), Types.INTEGER);
+            cs.setObject(15, dto.getIrazm(), Types.NUMERIC);
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });
@@ -86,6 +87,7 @@ public class MakeSubstituteDetailService {
         dto.setSeqNumOper(e.getSeqNumOper());
         dto.setD(e.getD());
         dto.setL(e.getL());
+        dto.setIrazm(e.getIrazm());
         dto.setValueMeas(e.getValueMeas());
         MakeSubstituteMain m = e.getIdSubstitutePrepared();
         dto.setIdSubstitutePrepared(m != null ? m.getIdSubstitutePrepared() : null);

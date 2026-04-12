@@ -42,7 +42,7 @@ public class FitingDetailService {
     public Integer save(FitingDetailSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_fiting_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "call substitute.add_edit_fiting_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setObject(2, dto.getIdFiting(), Types.INTEGER);
@@ -61,6 +61,7 @@ public class FitingDetailService {
             java.sql.Array ntkArray = conn.createArrayOf("integer", ntkIds);
             cs.setArray(14, ntkArray);
             cs.setObject(15, dto.getIdUserCreator(), Types.INTEGER);
+            cs.setObject(16, dto.getIrazm(), Types.NUMERIC);
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });
@@ -100,6 +101,7 @@ public class FitingDetailService {
         dto.setSeqNumOper(e.getSeqNumOper());
         dto.setD(e.getD());
         dto.setL(e.getL());
+        dto.setIrazm(e.getIrazm());
         dto.setValueMeas(e.getValueMeas());
         Fiting f = e.getIdFiting();
         dto.setIdFiting(f != null ? f.getIdFiting() : null);

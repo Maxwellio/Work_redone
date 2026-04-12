@@ -243,6 +243,7 @@ function SubstituteTransitionsModal({
                 seqNumOper: selectedRow.seqNumOper ?? '',
                 d: selectedRow.d ?? '',
                 l: selectedRow.l ?? '',
+                irazm: selectedRow.irazm ?? '',
                 valueMeas: selectedRow.valueMeas ?? '',
                 depthCut: selectedRow.depthCut ?? '',
                 i: selectedRow.i ?? '',
