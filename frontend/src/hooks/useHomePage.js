@@ -11,7 +11,7 @@ import { useHydrotestForm } from './useHydrotestForm'
 import { useSubstituteForm } from './useSubstituteForm'
 import { usePreformRef } from './usePreformRef'
 import { useTransitionsRef } from './useTransitionsRef'
-import { isSmallFormOperationId, isLargeFormOperationId } from '../utils/operationCategory'
+import { isAssignmentOperationId, isSmallFormOperationId, isLargeFormOperationId } from '../utils/operationCategory'
 
 function parseNum(v) {
   if (v === '' || v == null) return null
@@ -261,29 +261,27 @@ export function useHomePage() {
   const openTransitionsRefModal = (ctx = {}) => {
     if (ctx.mode === 'edit') {
       const selectedOperationId = ctx.selectedOperationId ?? null
-      const selectedOperationName = ctx.selectedOperationName ?? ''
-      const ownerType = ctx.ownerType ?? null
-      const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
-      const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
-      const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
-      const payloadBase = {
-        open: true,
-        idOperations: selectedOperationId,
-        nmOperations: selectedOperationName,
-        isEditMode: true,
-        ownerType,
-        tip,
-        idSubstitutePrepared,
-        idFiting,
-        transitionRecordId: ctx.transitionRecordId ?? null,
-        initialValues: ctx.transitionDraft ?? null,
-      }
-
-      setIsTransitionsRefModalOpen(false)
-      setResetTransitionsRefContextOnClose(false)
-      clearTransitionsRefContext()
-
       if (isSmallFormOperationId(selectedOperationId)) {
+        const selectedOperationName = ctx.selectedOperationName ?? ''
+        const ownerType = ctx.ownerType ?? null
+        const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
+        const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
+        const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+        const payloadBase = {
+          open: true,
+          idOperations: selectedOperationId,
+          nmOperations: selectedOperationName,
+          isEditMode: true,
+          ownerType,
+          tip,
+          idSubstitutePrepared,
+          idFiting,
+          transitionRecordId: ctx.transitionRecordId ?? null,
+          initialValues: ctx.transitionDraft ?? null,
+        }
+        setIsTransitionsRefModalOpen(false)
+        setResetTransitionsRefContextOnClose(false)
+        clearTransitionsRefContext()
         setTimeout(() => {
           setTransitionSmallForm(payloadBase)
         }, 0)
@@ -291,14 +289,31 @@ export function useHomePage() {
       }
 
       if (isLargeFormOperationId(selectedOperationId)) {
+        const selectedOperationName = ctx.selectedOperationName ?? ''
+        const ownerType = ctx.ownerType ?? null
+        const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
+        const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
+        const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+        const payloadBase = {
+          open: true,
+          idOperations: selectedOperationId,
+          nmOperations: selectedOperationName,
+          isEditMode: true,
+          ownerType,
+          tip,
+          idSubstitutePrepared,
+          idFiting,
+          transitionRecordId: ctx.transitionRecordId ?? null,
+          initialValues: ctx.transitionDraft ?? null,
+        }
+        setIsTransitionsRefModalOpen(false)
+        setResetTransitionsRefContextOnClose(false)
+        clearTransitionsRefContext()
         setTimeout(() => {
           setTransitionLargeForm(payloadBase)
         }, 0)
         return
       }
-
-      window.alert('Для выбранной операции предусмотрена другая форма (пока не реализована).')
-      return
     }
 
     transitionsRef.beginLoadingRef()
@@ -313,6 +328,68 @@ export function useHomePage() {
       transitionDraft: ctx.transitionDraft ?? null,
     })
     setIsTransitionsRefModalOpen(true)
+  }
+
+  const saveAssignmentTransitionDirect = async ({
+    ownerType,
+    idSubstitutePrepared,
+    idFiting,
+    operationId,
+    isEditMode,
+    transitionRecordId,
+    seqNumOper,
+  }) => {
+    const idUserCreator = isEditMode ? null : user?.userId ?? null
+
+    if (ownerType === 'substitute') {
+      if (idSubstitutePrepared == null) {
+        throw new Error('Не выбран переводник')
+      }
+      await saveSubstituteDetail({
+        id: isEditMode ? transitionRecordId : null,
+        idSubstitutePrepared,
+        idOperations: operationId,
+        d: null,
+        l: null,
+        irazm: null,
+        valueMeas: null,
+        i: null,
+        depthCut: null,
+        n: null,
+        s: null,
+        masCur: null,
+        lCur: null,
+        seqNumOper,
+        idUserCreator,
+      })
+      return
+    }
+
+    if (ownerType === 'fitting') {
+      if (idFiting == null) {
+        throw new Error('Не выбрана деталь')
+      }
+      await saveFittingDetail({
+        id: isEditMode ? transitionRecordId : null,
+        idFiting,
+        idOperations: operationId,
+        d: null,
+        l: null,
+        irazm: null,
+        valueMeas: null,
+        i: null,
+        depthCut: null,
+        n: null,
+        s: null,
+        masCur: null,
+        lCur: null,
+        seqNumOper,
+        idUserCreator,
+      })
+      return
+    }
+
+    throw new Error('Не определен тип владельца перехода')
   }
 
   const closeTransitionsRefModal = () => {
@@ -366,6 +443,7 @@ export function useHomePage() {
     const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
 
     let initialValues = null
+    let nextSeqNumOper = null
     if (!modeEdit) {
       try {
         let list = []
@@ -375,10 +453,12 @@ export function useHomePage() {
           list = await getFittingDetails(idFiting)
         }
         const nextSeq = computeNextSeqNumOper(list)
+        nextSeqNumOper = nextSeq
         initialValues = { seqNumOper: String(nextSeq) }
       } catch (e) {
         console.error('Не удалось загрузить переходы для автонумерации', e)
         initialValues = null
+        nextSeqNumOper = null
       }
     }
 
@@ -409,7 +489,25 @@ export function useHomePage() {
       return
     }
 
-    window.alert('Для выбранной операции предусмотрена другая форма (пока не реализована).')
+    if (isAssignmentOperationId(selectedOperationId)) {
+      try {
+        await saveAssignmentTransitionDirect({
+          ownerType,
+          idSubstitutePrepared,
+          idFiting,
+          operationId: selectedOperationId,
+          isEditMode: modeEdit,
+          transitionRecordId: ctx.transitionRecordId ?? null,
+          seqNumOper: modeEdit ? parseIntOrNull(ctx.transitionDraft?.seqNumOper) : nextSeqNumOper,
+        })
+        setTransitionsListRefreshKey((k) => k + 1)
+      } catch (err) {
+        window.alert(err?.message || 'Ошибка сохранения перехода')
+      }
+      return
+    }
+
+    window.alert('Для выбранной операции не настроен сценарий ввода.')
   }
 
   const handleTransitionsRefModalExited = () => {

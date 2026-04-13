@@ -18,8 +18,11 @@ public enum OperationCategory {
             IntStream.rangeClosed(52, 55).boxed()
     ).collect(Collectors.toSet())),
 
-    /** Операции 13-39 — большая форма */
-    CATEGORY_LARGE_FORM(IntStream.rangeClosed(13, 39).boxed().collect(Collectors.toSet())),
+    /** Операции 13-39, 56-60 — большая форма */
+    CATEGORY_LARGE_FORM(Stream.concat(
+            IntStream.rangeClosed(13, 39).boxed(),
+            IntStream.rangeClosed(56, 60).boxed()
+    ).collect(Collectors.toSet())),
 
     /** Операции 1-12, 42-51 — маленькая форма */
     CATEGORY_SMALL_FORM(Stream.concat(
