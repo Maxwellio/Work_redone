@@ -14,8 +14,10 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
+import ArrowUpward from '@mui/icons-material/ArrowUpward'
+import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getFittingDetails } from '../api'
-import { deleteFittingDetail } from '../api/transitionDetailsApi'
+import { deleteFittingDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import '../styles/Home.css'
 
 const COLUMNS = [
@@ -71,6 +73,7 @@ function FittingTransitionsModal({
   const [error, setError] = useState(null)
   const [selectedRowKey, setSelectedRowKey] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [moving, setMoving] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -111,6 +114,70 @@ function FittingTransitionsModal({
   const titleName = fittingName ? ` ${fittingName}` : ''
   const tipLabel = tip === 1 ? 'патрубку' : 'трубе'
   const emptyMessage = tip === 1 ? 'Нет переходов для выбранного патрубка' : 'Нет переходов для выбранной трубы'
+  const selectedIndex = useMemo(
+    () => rowsSorted.findIndex((row) => getRowKey(row) === selectedRowKey),
+    [rowsSorted, selectedRowKey]
+  )
+  const canMoveUp = selectedIndex > 0
+  const canMoveDown = selectedIndex >= 0 && selectedIndex < rowsSorted.length - 1
+
+  const buildSavePayload = (row, seqNumOper) => ({
+    id: row.idFitingDetail,
+    idFiting: fittingId,
+    idOperations: row.idOperations ?? null,
+    d: row.d ?? null,
+    l: row.l ?? null,
+    irazm: row.irazm ?? null,
+    valueMeas: row.valueMeas ?? null,
+    i: row.i ?? null,
+    depthCut: row.depthCut ?? null,
+    n: row.n ?? null,
+    s: row.s ?? null,
+    masCur: row.masCur ?? null,
+    lCur: row.lCur ?? null,
+    seqNumOper,
+    idUserCreator: null,
+  })
+
+  const handleMoveTransition = async (direction) => {
+    if (selectedIndex < 0) {
+      window.alert('Выберите переход')
+      return
+    }
+    const targetIndex = selectedIndex + direction
+    if (targetIndex < 0 || targetIndex >= rowsSorted.length) return
+    const selectedRow = rowsSorted[selectedIndex]
+    const neighborRow = rowsSorted[targetIndex]
+    if (!selectedRow || !neighborRow) return
+    if (!selectedRow.idFitingDetail || !neighborRow.idFitingDetail) {
+      window.alert('Нельзя изменить порядок: отсутствует идентификатор записи')
+      return
+    }
+
+    setMoving(true)
+    try {
+      const selectedSeq = selectedRow.seqNumOper ?? null
+      const neighborSeq = neighborRow.seqNumOper ?? null
+      await saveFittingDetail(buildSavePayload(selectedRow, neighborSeq))
+      await saveFittingDetail(buildSavePayload(neighborRow, selectedSeq))
+      setRows((prevRows) =>
+        prevRows.map((row) => {
+          if (row.idFitingDetail === selectedRow.idFitingDetail) {
+            return { ...row, seqNumOper: neighborSeq }
+          }
+          if (row.idFitingDetail === neighborRow.idFitingDetail) {
+            return { ...row, seqNumOper: selectedSeq }
+          }
+          return row
+        })
+      )
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка изменения порядка переходов')
+    } finally {
+      setMoving(false)
+    }
+  }
 
   const handleDeleteTransition = async () => {
     if (!selectedRowKey) {
@@ -217,10 +284,30 @@ function FittingTransitionsModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
+        <Box sx={{ display: 'flex', gap: 1, mr: 'auto' }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<ArrowUpward />}
+            disabled={deleting || moving || !canMoveUp}
+            onClick={() => handleMoveTransition(-1)}
+          >
+            Вверх
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<ArrowDownward />}
+            disabled={deleting || moving || !canMoveDown}
+            onClick={() => handleMoveTransition(1)}
+          >
+            Вниз
+          </Button>
+        </Box>
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'fitting',
@@ -235,7 +322,7 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={() => {
             if (!selectedRowKey) {
               window.alert('Выберите переход')
@@ -275,7 +362,7 @@ function FittingTransitionsModal({
         <Button
           variant="outlined"
           color="error"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={handleDeleteTransition}
         >
           Удалить переход
@@ -284,7 +371,7 @@ function FittingTransitionsModal({
           variant="outlined"
           color="inherit"
           startIcon={<Close />}
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={onClose}
         >
           Закрыть

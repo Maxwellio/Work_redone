@@ -14,8 +14,10 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
+import ArrowUpward from '@mui/icons-material/ArrowUpward'
+import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getSubstituteDetails } from '../api'
-import { deleteSubstituteDetail } from '../api/transitionDetailsApi'
+import { deleteSubstituteDetail, saveSubstituteDetail } from '../api/transitionDetailsApi'
 import '../styles/Home.css'
 
 const COLUMNS = [
@@ -70,6 +72,7 @@ function SubstituteTransitionsModal({
   const [error, setError] = useState(null)
   const [selectedRowKey, setSelectedRowKey] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [moving, setMoving] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -108,6 +111,70 @@ function SubstituteTransitionsModal({
   )
 
   const titleName = substituteName ? ` ${substituteName}` : ''
+  const selectedIndex = useMemo(
+    () => rowsSorted.findIndex((row) => getRowKey(row) === selectedRowKey),
+    [rowsSorted, selectedRowKey]
+  )
+  const canMoveUp = selectedIndex > 0
+  const canMoveDown = selectedIndex >= 0 && selectedIndex < rowsSorted.length - 1
+
+  const buildSavePayload = (row, seqNumOper) => ({
+    id: row.idMakeSubstitute,
+    idSubstitutePrepared: substituteId,
+    idOperations: row.idOperations ?? null,
+    d: row.d ?? null,
+    l: row.l ?? null,
+    irazm: row.irazm ?? null,
+    valueMeas: row.valueMeas ?? null,
+    i: row.i ?? null,
+    depthCut: row.depthCut ?? null,
+    n: row.n ?? null,
+    s: row.s ?? null,
+    masCur: row.masCur ?? null,
+    lCur: row.lCur ?? null,
+    seqNumOper,
+    idUserCreator: null,
+  })
+
+  const handleMoveTransition = async (direction) => {
+    if (selectedIndex < 0) {
+      window.alert('Выберите переход')
+      return
+    }
+    const targetIndex = selectedIndex + direction
+    if (targetIndex < 0 || targetIndex >= rowsSorted.length) return
+    const selectedRow = rowsSorted[selectedIndex]
+    const neighborRow = rowsSorted[targetIndex]
+    if (!selectedRow || !neighborRow) return
+    if (!selectedRow.idMakeSubstitute || !neighborRow.idMakeSubstitute) {
+      window.alert('Нельзя изменить порядок: отсутствует идентификатор записи')
+      return
+    }
+
+    setMoving(true)
+    try {
+      const selectedSeq = selectedRow.seqNumOper ?? null
+      const neighborSeq = neighborRow.seqNumOper ?? null
+      await saveSubstituteDetail(buildSavePayload(selectedRow, neighborSeq))
+      await saveSubstituteDetail(buildSavePayload(neighborRow, selectedSeq))
+      setRows((prevRows) =>
+        prevRows.map((row) => {
+          if (row.idMakeSubstitute === selectedRow.idMakeSubstitute) {
+            return { ...row, seqNumOper: neighborSeq }
+          }
+          if (row.idMakeSubstitute === neighborRow.idMakeSubstitute) {
+            return { ...row, seqNumOper: selectedSeq }
+          }
+          return row
+        })
+      )
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка изменения порядка переходов')
+    } finally {
+      setMoving(false)
+    }
+  }
 
   const handleDeleteTransition = async () => {
     if (!selectedRowKey) {
@@ -206,10 +273,30 @@ function SubstituteTransitionsModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
+        <Box sx={{ display: 'flex', gap: 1, mr: 'auto' }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<ArrowUpward />}
+            disabled={deleting || moving || !canMoveUp}
+            onClick={() => handleMoveTransition(-1)}
+          >
+            Вверх
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<ArrowDownward />}
+            disabled={deleting || moving || !canMoveDown}
+            onClick={() => handleMoveTransition(1)}
+          >
+            Вниз
+          </Button>
+        </Box>
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'substitute',
@@ -223,7 +310,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={() => {
             if (!selectedRowKey) {
               window.alert('Выберите переход')
@@ -262,7 +349,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="outlined"
           color="error"
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={handleDeleteTransition}
         >
           Удалить переход
@@ -271,7 +358,7 @@ function SubstituteTransitionsModal({
           variant="outlined"
           color="inherit"
           startIcon={<Close />}
-          disabled={deleting}
+          disabled={deleting || moving}
           onClick={onClose}
         >
           Закрыть
