@@ -15,6 +15,7 @@ import patrubki.repository.MakeSubstituteDetailRepository;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,25 @@ public class MakeSubstituteDetailService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         repository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcSubTvp(Integer idOperations, BigDecimal massPreform, BigDecimal lPreform) {
+        return jdbcTemplate.queryForObject(
+                "select substitute.calculate_sub_tvp(?,?,?,?,?,?,?,?,?,?,?)",
+                BigDecimal.class,
+                idOperations,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                massPreform,
+                lPreform,
+                null,
+                null
+        );
     }
 
     private static Integer extractId(Object rawId, Integer fallbackId) {

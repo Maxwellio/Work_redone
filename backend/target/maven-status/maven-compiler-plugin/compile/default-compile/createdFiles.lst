@@ -31,6 +31,7 @@ patrubki\service\FitingDetailService.class
 patrubki\repository\FitingDetailRepository.class
 patrubki\entity\package-info.class
 patrubki\repository\FitingRepository.class
+patrubki\dto\FitingDetailCalcTvpRequestDto.class
 patrubki\service\OperationStructureSprService.class
 patrubki\constants\OperationCategory.class
 patrubki\security\package-info.class
@@ -40,6 +41,7 @@ patrubki\entity\FitingDetail.class
 patrubki\service\HydrotestService.class
 patrubki\entity\OperationStructureSpr.class
 patrubki\entity\MakeSubstituteMain.class
+patrubki\dto\SubstituteDetailCalcTvpRequestDto.class
 patrubki\dto\FitingDto.class
 patrubki\repository\OperationStructureSprRepository.class
 patrubki\repository\package-info.class

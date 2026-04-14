@@ -15,6 +15,7 @@ import patrubki.repository.FitingDetailRepository;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -73,6 +74,25 @@ public class FitingDetailService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         repository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcFitTvp(Integer idOperations, BigDecimal massPreform, BigDecimal lPreform) {
+        return jdbcTemplate.queryForObject(
+                "select substitute.calculate_fit_tvp(?,?,?,?,?,?,?,?,?,?,?)",
+                BigDecimal.class,
+                idOperations,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                massPreform,
+                lPreform,
+                null,
+                null
+        );
     }
 
     private static Integer[] toDistinctIntegerArray(List<Integer> idNtk) {

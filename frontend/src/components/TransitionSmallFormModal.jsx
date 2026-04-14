@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography'
 import InputAdornment from '@mui/material/InputAdornment'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
+import { calcFittingDetailTvp, calcSubstituteDetailTvp } from '../api'
 
 const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'seqNumOper'])
 
@@ -23,6 +24,7 @@ function TransitionSmallFormModal({
   nmOperations,
   initialValues,
   onSave,
+  ownerType = null,
 }) {
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
   const [saveError, setSaveError] = useState(null)
@@ -84,6 +86,30 @@ function TransitionSmallFormModal({
     onClose()
   }
 
+  const handleCalculateTvp = async () => {
+    setSaveError(null)
+    setSaving(true)
+    try {
+      const payload = {
+        idOperations,
+        massPreform: draft.masCur === '' ? null : Number(draft.masCur),
+        lPreform: draft.lCur === '' ? null : Number(draft.lCur),
+      }
+      const result =
+        ownerType === 'fitting'
+          ? await calcFittingDetailTvp(payload)
+          : await calcSubstituteDetailTvp(payload)
+      setDraft((prev) => ({
+        ...prev,
+        tVp: result?.tVp ?? '',
+      }))
+    } catch (err) {
+      setSaveError(err.message || 'Ошибка расчета')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -135,7 +161,7 @@ function TransitionSmallFormModal({
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton edge="end" aria-label="Расчёт" size="small" onClick={() => {}}>
+                  <IconButton edge="end" aria-label="Расчёт" size="small" onClick={handleCalculateTvp} disabled={saving}>
                     <Calculate fontSize="small" />
                   </IconButton>
                 </InputAdornment>

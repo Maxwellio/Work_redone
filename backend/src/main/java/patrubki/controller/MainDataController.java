@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import patrubki.dto.FitingDetailDto;
+import patrubki.dto.FitingDetailCalcTvpRequestDto;
 import patrubki.dto.FitingDetailNtkDto;
 import patrubki.dto.FitingDetailSaveDto;
 import patrubki.dto.FitingDto;
@@ -28,6 +29,7 @@ import patrubki.dto.PreformTypDto;
 import patrubki.dto.FitingSaveDto;
 import patrubki.dto.HydrotestSaveDto;
 import patrubki.dto.SubstituteSaveDto;
+import patrubki.dto.SubstituteDetailCalcTvpRequestDto;
 import patrubki.service.FitingDetailNtkService;
 import patrubki.service.FitingDetailService;
 import patrubki.service.FitingService;
@@ -235,6 +237,16 @@ public class MainDataController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/fitting-details/calc-tvp")
+    public ResponseEntity<java.util.Map<String, BigDecimal>> calcFittingDetailTvp(@RequestBody FitingDetailCalcTvpRequestDto body) {
+        BigDecimal tVp = fitingDetailService.calcFitTvp(
+                body.getIdOperations(),
+                body.getMassPreform(),
+                body.getLPreform()
+        );
+        return ResponseEntity.ok(java.util.Map.of("tVp", tVp));
+    }
+
     @GetMapping("/substitutes/{idSubstitutePrepared}/details")
     public ResponseEntity<List<MakeSubstituteDetailDto>> getSubstituteDetails(@PathVariable("idSubstitutePrepared") Integer idSubstitutePrepared) {
         return ResponseEntity.ok(makeSubstituteDetailService.findByIdSubstitutePreparedOrderBySeqNumOper(idSubstitutePrepared));
@@ -257,6 +269,16 @@ public class MainDataController {
     public ResponseEntity<Void> deleteSubstituteDetail(@PathVariable Integer id) {
         makeSubstituteDetailService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/substitute-details/calc-tvp")
+    public ResponseEntity<java.util.Map<String, BigDecimal>> calcSubstituteDetailTvp(@RequestBody SubstituteDetailCalcTvpRequestDto body) {
+        BigDecimal tVp = makeSubstituteDetailService.calcSubTvp(
+                body.getIdOperations(),
+                body.getMassPreform(),
+                body.getLPreform()
+        );
+        return ResponseEntity.ok(java.util.Map.of("tVp", tVp));
     }
 
     @GetMapping("/fitting-details/{id}/ntk")

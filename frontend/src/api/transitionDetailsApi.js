@@ -70,3 +70,37 @@ export async function deleteFittingDetail(id) {
   })
   await handleDeleteResponse(res)
 }
+
+export async function calcSubstituteDetailTvp({ idOperations, massPreform, lPreform }) {
+  const res = await request('/substitute-details/calc-tvp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      idOperations,
+      massPreform,
+      lPreform,
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчета нормы времени')
+  }
+  return res.json()
+}
+
+export async function calcFittingDetailTvp({ idOperations, massPreform, lPreform }) {
+  const res = await request('/fitting-details/calc-tvp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      idOperations,
+      massPreform,
+      lPreform,
+    }),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчета нормы времени')
+  }
+  return res.json()
+}

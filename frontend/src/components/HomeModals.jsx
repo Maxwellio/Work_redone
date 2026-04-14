@@ -103,6 +103,7 @@ function HomeModals({
         nmOperations={transitionSmallForm.nmOperations}
         initialValues={transitionSmallForm.initialValues}
         onSave={onSaveTransitionSmall}
+        ownerType={transitionSmallForm.ownerType}
       />
 
       <TransitionLargeFormModal
