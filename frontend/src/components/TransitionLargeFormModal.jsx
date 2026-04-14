@@ -231,6 +231,16 @@ function TransitionLargeFormModal({
           type="number"
           value={draft.tMach}
           disabled
+        />
+        <TextField fullWidth size="small" label="Vрез, м/мин" type="number" value={draft.vRez} disabled />
+        <TextField fullWidth size="small" label="Твсп, мин" type="number" value={draft.tVp} disabled />
+        <TextField
+          fullWidth
+          size="small"
+          label="Норма времени, мин"
+          type="number"
+          value={draft.tSum}
+          disabled
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -241,9 +251,6 @@ function TransitionLargeFormModal({
             ),
           }}
         />
-        <TextField fullWidth size="small" label="Vрез, м/мин" type="number" value={draft.vRez} disabled />
-        <TextField fullWidth size="small" label="Твсп, мин" type="number" value={draft.tVp} disabled />
-        <TextField fullWidth size="small" label="Норма времени, мин" type="number" value={draft.tSum} disabled />
         <TextField
           fullWidth
           size="small"

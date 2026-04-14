@@ -444,7 +444,11 @@ export function useHomePage() {
 
     let initialValues = null
     let nextSeqNumOper = null
-    if (!modeEdit) {
+    if (modeEdit) {
+      initialValues = {
+        seqNumOper: ctx.transitionDraft?.seqNumOper ?? '',
+      }
+    } else {
       try {
         let list = []
         if (ownerType === 'substitute' && idSubstitutePrepared != null) {
@@ -472,7 +476,7 @@ export function useHomePage() {
       idSubstitutePrepared,
       idFiting,
       transitionRecordId: ctx.transitionRecordId,
-      initialValues: modeEdit ? null : initialValues,
+      initialValues,
     }
 
     if (isSmallFormOperationId(selectedOperationId)) {
