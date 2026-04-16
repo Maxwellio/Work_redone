@@ -118,6 +118,9 @@ function HomeModals({
         tip={transitionLargeForm.tip}
         idFiting={transitionLargeForm.idFiting}
         transitionRecordId={transitionLargeForm.transitionRecordId}
+        substitutePh={transitionLargeForm.substitutePh}
+        fittingPh={transitionLargeForm.fittingPh}
+        fittingDStan={transitionLargeForm.fittingDStan}
       />
 
       <PreformRefModal

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 import patrubki.dto.FitingDetailDto;
 import patrubki.dto.FitingDetailCalcTvpRequestDto;
+import patrubki.dto.FitingDetailLargeFormCalcRequestDto;
 import patrubki.dto.FitingDetailNtkDto;
 import patrubki.dto.FitingDetailSaveDto;
 import patrubki.dto.FitingDto;
@@ -30,6 +31,8 @@ import patrubki.dto.FitingSaveDto;
 import patrubki.dto.HydrotestSaveDto;
 import patrubki.dto.SubstituteSaveDto;
 import patrubki.dto.SubstituteDetailCalcTvpRequestDto;
+import patrubki.dto.SubstituteDetailLargeFormCalcRequestDto;
+import patrubki.dto.SubstituteDetailLargeFormCalcResponseDto;
 import patrubki.service.FitingDetailNtkService;
 import patrubki.service.FitingDetailService;
 import patrubki.service.FitingService;
@@ -247,6 +250,12 @@ public class MainDataController {
         return ResponseEntity.ok(java.util.Map.of("tVp", tVp));
     }
 
+    @PostMapping("/fitting-details/calc-large-form")
+    public ResponseEntity<SubstituteDetailLargeFormCalcResponseDto> calcFittingDetailLargeForm(
+            @RequestBody FitingDetailLargeFormCalcRequestDto body) {
+        return ResponseEntity.ok(fitingDetailService.calcLargeFormFitting(body));
+    }
+
     @GetMapping("/substitutes/{idSubstitutePrepared}/details")
     public ResponseEntity<List<MakeSubstituteDetailDto>> getSubstituteDetails(@PathVariable("idSubstitutePrepared") Integer idSubstitutePrepared) {
         return ResponseEntity.ok(makeSubstituteDetailService.findByIdSubstitutePreparedOrderBySeqNumOper(idSubstitutePrepared));
@@ -279,6 +288,12 @@ public class MainDataController {
                 body.getLPreform()
         );
         return ResponseEntity.ok(java.util.Map.of("tVp", tVp));
+    }
+
+    @PostMapping("/substitute-details/calc-large-form")
+    public ResponseEntity<SubstituteDetailLargeFormCalcResponseDto> calcSubstituteDetailLargeForm(
+            @RequestBody SubstituteDetailLargeFormCalcRequestDto body) {
+        return ResponseEntity.ok(makeSubstituteDetailService.calcLargeFormSubstitute(body));
     }
 
     @GetMapping("/fitting-details/{id}/ntk")

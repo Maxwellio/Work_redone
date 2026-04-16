@@ -16,6 +16,7 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
+import { calcFittingDetailLargeForm, calcSubstituteDetailLargeForm } from '../api'
 import { getFittingDetailNtk, getNtkForTransition } from '../api/fittingsApi'
 
 const NUMERIC_FIELDS = new Set([
@@ -58,6 +59,9 @@ function TransitionLargeFormModal({
   tip = null,
   idFiting = null,
   transitionRecordId = null,
+  substitutePh = null,
+  fittingPh = null,
+  fittingDStan = null,
 }) {
   const showNtkPanel = ownerType === 'fitting' && (tip === 1 || tip === 2)
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
@@ -183,6 +187,63 @@ function TransitionLargeFormModal({
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
 
+  const parseNumOrNull = (v) => {
+    if (v === '' || v == null) return null
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+
+  const parseIntOrNull = (v) => {
+    if (v === '' || v == null) return null
+    const n = parseInt(String(v), 10)
+    return Number.isInteger(n) ? n : null
+  }
+
+  const canRunLargeFormCalc =
+    idOperations != null &&
+    (ownerType === 'substitute' || (ownerType === 'fitting' && showNtkPanel))
+
+  const handleCalculateLargeForm = async () => {
+    if (!canRunLargeFormCalc) return
+    setSaveError(null)
+    setSaving(true)
+    try {
+      const basePayload = {
+        idOperations,
+        i: parseIntOrNull(draft.i),
+        s: parseNumOrNull(draft.s),
+        d: parseNumOrNull(draft.d),
+        n: parseNumOrNull(draft.n),
+        l: parseNumOrNull(draft.l),
+        valueMeas: parseNumOrNull(draft.valueMeas),
+        irazm: parseNumOrNull(draft.irazm),
+      }
+      const result =
+        ownerType === 'substitute'
+          ? await calcSubstituteDetailLargeForm({
+              ...basePayload,
+              ph: substitutePh,
+            })
+          : await calcFittingDetailLargeForm({
+              ...basePayload,
+              ph: fittingPh,
+              dStan: fittingDStan,
+              idNtk: Array.from(checkedNtkIds),
+            })
+      setDraft((prev) => ({
+        ...prev,
+        tVp: result?.tVp ?? '',
+        vRez: result?.vRez ?? '',
+        tMach: result?.tMach ?? '',
+        tSum: result?.tSum ?? '',
+      }))
+    } catch (err) {
+      setSaveError(err.message || 'Ошибка расчета')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleOk = async () => {
     setSaveError(null)
     if (typeof onSave === 'function') {
@@ -244,7 +305,13 @@ function TransitionLargeFormModal({
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton edge="end" aria-label="Расчёт" size="small" onClick={() => {}}>
+                <IconButton
+                  edge="end"
+                  aria-label="Расчёт"
+                  size="small"
+                  onClick={handleCalculateLargeForm}
+                  disabled={saving || !canRunLargeFormCalc}
+                >
                   <Calculate fontSize="small" />
                 </IconButton>
               </InputAdornment>

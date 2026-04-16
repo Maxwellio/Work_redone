@@ -88,6 +88,32 @@ export async function calcSubstituteDetailTvp({ idOperations, massPreform, lPref
   return res.json()
 }
 
+export async function calcSubstituteDetailLargeForm(payload) {
+  const res = await request('/substitute-details/calc-large-form', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчета')
+  }
+  return res.json()
+}
+
+export async function calcFittingDetailLargeForm(payload) {
+  const res = await request('/fitting-details/calc-large-form', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчета')
+  }
+  return res.json()
+}
+
 export async function calcFittingDetailTvp({ idOperations, massPreform, lPreform }) {
   const res = await request('/fitting-details/calc-tvp', {
     method: 'POST',

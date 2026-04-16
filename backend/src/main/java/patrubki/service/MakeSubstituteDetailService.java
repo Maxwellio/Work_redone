@@ -7,10 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.MakeSubstituteDetailDto;
 import patrubki.dto.MakeSubstituteDetailSaveDto;
+import patrubki.dto.SubstituteDetailLargeFormCalcRequestDto;
+import patrubki.dto.SubstituteDetailLargeFormCalcResponseDto;
 import patrubki.entity.MakeSubstituteDetail;
 import patrubki.entity.MakeSubstituteMain;
 import patrubki.entity.OperationStructureSpr;
 import patrubki.repository.MakeSubstituteDetailRepository;
+import patrubki.repository.OperationStructureSprRepository;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -23,11 +26,14 @@ import java.util.stream.Collectors;
 public class MakeSubstituteDetailService {
 
     private final MakeSubstituteDetailRepository repository;
+    private final OperationStructureSprRepository operationStructureSprRepository;
     private final JdbcTemplate jdbcTemplate;
 
     public MakeSubstituteDetailService(MakeSubstituteDetailRepository repository,
+                                       OperationStructureSprRepository operationStructureSprRepository,
                                        JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.operationStructureSprRepository = operationStructureSprRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -89,6 +95,60 @@ public class MakeSubstituteDetailService {
                 null,
                 null
         );
+    }
+
+    /**
+     * Расчет полей большой формы перехода переводника: tVp, vRez, tMach, затем tSum (по tk из справочника операций).
+     */
+    @Transactional(readOnly = true)
+    public SubstituteDetailLargeFormCalcResponseDto calcLargeFormSubstitute(SubstituteDetailLargeFormCalcRequestDto body) {
+        Integer idOps = body.getIdOperations();
+        BigDecimal tVp = jdbcTemplate.queryForObject(
+                "select substitute.calculate_sub_tvp(?,?,?,?,?,?,?,?,?,?,?)",
+                BigDecimal.class,
+                idOps,
+                body.getI(),
+                body.getS(),
+                body.getD(),
+                body.getN(),
+                body.getL(),
+                body.getValueMeas(),
+                null,
+                null,
+                body.getPh(),
+                body.getIrazm()
+        );
+        BigDecimal vRez = jdbcTemplate.queryForObject(
+                "select substitute.calculate_vrez(?,?)",
+                BigDecimal.class,
+                body.getD(),
+                body.getN()
+        );
+        BigDecimal tMach = jdbcTemplate.queryForObject(
+                "select substitute.calculate_tmach(?,?,?,?,?)",
+                BigDecimal.class,
+                idOps,
+                body.getL(),
+                body.getS(),
+                body.getI(),
+                body.getN()
+        );
+        BigDecimal tk = operationStructureSprRepository.findById(idOps)
+                .map(OperationStructureSpr::getTk)
+                .orElse(null);
+        BigDecimal tSum = jdbcTemplate.queryForObject(
+                "select substitute.calculate_tsum(?,?,?)",
+                BigDecimal.class,
+                tMach,
+                tVp,
+                tk
+        );
+        SubstituteDetailLargeFormCalcResponseDto out = new SubstituteDetailLargeFormCalcResponseDto();
+        out.setTvp(tVp);
+        out.setVRez(vRez);
+        out.setTMach(tMach);
+        out.setTSum(tSum);
+        return out;
     }
 
     private static Integer extractId(Object rawId, Integer fallbackId) {

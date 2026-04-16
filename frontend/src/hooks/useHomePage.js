@@ -86,6 +86,9 @@ export function useHomePage() {
     idFiting: null,
     transitionRecordId: null,
     initialValues: null,
+    substitutePh: null,
+    fittingPh: null,
+    fittingDStan: null,
   })
   const [transitionsListRefreshKey, setTransitionsListRefreshKey] = useState(0)
 
@@ -294,6 +297,18 @@ export function useHomePage() {
         const idSubstitutePrepared = ownerType === 'substitute' ? substituteTransitionsModal.idSubstitutePrepared : null
         const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
         const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
+        const substitutePh =
+          ownerType === 'substitute' && idSubstitutePrepared != null
+            ? data.listData.find((r) => r.idSubstitutePrepared === idSubstitutePrepared)?.ph ?? null
+            : null
+        const fittingPh =
+          ownerType === 'fitting' && idFiting != null
+            ? data.listData.find((r) => r.idFiting === idFiting)?.phPreform ?? null
+            : null
+        const fittingDStan =
+          ownerType === 'fitting' && idFiting != null
+            ? data.listData.find((r) => r.idFiting === idFiting)?.dStan ?? null
+            : null
         const payloadBase = {
           open: true,
           idOperations: selectedOperationId,
@@ -305,6 +320,9 @@ export function useHomePage() {
           idFiting,
           transitionRecordId: ctx.transitionRecordId ?? null,
           initialValues: ctx.transitionDraft ?? null,
+          substitutePh,
+          fittingPh,
+          fittingDStan,
         }
         setIsTransitionsRefModalOpen(false)
         setResetTransitionsRefContextOnClose(false)
@@ -424,6 +442,9 @@ export function useHomePage() {
       idFiting: null,
       transitionRecordId: null,
       initialValues: null,
+      substitutePh: null,
+      fittingPh: null,
+      fittingDStan: null,
     })
   }
 
@@ -466,6 +487,20 @@ export function useHomePage() {
       }
     }
 
+    const substitutePh =
+      ownerType === 'substitute' && idSubstitutePrepared != null
+        ? data.listData.find((r) => r.idSubstitutePrepared === idSubstitutePrepared)?.ph ?? null
+        : null
+
+    const fittingPh =
+      ownerType === 'fitting' && idFiting != null
+        ? data.listData.find((r) => r.idFiting === idFiting)?.phPreform ?? null
+        : null
+    const fittingDStan =
+      ownerType === 'fitting' && idFiting != null
+        ? data.listData.find((r) => r.idFiting === idFiting)?.dStan ?? null
+        : null
+
     const payloadBase = {
       open: true,
       idOperations: selectedOperationId,
@@ -477,6 +512,9 @@ export function useHomePage() {
       idFiting,
       transitionRecordId: ctx.transitionRecordId,
       initialValues,
+      substitutePh,
+      fittingPh,
+      fittingDStan,
     }
 
     if (isSmallFormOperationId(selectedOperationId)) {

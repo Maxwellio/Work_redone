@@ -1,3 +1,4 @@
+patrubki\dto\SubstituteDetailLargeFormCalcRequestDto.class
 patrubki\entity\Fiting.class
 patrubki\dto\MakeSubstituteDetailSaveDto.class
 patrubki\dto\package-info.class
@@ -40,6 +41,7 @@ patrubki\security\UserDetailsServiceImpl.class
 patrubki\entity\FitingDetail.class
 patrubki\service\HydrotestService.class
 patrubki\entity\OperationStructureSpr.class
+patrubki\dto\SubstituteDetailLargeFormCalcResponseDto.class
 patrubki\entity\MakeSubstituteMain.class
 patrubki\dto\SubstituteDetailCalcTvpRequestDto.class
 patrubki\dto\FitingDto.class
@@ -61,6 +63,7 @@ patrubki\controller\AuthController.class
 patrubki\config\SecurityConfig.class
 patrubki\repository\MakeSubstituteMainRepository.class
 patrubki\config\CorsConfig.class
+patrubki\dto\FitingDetailLargeFormCalcRequestDto.class
 patrubki\service\MakeSubstituteDetailService.class
 patrubki\entity\FitingDetailNtkId.class
 patrubki\dto\MakeSubstituteMainDto.class

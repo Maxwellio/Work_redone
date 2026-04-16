@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.FitingDetailDto;
+import patrubki.dto.FitingDetailLargeFormCalcRequestDto;
 import patrubki.dto.FitingDetailSaveDto;
+import patrubki.dto.SubstituteDetailLargeFormCalcResponseDto;
 import patrubki.entity.Fiting;
 import patrubki.entity.FitingDetail;
 import patrubki.entity.OperationStructureSpr;
@@ -14,6 +16,9 @@ import patrubki.repository.FitingDetailRepository;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.math.BigDecimal;
 import java.util.List;
@@ -93,6 +98,69 @@ public class FitingDetailService {
                 null,
                 null
         );
+    }
+
+    /**
+     * Расчет полей большой формы перехода труб/патрубков: tVp через calculate_fit_tvp (12 арг.),
+     * vRez, tMach, затем tSum через calculate_tsum_ntk с массивом id НТК.
+     */
+    @Transactional(readOnly = true)
+    public SubstituteDetailLargeFormCalcResponseDto calcLargeFormFitting(FitingDetailLargeFormCalcRequestDto body) {
+        Integer idOps = body.getIdOperations();
+        BigDecimal tVp = jdbcTemplate.queryForObject(
+                "select substitute.calculate_fit_tvp(?,?,?,?,?,?,?,?,?,?,?,?)",
+                BigDecimal.class,
+                idOps,
+                body.getI(),
+                body.getS(),
+                body.getD(),
+                body.getN(),
+                body.getL(),
+                body.getValueMeas(),
+                null,
+                null,
+                body.getPh(),
+                body.getDStan(),
+                body.getIrazm()
+        );
+        BigDecimal vRez = jdbcTemplate.queryForObject(
+                "select substitute.calculate_vrez(?,?)",
+                BigDecimal.class,
+                body.getD(),
+                body.getN()
+        );
+        BigDecimal tMach = jdbcTemplate.queryForObject(
+                "select substitute.calculate_tmach(?,?,?,?,?)",
+                BigDecimal.class,
+                idOps,
+                body.getL(),
+                body.getS(),
+                body.getI(),
+                body.getN()
+        );
+        BigDecimal tSum = jdbcTemplate.execute((Connection conn) -> calcTsumNtk(conn, tMach, tVp, body.getIdNtk()));
+        SubstituteDetailLargeFormCalcResponseDto out = new SubstituteDetailLargeFormCalcResponseDto();
+        out.setTvp(tVp);
+        out.setVRez(vRez);
+        out.setTMach(tMach);
+        out.setTSum(tSum);
+        return out;
+    }
+
+    private static BigDecimal calcTsumNtk(Connection conn, BigDecimal tMach, BigDecimal tVp, List<Integer> idNtk)
+            throws SQLException {
+        Integer[] idArray = toDistinctIntegerArray(idNtk);
+        try (PreparedStatement ps = conn.prepareStatement("select substitute.calculate_tsum_ntk(?,?,?)")) {
+            ps.setBigDecimal(1, tMach);
+            ps.setBigDecimal(2, tVp);
+            ps.setArray(3, conn.createArrayOf("integer", idArray));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                return rs.getBigDecimal(1);
+            }
+        }
     }
 
     private static Integer[] toDistinctIntegerArray(List<Integer> idNtk) {
