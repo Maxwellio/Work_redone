@@ -27,13 +27,16 @@ public class MakeSubstituteDetailService {
 
     private final MakeSubstituteDetailRepository repository;
     private final OperationStructureSprRepository operationStructureSprRepository;
+    private final MakeSubstituteMainService makeSubstituteMainService;
     private final JdbcTemplate jdbcTemplate;
 
     public MakeSubstituteDetailService(MakeSubstituteDetailRepository repository,
                                        OperationStructureSprRepository operationStructureSprRepository,
+                                       MakeSubstituteMainService makeSubstituteMainService,
                                        JdbcTemplate jdbcTemplate) {
         this.repository = repository;
         this.operationStructureSprRepository = operationStructureSprRepository;
+        this.makeSubstituteMainService = makeSubstituteMainService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -103,6 +106,10 @@ public class MakeSubstituteDetailService {
     @Transactional(readOnly = true)
     public SubstituteDetailLargeFormCalcResponseDto calcLargeFormSubstitute(SubstituteDetailLargeFormCalcRequestDto body) {
         Integer idOps = body.getIdOperations();
+        Integer idSubstitutePrepared = body.getIdSubstitutePrepared();
+        BigDecimal ph = idSubstitutePrepared != null
+                ? makeSubstituteMainService.getPhByIdSubstitutePrepared(idSubstitutePrepared)
+                : body.getPh();
         BigDecimal tVp = jdbcTemplate.queryForObject(
                 "select substitute.calculate_sub_tvp(?,?,?,?,?,?,?,?,?,?,?)",
                 BigDecimal.class,
@@ -115,7 +122,7 @@ public class MakeSubstituteDetailService {
                 body.getValueMeas(),
                 null,
                 null,
-                body.getPh(),
+                ph,
                 body.getIrazm()
         );
         BigDecimal vRez = jdbcTemplate.queryForObject(

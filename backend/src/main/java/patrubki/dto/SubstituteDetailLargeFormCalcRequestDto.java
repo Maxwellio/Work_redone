@@ -9,6 +9,9 @@ public class SubstituteDetailLargeFormCalcRequestDto {
     @JsonProperty("idOperations")
     private Integer idOperations;
 
+    @JsonProperty("idSubstitutePrepared")
+    private Integer idSubstitutePrepared;
+
     @JsonProperty("i")
     private Integer i;
 
@@ -39,6 +42,14 @@ public class SubstituteDetailLargeFormCalcRequestDto {
 
     public void setIdOperations(Integer idOperations) {
         this.idOperations = idOperations;
+    }
+
+    public Integer getIdSubstitutePrepared() {
+        return idSubstitutePrepared;
+    }
+
+    public void setIdSubstitutePrepared(Integer idSubstitutePrepared) {
+        this.idSubstitutePrepared = idSubstitutePrepared;
     }
 
     public Integer getI() {

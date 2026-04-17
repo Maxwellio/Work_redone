@@ -29,11 +29,14 @@ import java.util.stream.Collectors;
 public class FitingDetailService {
 
     private final FitingDetailRepository repository;
+    private final FitingService fitingService;
     private final JdbcTemplate jdbcTemplate;
 
     public FitingDetailService(FitingDetailRepository repository,
+                               FitingService fitingService,
                                JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.fitingService = fitingService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -107,6 +110,9 @@ public class FitingDetailService {
     @Transactional(readOnly = true)
     public SubstituteDetailLargeFormCalcResponseDto calcLargeFormFitting(FitingDetailLargeFormCalcRequestDto body) {
         Integer idOps = body.getIdOperations();
+        Integer idFiting = body.getIdFiting();
+        BigDecimal ph = idFiting != null ? fitingService.getPhPreformByIdFiting(idFiting) : body.getPh();
+        BigDecimal dStan = idFiting != null ? fitingService.getDStanByIdFiting(idFiting) : body.getDStan();
         BigDecimal tVp = jdbcTemplate.queryForObject(
                 "select substitute.calculate_fit_tvp(?,?,?,?,?,?,?,?,?,?,?,?)",
                 BigDecimal.class,
@@ -119,8 +125,8 @@ public class FitingDetailService {
                 body.getValueMeas(),
                 null,
                 null,
-                body.getPh(),
-                body.getDStan(),
+                ph,
+                dStan,
                 body.getIrazm()
         );
         BigDecimal vRez = jdbcTemplate.queryForObject(

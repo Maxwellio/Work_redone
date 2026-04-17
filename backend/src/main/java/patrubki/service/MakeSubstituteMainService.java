@@ -116,6 +116,14 @@ public class MakeSubstituteMainService {
         repository.deleteById(id);
     }
 
+    /** Коэф. жесткости (ph) для переводника; null если запись не найдена. */
+    public BigDecimal getPhByIdSubstitutePrepared(Integer idSubstitutePrepared) {
+        if (idSubstitutePrepared == null) {
+            return null;
+        }
+        return repository.findById(idSubstitutePrepared).map(MakeSubstituteMain::getPh).orElse(null);
+    }
+
     private String buildName(MakeSubstituteMain e) {
         String s1 = e.getNmSub1() != null ? e.getNmSub1() : "";
         String s2 = e.getNmSub2() != null ? e.getNmSub2() : "";

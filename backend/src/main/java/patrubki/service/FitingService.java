@@ -117,6 +117,14 @@ public class FitingService {
         return repository.findById(idFiting).map(Fiting::getDStan).orElse(null);
     }
 
+    /** Коэф. жесткости заготовки (ph_preform) для фитинга; null если запись не найдена. */
+    public BigDecimal getPhPreformByIdFiting(Integer idFiting) {
+        if (idFiting == null) {
+            return null;
+        }
+        return repository.findById(idFiting).map(Fiting::getPhPreform).orElse(null);
+    }
+
     private FitingDto toDto(Fiting e, long transitionCount) {
         FitingDto dto = new FitingDto();
         dto.setIdFiting(e.getIdFiting());

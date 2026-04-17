@@ -10,6 +10,9 @@ public class FitingDetailLargeFormCalcRequestDto {
     @JsonProperty("idOperations")
     private Integer idOperations;
 
+    @JsonProperty("idFiting")
+    private Integer idFiting;
+
     @JsonProperty("i")
     private Integer i;
 
@@ -46,6 +49,14 @@ public class FitingDetailLargeFormCalcRequestDto {
 
     public void setIdOperations(Integer idOperations) {
         this.idOperations = idOperations;
+    }
+
+    public Integer getIdFiting() {
+        return idFiting;
+    }
+
+    public void setIdFiting(Integer idFiting) {
+        this.idFiting = idFiting;
     }
 
     public Integer getI() {

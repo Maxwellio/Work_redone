@@ -58,10 +58,8 @@ function TransitionLargeFormModal({
   ownerType = null,
   tip = null,
   idFiting = null,
+  idSubstitutePrepared = null,
   transitionRecordId = null,
-  substitutePh = null,
-  fittingPh = null,
-  fittingDStan = null,
 }) {
   const showNtkPanel = ownerType === 'fitting' && (tip === 1 || tip === 2)
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
@@ -222,12 +220,11 @@ function TransitionLargeFormModal({
         ownerType === 'substitute'
           ? await calcSubstituteDetailLargeForm({
               ...basePayload,
-              ph: substitutePh,
+              idSubstitutePrepared,
             })
           : await calcFittingDetailLargeForm({
               ...basePayload,
-              ph: fittingPh,
-              dStan: fittingDStan,
+              idFiting,
               idNtk: Array.from(checkedNtkIds),
             })
       setDraft((prev) => ({
