@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { calcFitTime, calcSubTime } from '../api'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import { getSubstituteDetails } from '../api/operationsApi'
 import { getFittingDetails } from '../api/fittingsApi'
@@ -111,7 +112,21 @@ export function useHomePage() {
   }
 
   const closeSubstituteTransitions = () => {
-    setSubstituteTransitionsModal((prev) => ({ ...prev, isOpen: false }))
+    let idToCalc = null
+    setSubstituteTransitionsModal((prev) => {
+      if (prev.isOpen && prev.idSubstitutePrepared != null) {
+        idToCalc = prev.idSubstitutePrepared
+      }
+      return { ...prev, isOpen: false }
+    })
+    if (idToCalc != null) {
+      void calcSubTime(idToCalc)
+        .then(() => data.loadData())
+        .then(() => {
+          data.setPendingScrollToId(idToCalc)
+        })
+        .catch((err) => window.alert(err.message || 'Ошибка перерасчёта времени'))
+    }
   }
 
   const openFittingTransitions = ({ idFiting, name, tip }) => {
@@ -124,7 +139,21 @@ export function useHomePage() {
   }
 
   const closeFittingTransitions = () => {
-    setFittingTransitionsModal((prev) => ({ ...prev, isOpen: false }))
+    let idToCalc = null
+    setFittingTransitionsModal((prev) => {
+      if (prev.isOpen && prev.idFiting != null) {
+        idToCalc = prev.idFiting
+      }
+      return { ...prev, isOpen: false }
+    })
+    if (idToCalc != null) {
+      void calcFitTime(idToCalc)
+        .then(() => data.loadData())
+        .then(() => {
+          data.setPendingScrollToId(idToCalc)
+        })
+        .catch((err) => window.alert(err.message || 'Ошибка перерасчёта времени'))
+    }
   }
 
   const substituteForm = useSubstituteForm({
