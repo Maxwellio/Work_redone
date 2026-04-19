@@ -12,8 +12,17 @@ public class NtkTransitionRowDto {
     @JsonProperty("nm")
     private String nm;
 
-    @JsonProperty("parid")
-    private BigDecimal parid;
+    @JsonProperty("d")
+    private BigDecimal d;
+
+    @JsonProperty("ntk")
+    private BigDecimal ntk;
+
+    @JsonProperty("poz")
+    private BigDecimal poz;
+
+    @JsonProperty("ind")
+    private String ind;
 
     public Integer getIdNtk() {
         return idNtk;
@@ -31,11 +40,35 @@ public class NtkTransitionRowDto {
         this.nm = nm;
     }
 
-    public BigDecimal getParid() {
-        return parid;
+    public BigDecimal getD() {
+        return d;
     }
 
-    public void setParid(BigDecimal parid) {
-        this.parid = parid;
+    public void setD(BigDecimal d) {
+        this.d = d;
+    }
+
+    public BigDecimal getNtk() {
+        return ntk;
+    }
+
+    public void setNtk(BigDecimal ntk) {
+        this.ntk = ntk;
+    }
+
+    public BigDecimal getPoz() {
+        return poz;
+    }
+
+    public void setPoz(BigDecimal poz) {
+        this.poz = poz;
+    }
+
+    public String getInd() {
+        return ind;
+    }
+
+    public void setInd(String ind) {
+        this.ind = ind;
     }
 }

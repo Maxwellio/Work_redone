@@ -182,6 +182,7 @@ function SubstituteModal({
             size="small"
             label="Коэф. жесткости, ГПа"
             type="number"
+            required
             value={draft.ph ?? ''}
             onChange={handleFieldChange('ph')}
           />

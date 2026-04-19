@@ -38,23 +38,10 @@ const COLUMNS = [
 
 const formatCell = (value) => (value == null ? '—' : String(value))
 
-const toNumeric = (value) => {
-  if (value == null || value === '') return null
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : null
-}
-
-const mapRow = (row) => {
-  const lCalc = row.lCur ?? row.l
-  const tMachNum = toNumeric(row.tMach)
-  const tVpNum = toNumeric(row.tVp)
-  const fallbackTSum = tMachNum == null && tVpNum == null ? null : (tMachNum ?? 0) + (tVpNum ?? 0)
-  return {
-    ...row,
-    lCalc,
-    tSum: row.tSum ?? fallbackTSum,
-  }
-}
+const mapRow = (row) => ({
+  ...row,
+  lCalc: row.lCur ?? row.l,
+})
 
 const getRowKey = (row) => row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
 

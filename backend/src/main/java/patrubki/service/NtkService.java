@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class NtkService {
 
     private static final String FOR_TRANSITION_SQL =
-            "SELECT id_ntk, (nm || ': ' || ntk::varchar) AS nm, 0::numeric AS parid "
+            "SELECT id_ntk, (nm || ': ' || ntk::varchar) AS nm, d, ntk, poz, ind "
                     + "FROM substitute.ntk WHERE d = ("
                     + "SELECT MIN(d) FROM substitute.ntk WHERE d >= ?"
                     + ")";
@@ -43,7 +43,10 @@ public class NtkService {
             NtkTransitionRowDto dto = new NtkTransitionRowDto();
             dto.setIdNtk((Integer) rs.getObject("id_ntk"));
             dto.setNm(rs.getString("nm"));
-            dto.setParid(rs.getBigDecimal("parid"));
+            dto.setD(rs.getBigDecimal("d"));
+            dto.setNtk(rs.getBigDecimal("ntk"));
+            dto.setPoz(rs.getBigDecimal("poz"));
+            dto.setInd(rs.getString("ind"));
             return dto;
         }, pDStan);
     }

@@ -58,6 +58,10 @@ export function useSubstituteForm({
       setSaveError('Заполните хотя бы одно поле наименования')
       return
     }
+    if (parseNum(source.ph) == null) {
+      setSaveError('Заполните поле «Коэф. жесткости, ГПа»')
+      return null
+    }
     const payload = {
       id: isEditMode ? selectedRowId : null,
       nmSub1: source.nmSub1 || null,

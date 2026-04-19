@@ -74,6 +74,10 @@ export function useFittingForm({
       setSaveError('Заполните хотя бы одно поле наименования')
       return null
     }
+    if (parseNum(source.phPreform) == null) {
+      setSaveError('Заполните поле «Коэф. жесткости, ГПа»')
+      return null
+    }
     const payload = {
       id: isEditMode ? selectedRowId : null,
       tip,

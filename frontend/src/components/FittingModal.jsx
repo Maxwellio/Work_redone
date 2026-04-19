@@ -175,6 +175,7 @@ function FittingModal({
             size="small"
             label="Коэф. жесткости, ГПа"
             type="number"
+            required
             value={draft.phPreform}
             onChange={handleFieldChange('phPreform')}
           />
