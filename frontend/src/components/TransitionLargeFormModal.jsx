@@ -18,6 +18,19 @@ import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
 import { calcFittingDetailLargeForm, calcSubstituteDetailLargeForm } from '../api'
 import { getFittingDetailNtk, getNtkForTransition } from '../api/fittingsApi'
+import {
+  isIrazmUsedInLargeFormCalc,
+  isValueMeasUsedInLargeFormCalc,
+} from '../utils/operationCategory'
+
+const disabledReadonlyFieldSx = {
+  '& .MuiOutlinedInput-root.Mui-disabled': {
+    bgcolor: 'action.disabledBackground',
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'divider',
+    },
+  },
+}
 
 const NUMERIC_FIELDS = new Set([
   'd',
@@ -72,6 +85,9 @@ function TransitionLargeFormModal({
   const [checkedNtkIds, setCheckedNtkIds] = useState(() => new Set())
   const [ntkLinksError, setNtkLinksError] = useState(null)
 
+  const irazmEnabled = isIrazmUsedInLargeFormCalc(idOperations)
+  const valueMeasEnabled = isValueMeasUsedInLargeFormCalc(idOperations)
+
   useEffect(() => {
     if (!open) return
     setSaveError(null)
@@ -79,8 +95,8 @@ function TransitionLargeFormModal({
       setDraft({
         d: initialValues.d ?? '',
         l: initialValues.l ?? '',
-        irazm: initialValues.irazm ?? '',
-        valueMeas: initialValues.valueMeas ?? '',
+        irazm: irazmEnabled ? initialValues.irazm ?? '' : '',
+        valueMeas: valueMeasEnabled ? initialValues.valueMeas ?? '' : '',
         depthCut: initialValues.depthCut ?? '',
         i: initialValues.i ?? '',
         s: initialValues.s ?? '',
@@ -97,7 +113,7 @@ function TransitionLargeFormModal({
       ...emptyDraft(),
       seqNumOper: initialValues?.seqNumOper != null ? String(initialValues.seqNumOper) : '',
     })
-  }, [open, idOperations, isEditMode, initialValues])
+  }, [open, idOperations, isEditMode, initialValues, irazmEnabled, valueMeasEnabled])
 
   useEffect(() => {
     if (!open) {
@@ -213,8 +229,8 @@ function TransitionLargeFormModal({
         d: parseNumOrNull(draft.d),
         n: parseNumOrNull(draft.n),
         l: parseNumOrNull(draft.l),
-        valueMeas: parseNumOrNull(draft.valueMeas),
-        irazm: parseNumOrNull(draft.irazm),
+        valueMeas: valueMeasEnabled ? parseNumOrNull(draft.valueMeas) : null,
+        irazm: irazmEnabled ? parseNumOrNull(draft.irazm) : null,
       }
       const result =
         ownerType === 'substitute'
@@ -273,8 +289,26 @@ function TransitionLargeFormModal({
       <Stack spacing={2}>
         <TextField fullWidth size="small" label="Длина наруж, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
         <TextField fullWidth size="small" label="Длина, мм" type="number" value={draft.l} onChange={handleFieldChange('l')} />
-        <TextField fullWidth size="small" label="Измеряемый размер, мм" type="number" value={draft.irazm} onChange={handleFieldChange('irazm')} />
-        <TextField fullWidth size="small" label="Измер велич, мм" type="number" value={draft.valueMeas} onChange={handleFieldChange('valueMeas')} />
+        <TextField
+          fullWidth
+          size="small"
+          label="Измеряемый размер, мм"
+          type="number"
+          value={draft.irazm}
+          onChange={handleFieldChange('irazm')}
+          disabled={!irazmEnabled}
+          sx={disabledReadonlyFieldSx}
+        />
+        <TextField
+          fullWidth
+          size="small"
+          label="Измер велич, мм"
+          type="number"
+          value={draft.valueMeas}
+          onChange={handleFieldChange('valueMeas')}
+          disabled={!valueMeasEnabled}
+          sx={disabledReadonlyFieldSx}
+        />
         <TextField fullWidth size="small" label="Глубина резания, мм" type="number" value={draft.depthCut} onChange={handleFieldChange('depthCut')} />
         <TextField fullWidth size="small" label="Число проходов" type="number" value={draft.i} onChange={handleFieldChange('i')} />
         <TextField fullWidth size="small" label="Подача, мм/об" type="number" value={draft.s} onChange={handleFieldChange('s')} />

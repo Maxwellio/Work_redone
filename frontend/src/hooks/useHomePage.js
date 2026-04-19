@@ -11,7 +11,13 @@ import { useHydrotestForm } from './useHydrotestForm'
 import { useSubstituteForm } from './useSubstituteForm'
 import { usePreformRef } from './usePreformRef'
 import { useTransitionsRef } from './useTransitionsRef'
-import { isAssignmentOperationId, isSmallFormOperationId, isLargeFormOperationId } from '../utils/operationCategory'
+import {
+  isAssignmentOperationId,
+  isSmallFormOperationId,
+  isLargeFormOperationId,
+  isIrazmUsedInLargeFormCalc,
+  isValueMeasUsedInLargeFormCalc,
+} from '../utils/operationCategory'
 
 function parseNum(v) {
   if (v === '' || v == null) return null
@@ -579,8 +585,10 @@ export function useHomePage() {
     const payloadBase = {
       d: parseNum(draft.d),
       l: parseNum(draft.l),
-      irazm: parseNum(draft.irazm),
-      valueMeas: parseNum(draft.valueMeas),
+      irazm: isIrazmUsedInLargeFormCalc(s.idOperations) ? parseNum(draft.irazm) : null,
+      valueMeas: isValueMeasUsedInLargeFormCalc(s.idOperations)
+        ? parseNum(draft.valueMeas)
+        : null,
       i: parseIntOrNull(draft.i),
       depthCut: parseNum(draft.depthCut),
       n: parseNum(draft.n),

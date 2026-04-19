@@ -36,3 +36,21 @@ export function isAssignmentOperationId(id) {
   if (n >= 52 && n <= 55) return true
   return false
 }
+
+/** Большая форма: irazm участвует в расчёте только для операций 13, 38, 39. */
+export function isIrazmUsedInLargeFormCalc(id) {
+  if (id == null || !Number.isFinite(Number(id))) return false
+  const n = Number(id)
+  if (!Number.isInteger(n)) return false
+  return n === 13 || n === 38 || n === 39
+}
+
+/** Большая форма: valueMeas участвует в расчёте для 14–17, 28–37, 59, 60. */
+export function isValueMeasUsedInLargeFormCalc(id) {
+  if (id == null || !Number.isFinite(Number(id))) return false
+  const n = Number(id)
+  if (!Number.isInteger(n)) return false
+  if (n >= 14 && n <= 17) return true
+  if (n >= 28 && n <= 37) return true
+  return n === 59 || n === 60
+}
