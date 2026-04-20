@@ -58,6 +58,8 @@ public class FitingDetailDto {
 
     private BigDecimal lCur;
 
+    private BigDecimal tSum;
+
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 
@@ -215,6 +217,15 @@ public class FitingDetailDto {
 
     public void setLCur(BigDecimal lCur) {
         this.lCur = lCur;
+    }
+
+    @JsonProperty("tSum")
+    public BigDecimal getTSum() {
+        return tSum;
+    }
+
+    public void setTSum(BigDecimal tSum) {
+        this.tSum = tSum;
     }
 
     public Integer getIdUserCreator() {

@@ -57,6 +57,8 @@ public class MakeSubstituteDetailDto {
 
     private BigDecimal tVpNbdt;
 
+    private BigDecimal tSum;
+
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 
@@ -215,6 +217,15 @@ public class MakeSubstituteDetailDto {
 
     public void setTVpNbdt(BigDecimal tVpNbdt) {
         this.tVpNbdt = tVpNbdt;
+    }
+
+    @JsonProperty("tSum")
+    public BigDecimal getTSum() {
+        return tSum;
+    }
+
+    public void setTSum(BigDecimal tSum) {
+        this.tSum = tSum;
     }
 
     public Integer getIdUserCreator() {

@@ -11,7 +11,9 @@ import patrubki.dto.FitingDetailSaveDto;
 import patrubki.dto.SubstituteDetailLargeFormCalcResponseDto;
 import patrubki.entity.Fiting;
 import patrubki.entity.FitingDetail;
+import patrubki.entity.FitingDetailNtk;
 import patrubki.entity.OperationStructureSpr;
+import patrubki.repository.FitingDetailNtkRepository;
 import patrubki.repository.FitingDetailRepository;
 
 import java.sql.CallableStatement;
@@ -29,13 +31,16 @@ import java.util.stream.Collectors;
 public class FitingDetailService {
 
     private final FitingDetailRepository repository;
+    private final FitingDetailNtkRepository fitingDetailNtkRepository;
     private final FitingService fitingService;
     private final JdbcTemplate jdbcTemplate;
 
     public FitingDetailService(FitingDetailRepository repository,
+                               FitingDetailNtkRepository fitingDetailNtkRepository,
                                FitingService fitingService,
                                JdbcTemplate jdbcTemplate) {
         this.repository = repository;
+        this.fitingDetailNtkRepository = fitingDetailNtkRepository;
         this.fitingService = fitingService;
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -153,6 +158,20 @@ public class FitingDetailService {
         return out;
     }
 
+    /**
+     * Tобщ для списка переходов: как в calcLargeFormFitting (calculate_tsum_ntk по связям fiting_detail_ntk).
+     */
+    private BigDecimal computeTSum(Integer idFitingDetail, BigDecimal tVp, BigDecimal tMach) {
+        if (idFitingDetail == null || tVp == null || tMach == null) {
+            return null;
+        }
+        List<Integer> idNtkList = fitingDetailNtkRepository.findByIdFitingDetailOrderByIdNtkAsc(idFitingDetail).stream()
+                .map(FitingDetailNtk::getIdNtk)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return jdbcTemplate.execute((Connection conn) -> calcTsumNtk(conn, tMach, tVp, idNtkList));
+    }
+
     private static BigDecimal calcTsumNtk(Connection conn, BigDecimal tMach, BigDecimal tVp, List<Integer> idNtk)
             throws SQLException {
         Integer[] idArray = toDistinctIntegerArray(idNtk);
@@ -210,6 +229,7 @@ public class FitingDetailService {
         dto.setMasCur(e.getMasCur());
         dto.setLCur(e.getLCur());
         dto.setIdUserCreator(e.getIdUserCreator());
+        dto.setTSum(computeTSum(e.getIdFitingDetail(), e.getTVp(), e.getTMach()));
         return dto;
     }
 }

@@ -158,6 +158,25 @@ public class MakeSubstituteDetailService {
         return out;
     }
 
+    /**
+     * Tобщ для списка переходов: как в calcLargeFormSubstitute (calculate_tsum + tk из справочника операций).
+     */
+    private BigDecimal computeTSum(Integer idOperations, BigDecimal tVp, BigDecimal tMach) {
+        if (idOperations == null || tVp == null || tMach == null) {
+            return null;
+        }
+        BigDecimal tk = operationStructureSprRepository.findById(idOperations)
+                .map(OperationStructureSpr::getTk)
+                .orElse(null);
+        return jdbcTemplate.queryForObject(
+                "select substitute.calculate_tsum(?,?,?)",
+                BigDecimal.class,
+                tMach,
+                tVp,
+                tk
+        );
+    }
+
     private static Integer extractId(Object rawId, Integer fallbackId) {
         if (rawId instanceof Number) {
             return ((Number) rawId).intValue();
@@ -189,6 +208,8 @@ public class MakeSubstituteDetailService {
         dto.setLCur(e.getLCur());
         dto.setTVpNbdt(e.getTVpNbdt());
         dto.setIdUserCreator(e.getIdUserCreator());
+        Integer idOps = op != null ? op.getIdOperations() : null;
+        dto.setTSum(computeTSum(idOps, e.getTVp(), e.getTMach()));
         return dto;
     }
 }
