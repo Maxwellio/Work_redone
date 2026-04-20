@@ -22,6 +22,7 @@ import {
   isIrazmUsedInLargeFormCalc,
   isValueMeasUsedInLargeFormCalc,
 } from '../utils/operationCategory'
+import { computedNumericFieldSx } from '../styles/computedFieldSx'
 
 const disabledReadonlyFieldSx = {
   '& .MuiOutlinedInput-root.Mui-disabled': {
@@ -322,18 +323,36 @@ function TransitionLargeFormModal({
           label="Tмаш, мин"
           type="number"
           value={draft.tMach}
-          disabled
+          sx={computedNumericFieldSx}
+          InputProps={{ readOnly: true }}
         />
-        <TextField fullWidth size="small" label="Vрез, м/мин" type="number" value={draft.vRez} disabled />
-        <TextField fullWidth size="small" label="Твсп, мин" type="number" value={draft.tVp} disabled />
+        <TextField
+          fullWidth
+          size="small"
+          label="Vрез, м/мин"
+          type="number"
+          value={draft.vRez}
+          sx={computedNumericFieldSx}
+          InputProps={{ readOnly: true }}
+        />
+        <TextField
+          fullWidth
+          size="small"
+          label="Твсп, мин"
+          type="number"
+          value={draft.tVp}
+          sx={computedNumericFieldSx}
+          InputProps={{ readOnly: true }}
+        />
         <TextField
           fullWidth
           size="small"
           label="Норма времени, мин"
           type="number"
           value={draft.tSum}
-          disabled
+          sx={computedNumericFieldSx}
           InputProps={{
+            readOnly: true,
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton

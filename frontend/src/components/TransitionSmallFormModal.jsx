@@ -13,6 +13,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
 import { calcFittingDetailTvp, calcSubstituteDetailTvp } from '../api'
+import { computedNumericFieldSx } from '../styles/computedFieldSx'
 
 const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'seqNumOper'])
 
@@ -157,8 +158,9 @@ function TransitionSmallFormModal({
             label="Норма времени, мин"
             type="number"
             value={draft.tVp}
-            disabled
+            sx={computedNumericFieldSx}
             InputProps={{
+              readOnly: true,
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton edge="end" aria-label="Расчёт" size="small" onClick={handleCalculateTvp} disabled={saving}>
