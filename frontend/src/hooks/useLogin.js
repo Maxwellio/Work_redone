@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { login as apiLogin } from '../api'
+import { userHasAdminRole } from '../utils/userRoles'
 
 export function useLogin(fetchUser, navigate) {
   const [username, setUsername] = useState('')
@@ -32,8 +33,8 @@ export function useLogin(fetchUser, navigate) {
         }
         return
       }
-      await fetchUser()
-      navigate('/', { replace: true })
+      const u = await fetchUser()
+      navigate(userHasAdminRole(u) ? '/admin' : '/', { replace: true })
     } catch {
       setError('Ошибка соединения. Проверьте подключение.')
     } finally {

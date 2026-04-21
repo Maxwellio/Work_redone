@@ -37,8 +37,33 @@ export const theme = createTheme({
     body2: { fontSize: '0.9375rem' },
     button: { fontSize: '1rem' },
     caption: { fontSize: '0.875rem' },
+    /** Зона под AppBar на `/admin` (без навигации) */
+    adminChromeTitle: {
+      fontSize: '1rem',
+      fontWeight: 600,
+      letterSpacing: '0.02em',
+      lineHeight: 1.4,
+    },
+    /** Текст заглушки основной области админки */
+    adminPageStub: {
+      fontSize: '1rem',
+      lineHeight: 1.55,
+      fontWeight: 400,
+    },
   },
   components: {
+    MuiPaper: {
+      variants: [
+        {
+          props: { variant: 'adminShell' },
+          style: ({ theme }) => ({
+            borderRadius: theme.shape.borderRadius,
+            backgroundColor: theme.palette.background.paper,
+            border: `1px solid ${theme.palette.divider}`,
+          }),
+        },
+      ],
+    },
     MuiTextField: {
       styleOverrides: {
         root: {

@@ -7,12 +7,13 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { useAuth } from '../context/AuthContext'
 import { useLogin } from '../hooks/useLogin'
+import { userHasAdminRole } from '../utils/userRoles'
 import '../styles/Login.css'
 
 /**
  * Страница входа: форма логин/пароль, вызов POST /api/login (form-urlencoded),
- * после успеха — getCurrentUser и редирект на /.
- * При заходе на /login авторизованного пользователя — проверка сессии и редирект на главную.
+ * после успеха — getCurrentUser и редирект на `/` или `/admin` при роли администратора.
+ * При заходе на /login авторизованного пользователя — редирект по той же логике.
  */
 function Login() {
   const navigate = useNavigate()
@@ -43,7 +44,7 @@ function Login() {
   }
 
   if (user) {
-    return <Navigate to="/" replace />
+    return <Navigate to={userHasAdminRole(user) ? '/admin' : '/'} replace />
   }
 
   return (

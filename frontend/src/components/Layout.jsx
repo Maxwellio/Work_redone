@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
@@ -7,12 +7,16 @@ import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useAuth } from '../context/AuthContext'
+import { userHasAdminRole } from '../utils/userRoles'
 import ChangePasswordDialog from './ChangePasswordDialog'
 import '../styles/Layout.css'
 
-function Layout({ children, chrome }) {
+function Layout({ children, chrome, title = 'Патрубки' }) {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { user, logout } = useAuth()
+  const onAdminRoute = pathname.startsWith('/admin')
+  const showAdminPanelItem = userHasAdminRole(user) && !onAdminRoute
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null)
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
 
@@ -45,7 +49,7 @@ function Layout({ children, chrome }) {
         <AppBar position="static" color="primary">
           <Toolbar>
             <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
-              Патрубки
+              {title}
             </Typography>
             {user && (
               <>
@@ -70,6 +74,26 @@ function Layout({ children, chrome }) {
                     horizontal: 'right',
                   }}
                 >
+                  {onAdminRoute && (
+                    <MenuItem
+                      onClick={() => {
+                        handleUserMenuClose()
+                        navigate('/')
+                      }}
+                    >
+                      К патрубкам
+                    </MenuItem>
+                  )}
+                  {showAdminPanelItem && (
+                    <MenuItem
+                      onClick={() => {
+                        handleUserMenuClose()
+                        navigate('/admin')
+                      }}
+                    >
+                      Админ-панель
+                    </MenuItem>
+                  )}
                   <MenuItem
                     onClick={() => {
                       handleUserMenuClose()
