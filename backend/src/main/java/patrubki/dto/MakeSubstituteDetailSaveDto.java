@@ -52,8 +52,6 @@ public class MakeSubstituteDetailSaveDto {
 
     private BigDecimal lCur;
 
-    private BigDecimal tVpNbdt;
-
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 
@@ -195,15 +193,6 @@ public class MakeSubstituteDetailSaveDto {
 
     public void setLCur(BigDecimal lCur) {
         this.lCur = lCur;
-    }
-
-    @JsonProperty("tVpNbdt")
-    public BigDecimal getTVpNbdt() {
-        return tVpNbdt;
-    }
-
-    public void setTVpNbdt(BigDecimal tVpNbdt) {
-        this.tVpNbdt = tVpNbdt;
     }
 
     public Integer getIdUserCreator() {

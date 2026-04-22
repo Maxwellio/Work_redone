@@ -70,9 +70,6 @@ public class MakeSubstituteDetail {
     @Column(name = "l_cur", precision = 19, scale = 2)
     private BigDecimal lCur;
 
-    @Column(name = "t_vp_nbdt", precision = 19, scale = 2)
-    private BigDecimal tVpNbdt;
-
     @Column(name = "id_user_creator")
     private Integer idUserCreator;
 
@@ -210,14 +207,6 @@ public class MakeSubstituteDetail {
 
     public void setLCur(BigDecimal lCur) {
         this.lCur = lCur;
-    }
-
-    public BigDecimal getTVpNbdt() {
-        return tVpNbdt;
-    }
-
-    public void setTVpNbdt(BigDecimal tVpNbdt) {
-        this.tVpNbdt = tVpNbdt;
     }
 
     public Integer getIdUserCreator() {

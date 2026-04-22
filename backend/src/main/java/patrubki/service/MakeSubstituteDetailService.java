@@ -206,7 +206,6 @@ public class MakeSubstituteDetailService {
         dto.setVRez(e.getVRez());
         dto.setMasCur(e.getMasCur());
         dto.setLCur(e.getLCur());
-        dto.setTVpNbdt(e.getTVpNbdt());
         dto.setIdUserCreator(e.getIdUserCreator());
         Integer idOps = op != null ? op.getIdOperations() : null;
         dto.setTSum(computeTSum(idOps, e.getTVp(), e.getTMach()));
