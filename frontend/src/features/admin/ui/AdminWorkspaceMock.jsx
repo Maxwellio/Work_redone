@@ -18,9 +18,10 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 const mockRows = [
-  { id: 1, colA: 'Запись A', colB: '12', colC: 'черновик' },
-  { id: 2, colA: 'Запись B', colB: '34', colC: 'готово' },
-  { id: 3, colA: 'Запись C', colB: '56', colC: 'ожидает' },
+  { id: 1, colA: 'Запись A', colB: '12', colC: 'черновик', colD: 'Тип 1' },
+  { id: 2, colA: 'Запись B', colB: '34', colC: 'готово', colD: 'Тип 2' },
+  { id: 3, colA: 'Запись C', colB: '56', colC: 'ожидает', colD: 'Тип 1' },
+  { id: 4, colA: 'Запись D', colB: '78', colC: 'готово', colD: 'Тип 3' },
 ]
 
 const selectedRowId = 1
@@ -31,13 +32,10 @@ const detailFieldLabels = [
   'Поле 3',
   'Поле 4',
   'Поле 5',
-  'Поле 6',
-  'Поле 7',
-  'Поле 8',
 ]
 
 /**
- * Статичный макет основной рабочей зоны: 3:2, фильтр, таблица, форма — без бизнес-логики и API.
+ * Статичный макет основной рабочей зоны: фильтры + таблица слева, форма справа.
  */
 export function AdminWorkspaceMock() {
   return (
@@ -47,14 +45,13 @@ export function AdminWorkspaceMock() {
       alignItems="stretch"
       sx={{ flex: 1, minHeight: 0 }}
     >
+      {/* Left panel: filters + table */}
       <Box
         sx={(theme) => ({
-          flex: { md: '3 1 0' },
+          flex: { md: '7 1 0' },
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing(1.5),
-          p: 2,
           borderRight: { md: `1px solid ${theme.palette.divider}` },
           borderBottom: { xs: `1px solid ${theme.palette.divider}`, md: 'none' },
         })}
@@ -67,6 +64,12 @@ export function AdminWorkspaceMock() {
           columnGap={2}
           rowGap={1.5}
           alignItems="center"
+          sx={(theme) => ({
+            px: 2,
+            py: 1.5,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            flexShrink: 0,
+          })}
         >
           <FormControl size="small" sx={{ minWidth: 200 }}>
             <InputLabel id="admin-workspace-mock-select-label">Раздел</InputLabel>
@@ -100,29 +103,28 @@ export function AdminWorkspaceMock() {
                 </InputAdornment>
               ),
             }}
-            sx={(theme) => ({
+            sx={{
               minWidth: { xs: '100%', sm: 220 },
               flex: { sm: '1 1 200px' },
               maxWidth: { sm: 320 },
-            })}
+            }}
           />
         </Stack>
         <TableContainer
-          sx={(theme) => ({
+          sx={{
             flex: 1,
-            border: `1px solid ${theme.palette.divider}`,
             borderRadius: 0,
-            maxHeight: { xs: 360, md: 'none' },
             overflow: 'auto',
-            bgcolor: theme.palette.background.paper,
-          })}
+          }}
         >
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
+                <TableCell sx={{ width: 48 }}>№</TableCell>
                 <TableCell>Наименование</TableCell>
-                <TableCell align="right">Кол-во</TableCell>
+                <TableCell>Кол-во</TableCell>
                 <TableCell>Статус</TableCell>
+                <TableCell>Тип</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -137,9 +139,11 @@ export function AdminWorkspaceMock() {
                         : { '&:nth-of-type(even)': { bgcolor: theme.palette.action.hover } }
                     }
                   >
+                    <TableCell>{row.id}</TableCell>
                     <TableCell>{row.colA}</TableCell>
-                    <TableCell align="right">{row.colB}</TableCell>
+                    <TableCell>{row.colB}</TableCell>
                     <TableCell>{row.colC}</TableCell>
+                    <TableCell>{row.colD}</TableCell>
                   </TableRow>
                 )
               })}
@@ -147,15 +151,17 @@ export function AdminWorkspaceMock() {
           </Table>
         </TableContainer>
       </Box>
+
+      {/* Right panel: detail form */}
       <Box
-        sx={(theme) => ({
-          flex: { md: '2 1 0' },
+        sx={{
+          flex: { md: '3 1 0' },
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
           p: 2,
           overflow: 'auto',
-        })}
+        }}
       >
         <Stack spacing={2}>
           {detailFieldLabels.map((label, i) => (
@@ -167,6 +173,14 @@ export function AdminWorkspaceMock() {
               fullWidth
             />
           ))}
+          <TextField
+            size="small"
+            label="Поле 6"
+            defaultValue={selectedRowId ? 'Значение 6 (макет)' : ''}
+            fullWidth
+            multiline
+            minRows={4}
+          />
         </Stack>
       </Box>
     </Stack>
