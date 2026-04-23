@@ -11,7 +11,7 @@ import { userHasAdminRole } from '../utils/userRoles'
 import ChangePasswordDialog from './ChangePasswordDialog'
 import '../styles/Layout.css'
 
-function Layout({ children, chrome, title = 'Патрубки' }) {
+function Layout({ children, chrome, title = 'Патрубки', flush = false }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
@@ -129,7 +129,7 @@ function Layout({ children, chrome, title = 'Патрубки' }) {
         />
         {chrome}
       </div>
-      <main className="layout-main">
+      <main className={`layout-main${flush ? ' layout-main--flush' : ''}`}>
         {children}
       </main>
     </div>

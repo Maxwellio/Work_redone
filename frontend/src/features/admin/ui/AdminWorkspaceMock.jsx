@@ -43,9 +43,9 @@ export function AdminWorkspaceMock() {
   return (
     <Stack
       direction={{ xs: 'column', md: 'row' }}
-      spacing={2}
+      spacing={0}
       alignItems="stretch"
-      sx={{ minHeight: { md: 'min(60vh, 640px)' } }}
+      sx={{ flex: 1, minHeight: 0 }}
     >
       <Box
         sx={(theme) => ({
@@ -53,7 +53,10 @@ export function AdminWorkspaceMock() {
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing(2),
+          gap: theme.spacing(1.5),
+          p: 2,
+          borderRight: { md: `1px solid ${theme.palette.divider}` },
+          borderBottom: { xs: `1px solid ${theme.palette.divider}`, md: 'none' },
         })}
       >
         <Stack
@@ -108,7 +111,7 @@ export function AdminWorkspaceMock() {
           sx={(theme) => ({
             flex: 1,
             border: `1px solid ${theme.palette.divider}`,
-            borderRadius: theme.shape.borderRadius,
+            borderRadius: 0,
             maxHeight: { xs: 360, md: 'none' },
             overflow: 'auto',
             bgcolor: theme.palette.background.paper,
@@ -150,6 +153,8 @@ export function AdminWorkspaceMock() {
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
+          p: 2,
+          overflow: 'auto',
         })}
       >
         <Stack spacing={2}>

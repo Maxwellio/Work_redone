@@ -7,7 +7,7 @@ import { AdminPageBody } from '../ui/AdminPageBody'
  */
 export function AdminPage() {
   return (
-    <Layout title="Админ-панель" chrome={<AdminPageChrome />}>
+    <Layout title="Админ-панель" chrome={<AdminPageChrome />} flush>
       <AdminPageBody />
     </Layout>
   )

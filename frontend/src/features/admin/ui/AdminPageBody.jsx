@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import Stack from '@mui/material/Stack'
-import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
 import { AdminWorkspaceMock } from './AdminWorkspaceMock'
 
 /**
@@ -8,23 +7,17 @@ import { AdminWorkspaceMock } from './AdminWorkspaceMock'
  */
 export function AdminPageBody() {
   return (
-    <Stack
+    <Box
       component="section"
-      spacing={2}
-      sx={(theme) => ({
-        px: { xs: 2, sm: 3 },
-        py: 3,
-        maxWidth: theme.breakpoints.values.xl,
-        mx: 'auto',
-        width: '100%',
-      })}
+      sx={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0,
+      }}
     >
-      <Paper variant="adminShell" sx={(theme) => ({ p: theme.spacing(3) })}>
-        <Stack spacing={2}>
-          <AdminWorkspaceMock />
-          <Outlet />
-        </Stack>
-      </Paper>
-    </Stack>
+      <AdminWorkspaceMock />
+      <Outlet />
+    </Box>
   )
 }
