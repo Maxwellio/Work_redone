@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity entity = userRepository.findByUsernameIgnoreCaseAndActive(username, 1)
+        UserEntity entity = userRepository.findByUserNameIgnoreCaseAndActive(username, 1)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found or inactive: " + username));
 
         String roleAuthority = roleNmToAuthority(entity.getRole() != null ? entity.getRole().getNm() : null);
@@ -42,7 +42,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 : Collections.emptyList();
 
         return User.builder()
-                .username(entity.getUsername())
+                .username(entity.getUserName())
                 .password(entity.getPassword())
                 .authorities(authorities)
                 .disabled(entity.getActive() == null || entity.getActive() != 1)

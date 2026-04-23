@@ -6,17 +6,21 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Справочник ролей (таблица substitute.spr_role).
+ * Подразделение / организация (таблица substitute.org_stru).
  */
 @Entity
-@Table(name = "spr_role", schema = "substitute")
-public class RoleSpr {
+@Table(name = "org_stru", schema = "substitute")
+public class OrgStru {
 
     @Id
+    @Column(name = "id")
     private Integer id;
 
-    @Column(name = "nm", nullable = false, length = 255)
+    @Column(name = "nm", length = 1000)
     private String nm;
+
+    @Column(name = "fullnm", length = 2000)
+    private String fullnm;
 
     public Integer getId() {
         return id;
@@ -32,5 +36,13 @@ public class RoleSpr {
 
     public void setNm(String nm) {
         this.nm = nm;
+    }
+
+    public String getFullnm() {
+        return fullnm;
+    }
+
+    public void setFullnm(String fullnm) {
+        this.fullnm = fullnm;
     }
 }

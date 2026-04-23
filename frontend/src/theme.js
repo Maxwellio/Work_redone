@@ -37,13 +37,6 @@ export const theme = createTheme({
     body2: { fontSize: '0.9375rem' },
     button: { fontSize: '1rem' },
     caption: { fontSize: '0.875rem' },
-    /** Зона под AppBar на `/admin` (без навигации) */
-    adminChromeTitle: {
-      fontSize: '1rem',
-      fontWeight: 600,
-      letterSpacing: '0.02em',
-      lineHeight: 1.4,
-    },
     /** Текст заглушки основной области админки */
     adminPageStub: {
       fontSize: '1rem',

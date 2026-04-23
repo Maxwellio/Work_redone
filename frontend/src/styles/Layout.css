@@ -13,6 +13,12 @@
   background: var(--color-white);
 }
 
+/* Разделение AppBar / main на `/admin` (без отдельной полосы chrome) */
+.layout-sticky--admin {
+  border-bottom: 1px solid #d4cfc4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
 .layout-main {
   flex: 1;
   display: flex;

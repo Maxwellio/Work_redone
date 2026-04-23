@@ -6,63 +6,76 @@
 
 ## Правила разработки (feature-based и стили)
 
-- **Слои:** UI-компоненты в `ui/`, композиция страниц и точки входа маршрутов в `pages/`. По мере роста фичи добавлять `api/`, `hooks/`, `model/` рядом с фичей, не смешивать доменную логику основного приложения без необходимости.
-- **Стили:** только через общий MUI-теминг в [`src/theme.js`](../../theme.js) — кастомные варианты `typography`, `components.styleOverrides`, кастомные варианты компонентов (например `Paper` с `variant="adminShell"`), плюс `sx` с обращением к токенам темы (`theme.spacing`, `theme.palette`, `theme.shape`, `theme.breakpoints`). **Не** заводить отдельные `.css` для каркаса админки внутри фичи.
-- **Импорты из приложения:** допустимы общие части (`components/Layout`, `context/AuthContext`, `api/http` и т.д.) при необходимости.
+- **Слои:** UI в `ui/`, страницы и точки входа в `pages/`, HTTP-вызовы в `api/`. По мере роста фичи добавлять `hooks/`, `model/` рядом с фичей, не смешивать доменную логику основного приложения без необходимости.
+- **Стили:** через общий MUI-теминг в [`src/theme.js`](../../theme.js) — кастомные варианты `typography`, `components.MuiPaper.variants` (например `Paper` с `variant="adminShell"`, если используется), плюс `sx` с токенами темы. **Не** заводить отдельные `.css` для каркаса админки внутри фичи.
+- **Импорты из приложения:** допустимы общие части (`components/Layout`, `context/AuthContext`, [`api/http`](../../api/http.js) и т.д.).
 
 ## Дерево каталогов
 
 ```text
 features/admin/
-  README.md          ← этот файл (живой документ)
-  index.js           ← публичные экспорты фичи
+  README.md
+  index.js
+  api/
+    adminUsers.js       ← GET /api/admin/users
+    adminReferences.js  ← роли, подразделения (см. ниже)
   pages/
     AdminPage.jsx
   ui/
-    AdminPageChrome.jsx
     AdminPageBody.jsx
+    AdminUserFormPanel.jsx
     AdminWorkspaceMock.jsx
 ```
 
-## Основная рабочая зона (текущий макет)
+## Основная рабочая зона
 
-Статичный UI без API и бизнес-логики: на широком экране две колонки в пропорции **3:2** (слева — фильтр: `Select`, два `Checkbox`, поле поиска; под ним таблица-заглушка; справа — восемь полей ввода для превью карточки записи). На узком экране колонки складываются вертикально. Далее планируется привязка к данным, выбор строки и сохранение.
+На широком экране две колонки (пропорция ориентировочно **7:3**): **слева** — поиск и таблица пользователей; **справа** — **форма** [`AdminUserFormPanel`](ui/AdminUserFormPanel.jsx): при клике по строке в таблицу подставляются данные выбранного пользователя (в т.ч. `isFirstLogin` из `GET /api/admin/users`). Без выбранной строки — значения по умолчанию для будущего сценария «добавить» (роль «Пользователь», `orgId` 30, даты: сегодня / 01.01.2100). Сохранение на сервер не реализовано. Даты: **MUI X DatePicker** + **dayjs** (локаль `ru`).
+
+**API (сессия админа, `credentials: 'include'`):**
+
+| Метод | Путь | Назначение |
+|-------|------|------------|
+| GET | `/api/admin/users` | Список пользователей, поле `isFirstLogin` в JSON. |
+| GET | `/api/admin/roles` | Все роли из `spr_role` (селект «Роль»). |
+| GET | `/api/admin/organizations/choices` | Подразделения только `id` 30 и 99 (селект «Подразделение»). |
+
+- **Таблица слева:** колонок подразделения нет; `orgId` в JSON строки. Клик по строке: выбор/снятие, стили как у [`HomeTable`](../../components/HomeTable.jsx) / [`Home.css`](../../styles/Home.css).
+- **Пароль:** в API не отдаётся; в форме при выбранном пользователе поле пустое.
 
 ## Реестр файлов
 
 | Файл | Назначение | Статус |
 |------|------------|--------|
-| `index.js` | Barrel: экспорт `AdminPage`, `AdminIndexOutletFallback` для роутера. | каркас |
-| `pages/AdminPage.jsx` | Корневая страница: `Layout` с заголовком «Админ-панель», `chrome`, дочерний контент с `Outlet` внутри `AdminPageBody`. Экспорт пустого индексного fallback для вложенного маршрута. | каркас |
-| `ui/AdminPageChrome.jsx` | Полоса под `AppBar`: подзаголовок, без ссылок и кнопок навигации. | каркас |
-| `ui/AdminPageBody.jsx` | Основная область: `Paper variant="adminShell"`, макет рабочей зоны (`AdminWorkspaceMock`), вложенный `Outlet`; контейнер до `theme.breakpoints.values.xl`. | каркас |
-| `ui/AdminWorkspaceMock.jsx` | Макет 3:2: фильтр, таблица-заглушка, справа 8 полей (только визуал, без логики). | макет / без логики |
-| `README.md` | Конвенции, дерево, реестр, маршрутизация, заметки по безопасности. | актуален |
-| [`src/components/AdminRoleRoute.jsx`](../../components/AdminRoleRoute.jsx) (вне фичи) | Маршрутный гард: после успешной авторизации допускает `/admin` только при наличии **`ROLE_ADMIN`** в `user.roles`; иначе редирект на `/`. | готово |
-| [`src/utils/userRoles.js`](../../utils/userRoles.js) (вне фичи) | `ROLE_ADMIN`, `userHasAdminRole(user)` — единая проверка роли по данным `GET /api/current-user`. | готово |
-| [`src/components/Layout.jsx`](../../components/Layout.jsx) (вне фичи) | Меню по клику на username: «К патрубкам» на маршруте `/admin`; «Админ-панель» — только при `ROLE_ADMIN` вне `/admin`; «Сменить пароль». | готово |
+| `index.js` | Barrel: экспорт `AdminPage`, `AdminIndexOutletFallback` для роутера. | готово |
+| `api/adminUsers.js` | `GET /api/admin/users` — список пользователей. | готово |
+| `api/adminReferences.js` | `GET /api/admin/roles`, `GET /api/admin/organizations/choices`. | готово |
+| `pages/AdminPage.jsx` | Корневая страница: `Layout` с заголовком «Админ-панель» (без `chrome` под `AppBar`, класс `layout-sticky--admin` в `Layout` для визуального разделения), дочерний контент с `Outlet` внутри `AdminPageBody`. | готово |
+| `ui/AdminPageBody.jsx` | Секция: `AdminWorkspaceMock`, вложенный `Outlet` для будущих подмаршрутов. | готово |
+| `ui/AdminUserFormPanel.jsx` | Правая панель: селекты (роль, подразделение 30/99), ФИО, логин, пароль, телефон, почта, даты, примечание, чекбоксы «Подключен» / «Первое подключение». | готово |
+| `ui/AdminWorkspaceMock.jsx` | Таблица, поиск, `AdminUserFormPanel`. | готово |
+| `README.md` | Конвенции, дерево, реестр, маршрутизация, безопасность. | актуален |
+| [`src/components/AdminRoleRoute.jsx`](../../components/AdminRoleRoute.jsx) (вне фичи) | Гард: `/admin` только при **`ROLE_ADMIN`**; иначе редирект на `/`. | готово |
+| [`src/utils/userRoles.js`](../../utils/userRoles.js) (вне фичи) | `userHasAdminRole(user)` — по `GET /api/current-user`. | готово |
+| [`src/components/Layout.jsx`](../../components/Layout.jsx) (вне фичи) | Меню: «К патрубкам» на `/admin`, «Админ-панель» вне `/admin` при `ROLE_ADMIN`, смена пароля, выход. | готово |
 
 *При добавлении файлов или функционала обновляйте таблицу и дерево.*
 
 ## Маршрутизация
 
 - URL: **`/admin`** (см. [`src/App.jsx`](../../App.jsx)).
-- Родительский маршрут: **`ProtectedRoute`** → **`AdminRoleRoute`** → `AdminPage` (сначала сессия и логин, затем роль администратора).
-- Вложенный **`index`** с элементом `AdminIndexOutletFallback` — заготовка под будущие подмаршруты; контент индекса сейчас пустой (`null`); основной контент индекса — макет в `AdminPageBody` (см. `AdminWorkspaceMock`).
-- **Вход на админку:** пункт «Админ-панель» в меню по username в [`Layout.jsx`](../../components/Layout.jsx) (виден только при `ROLE_ADMIN`); прямой URL `/admin` по-прежнему работает. После успешного логина и при заходе на `/login` с активной сессией админ перенаправляется на **`/admin`** ([`useLogin.js`](../../hooks/useLogin.js), [`Login.jsx`](../../pages/Login.jsx)). С админки возврат на основное приложение — пункт «К патрубкам» в том же меню.
+- Родительский маршрут: **`ProtectedRoute`** → **`AdminRoleRoute`** → `AdminPage`.
+- Вложенный **`index`** с элементом `AdminIndexOutletFallback` — контент индекса пустой (`null`); основной UI — `AdminPageBody` / `AdminWorkspaceMock`.
+- **Вход на админку:** пункт в меню username в [`Layout.jsx`](../../components/Layout.jsx) (только при `ROLE_ADMIN`); прямой URL `/admin`. После логина админ может перенаправляться на `/admin` ([`useLogin.js`](../../hooks/useLogin.js), [`Login.jsx`](../../pages/Login.jsx)). «К патрубкам» — возврат на `/`.
 
-## Расширение темы для админки
+## Расширение темы
 
-В [`src/theme.js`](../../theme.js):
+В [`src/theme.js`](../../theme.js) для админки по-прежнему доступны, при необходимости:
 
-- **`typography.adminChromeTitle`** — текст полосы под `AppBar`.
-- **`typography.adminPageStub`** — текст заглушки в теле страницы.
-- **`components.MuiPaper.variants`** — вариант **`adminShell`**: фон `background.paper`, рамка `divider`, скругление из `shape`.
-- В JSX для кастомных вариантов типографики задан явный **`component="p"`**, чтобы не зависеть от глобального `variantMapping`.
+- **`typography.adminPageStub`**
+- **`components.MuiPaper.variants` → `adminShell`**
 
 ## Безопасность
 
-- **Не залогинен:** `ProtectedRoute` по-прежнему ведёт на **`/login`** (после проверки `GET /api/current-user`).
-- **Залогинен, нет роли администратора:** [`AdminRoleRoute`](../../components/AdminRoleRoute.jsx) перенаправляет на **`/`** (основное приложение).
-- **Залогинен, в `user.roles` есть `ROLE_ADMIN`:** отображается админ-панель. Строка роли совпадает с authority Spring Security на бэкенде (`UserDetailsServiceImpl` для роли «Администратор»).
-- API под админку на сервере по-прежнему нужно защищать отдельно (например `hasRole("ADMIN")` на `/api/admin/**` в `SecurityConfig`); клиентский гард только улучшает UX и не заменяет проверки на сервере.
+- **Не залогинен:** `ProtectedRoute` ведёт на **`/login`**.
+- **Нет роли админа:** [`AdminRoleRoute`](../../components/AdminRoleRoute.jsx) → **`/`**.
+- **Админ:** отображается панель; бэкенд защищает **`/api/admin/**`** (например `hasRole("ADMIN")`); клиентский гард не заменяет проверки на сервере.

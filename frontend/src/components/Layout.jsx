@@ -45,7 +45,9 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
 
   return (
     <div className="layout">
-      <div className="layout-sticky">
+      <div
+        className={`layout-sticky${onAdminRoute ? ' layout-sticky--admin' : ''}`}
+      >
         <AppBar position="static" color="primary">
           <Toolbar>
             <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>

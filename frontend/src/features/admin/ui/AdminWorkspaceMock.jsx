@@ -1,12 +1,8 @@
 import SearchIcon from '@mui/icons-material/Search'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Checkbox from '@mui/material/Checkbox'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import CircularProgress from '@mui/material/CircularProgress'
 import InputAdornment from '@mui/material/InputAdornment'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -16,28 +12,82 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import '../../../styles/Home.css'
+import { fetchAdminUsers } from '../api/adminUsers'
+import { AdminUserFormPanel } from './AdminUserFormPanel'
 
-const mockRows = [
-  { id: 1, colA: 'Запись A', colB: '12', colC: 'черновик', colD: 'Тип 1' },
-  { id: 2, colA: 'Запись B', colB: '34', colC: 'готово', colD: 'Тип 2' },
-  { id: 3, colA: 'Запись C', colB: '56', colC: 'ожидает', colD: 'Тип 1' },
-  { id: 4, colA: 'Запись D', colB: '78', colC: 'готово', colD: 'Тип 3' },
-]
+const tableRowClickable = {
+  cursor: 'pointer',
+  '&:hover': { background: 'var(--color-sand-light)' },
+  '&.Mui-selected': { background: 'rgba(0, 142, 185, 0.08)' },
+  '&.Mui-selected:hover': { background: 'rgba(0, 142, 185, 0.12)' },
+}
 
-const selectedRowId = 1
+function formatDate(isoOrNull) {
+  if (isoOrNull == null || isoOrNull === '') return '—'
+  const d = typeof isoOrNull === 'string' ? isoOrNull.slice(0, 10) : String(isoOrNull)
+  return d
+}
 
-const detailFieldLabels = [
-  'Поле 1',
-  'Поле 2',
-  'Поле 3',
-  'Поле 4',
-  'Поле 5',
-]
+function activeLabel(active) {
+  return active === 1 ? 'Да' : 'Нет'
+}
 
 /**
- * Статичный макет основной рабочей зоны: фильтры + таблица слева, форма справа.
+ * Рабочая зона админки: список пользователей слева (данные с API), форма-заглушка справа.
+ * orgId приходит в данных для будущих экранов, в таблице не показывается.
  */
 export function AdminWorkspaceMock() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedUsersId, setSelectedUsersId] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await fetchAdminUsers()
+      setUsers(Array.isArray(data) ? data : [])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось загрузить список')
+      setUsers([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return users
+    return users.filter((u) => {
+      const hay = [
+        u.userName,
+        u.fio,
+        u.mail,
+        u.telefon,
+        u.roleName,
+        u.note,
+        String(u.usersId),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+      return hay.includes(q)
+    })
+  }, [users, searchQuery])
+
+  const selected = useMemo(
+    () => users.find((u) => u.usersId === selectedUsersId) ?? null,
+    [users, selectedUsersId],
+  )
+
   return (
     <Stack
       direction={{ xs: 'column', md: 'row' }}
@@ -45,7 +95,6 @@ export function AdminWorkspaceMock() {
       alignItems="stretch"
       sx={{ flex: 1, minHeight: 0 }}
     >
-      {/* Left panel: filters + table */}
       <Box
         sx={(theme) => ({
           flex: { md: '7 1 0' },
@@ -71,31 +120,11 @@ export function AdminWorkspaceMock() {
             flexShrink: 0,
           })}
         >
-          <FormControl size="small" sx={{ minWidth: 200 }}>
-            <InputLabel id="admin-workspace-mock-select-label">Раздел</InputLabel>
-            <Select
-              labelId="admin-workspace-mock-select-label"
-              id="admin-workspace-mock-select"
-              label="Раздел"
-              defaultValue="all"
-            >
-              <MenuItem value="all">Все разделы</MenuItem>
-              <MenuItem value="one">Раздел 1</MenuItem>
-              <MenuItem value="two">Раздел 2</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControlLabel
-            control={<Checkbox defaultChecked size="small" />}
-            label={<Typography variant="body2">Опция A</Typography>}
-          />
-          <FormControlLabel
-            control={<Checkbox size="small" />}
-            label={<Typography variant="body2">Опция B</Typography>}
-          />
           <TextField
             size="small"
-            placeholder="Поиск…"
-            defaultValue=""
+            placeholder="Поиск по списку…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -106,53 +135,103 @@ export function AdminWorkspaceMock() {
             sx={{
               minWidth: { xs: '100%', sm: 220 },
               flex: { sm: '1 1 200px' },
-              maxWidth: { sm: 320 },
+              maxWidth: { sm: 400 },
             }}
           />
         </Stack>
-        <TableContainer
-          sx={{
-            flex: 1,
-            borderRadius: 0,
-            overflow: 'auto',
-          }}
-        >
-          <Table size="small" stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: 48 }}>№</TableCell>
-                <TableCell>Наименование</TableCell>
-                <TableCell>Кол-во</TableCell>
-                <TableCell>Статус</TableCell>
-                <TableCell>Тип</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {mockRows.map((row) => {
-                const isSelected = row.id === selectedRowId
-                return (
-                  <TableRow
-                    key={row.id}
-                    sx={(theme) =>
-                      isSelected
-                        ? { bgcolor: theme.palette.action.selected }
-                        : { '&:nth-of-type(even)': { bgcolor: theme.palette.action.hover } }
-                    }
-                  >
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell>{row.colA}</TableCell>
-                    <TableCell>{row.colB}</TableCell>
-                    <TableCell>{row.colC}</TableCell>
-                    <TableCell>{row.colD}</TableCell>
+
+        {error && (
+          <Box sx={{ px: 2, py: 1 }}>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        )}
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, py: 4 }}>
+            <CircularProgress size={32} />
+          </Box>
+        ) : (
+          <TableContainer
+            className="home-table-wrap"
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              m: 0,
+              mt: 1,
+              mx: 2,
+              mb: 2,
+              overflow: 'auto',
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'secondary.main',
+              borderRadius: 1,
+            }}
+          >
+            <Table className="home-table" size="small" stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: 56 }}>ID</TableCell>
+                  <TableCell>Логин</TableCell>
+                  <TableCell>ФИО</TableCell>
+                  <TableCell>Почта</TableCell>
+                  <TableCell>Телефон</TableCell>
+                  <TableCell>Роль</TableCell>
+                  <TableCell align="center">Активен</TableCell>
+                  <TableCell>Подключён</TableCell>
+                  <TableCell>Отключён</TableCell>
+                  <TableCell>Заметка</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10}>
+                      <Typography variant="body2" color="text.secondary">
+                        {users.length === 0 ? 'Нет пользователей' : 'Ничего не найдено'}
+                      </Typography>
+                    </TableCell>
                   </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                ) : (
+                  filtered.map((row) => {
+                    const isSelected = row.usersId === selectedUsersId
+                    return (
+                      <TableRow
+                        key={row.usersId}
+                        data-row-id={row.usersId}
+                        selected={isSelected}
+                        onClick={() => setSelectedUsersId(isSelected ? null : row.usersId)}
+                        sx={tableRowClickable}
+                      >
+                        <TableCell>{row.usersId}</TableCell>
+                        <TableCell>{row.userName}</TableCell>
+                        <TableCell>{row.fio ?? '—'}</TableCell>
+                        <TableCell>{row.mail ?? '—'}</TableCell>
+                        <TableCell>{row.telefon ?? '—'}</TableCell>
+                        <TableCell>{row.roleName ?? '—'}</TableCell>
+                        <TableCell align="center">{activeLabel(row.active)}</TableCell>
+                        <TableCell>{formatDate(row.dtenter)}</TableCell>
+                        <TableCell>{formatDate(row.dtout)}</TableCell>
+                        <TableCell
+                          sx={{
+                            maxWidth: 220,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                          title={row.note || ''}
+                        >
+                          {row.note || '—'}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Box>
 
-      {/* Right panel: detail form */}
       <Box
         sx={{
           flex: { md: '3 1 0' },
@@ -163,25 +242,7 @@ export function AdminWorkspaceMock() {
           overflow: 'auto',
         }}
       >
-        <Stack spacing={2}>
-          {detailFieldLabels.map((label, i) => (
-            <TextField
-              key={label}
-              size="small"
-              label={label}
-              defaultValue={selectedRowId ? `Значение ${i + 1} (макет)` : ''}
-              fullWidth
-            />
-          ))}
-          <TextField
-            size="small"
-            label="Поле 6"
-            defaultValue={selectedRowId ? 'Значение 6 (макет)' : ''}
-            fullWidth
-            multiline
-            minRows={4}
-          />
-        </Stack>
+        <AdminUserFormPanel selectedUser={selected} />
       </Box>
     </Stack>
   )

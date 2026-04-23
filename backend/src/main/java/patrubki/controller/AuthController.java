@@ -37,7 +37,7 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         
-        Integer userId = userRepository.findByUsername(username)
+        Integer userId = userRepository.findByUserName(username)
                 .map(user -> user.getUsersId())
                 .orElse(null);
         

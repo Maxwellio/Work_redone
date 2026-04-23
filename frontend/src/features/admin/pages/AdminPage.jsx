@@ -1,5 +1,4 @@
 import Layout from '../../../components/Layout'
-import { AdminPageChrome } from '../ui/AdminPageChrome'
 import { AdminPageBody } from '../ui/AdminPageBody'
 
 /**
@@ -7,7 +6,7 @@ import { AdminPageBody } from '../ui/AdminPageBody'
  */
 export function AdminPage() {
   return (
-    <Layout title="Админ-панель" chrome={<AdminPageChrome />} flush>
+    <Layout title="Админ-панель" flush>
       <AdminPageBody />
     </Layout>
   )
