@@ -7,18 +7,16 @@ import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import dayjs from 'dayjs'
-import 'dayjs/locale/ru'
 import { useCallback, useEffect, useState } from 'react'
 import { fetchAdminOrgChoices, fetchAdminRoles } from '../api/adminReferences'
 
-dayjs.locale('ru')
-
 const NM_USER = 'Пользователь'
 const DEFAULT_ORG_ID = 30
+
+/** Returns today's date as YYYY-MM-DD string. */
+function today() {
+  return new Date().toISOString().slice(0, 10)
+}
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
@@ -37,8 +35,8 @@ export function AdminUserFormPanel({ selectedUser }) {
   const [password, setPassword] = useState('')
   const [telefon, setTelefon] = useState('')
   const [mail, setMail] = useState('')
-  const [dtenter, setDtenter] = useState(() => dayjs())
-  const [dtout, setDtout] = useState(() => dayjs('2100-01-01'))
+  const [dtenter, setDtenter] = useState(() => today())
+  const [dtout, setDtout] = useState('2100-01-01')
   const [note, setNote] = useState('')
   const [active, setActive] = useState(true)
   const [isFirstLogin, setIsFirstLogin] = useState(true)
@@ -53,8 +51,8 @@ export function AdminUserFormPanel({ selectedUser }) {
     setPassword('')
     setTelefon('')
     setMail('')
-    setDtenter(dayjs())
-    setDtout(dayjs('2100-01-01'))
+    setDtenter(today())
+    setDtout('2100-01-01')
     setNote('')
     setActive(true)
     setIsFirstLogin(true)
@@ -93,8 +91,8 @@ export function AdminUserFormPanel({ selectedUser }) {
       setPassword('')
       setTelefon(selectedUser.telefon ?? '')
       setMail(selectedUser.mail ?? '')
-      setDtenter(selectedUser.dtenter ? dayjs(selectedUser.dtenter) : dayjs())
-      setDtout(selectedUser.dtout ? dayjs(selectedUser.dtout) : dayjs('2100-01-01'))
+      setDtenter(selectedUser.dtenter ? selectedUser.dtenter.slice(0, 10) : today())
+      setDtout(selectedUser.dtout ? selectedUser.dtout.slice(0, 10) : '2100-01-01')
       setNote(selectedUser.note ?? '')
       setActive(selectedUser.active === 1)
       setIsFirstLogin(selectedUser.isFirstLogin === true)
@@ -115,137 +113,141 @@ export function AdminUserFormPanel({ selectedUser }) {
   }
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ru">
-      <Stack spacing={2} sx={{ width: '100%' }}>
-        <Typography variant="subtitle2" color="text.secondary">
-          {title}
-        </Typography>
+    <Stack spacing={2} sx={{ width: '100%' }}>
+      <Typography variant="subtitle2" color="text.secondary">
+        {title}
+      </Typography>
 
-        <FormControl size="small" fullWidth>
-          <InputLabel id="admin-form-role-label">Роль пользователя программы</InputLabel>
-          <Select
-            labelId="admin-form-role-label"
-            id="admin-form-role"
-            label="Роль пользователя программы"
-            value={roleId === '' ? '' : roleId}
-            onChange={(e) => setRoleId(e.target.value)}
-          >
-            {roles.map((r) => (
-              <MenuItem key={r.id} value={r.id}>
-                {r.nm}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+      <FormControl size="small" fullWidth>
+        <InputLabel id="admin-form-role-label">Роль пользователя программы</InputLabel>
+        <Select
+          labelId="admin-form-role-label"
+          id="admin-form-role"
+          label="Роль пользователя программы"
+          value={roleId === '' ? '' : roleId}
+          onChange={(e) => setRoleId(e.target.value)}
+        >
+          {roles.map((r) => (
+            <MenuItem key={r.id} value={r.id}>
+              {r.nm}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-        <TextField
-          size="small"
-          label="Полное ФИО"
-          value={fio}
-          onChange={(e) => setFio(e.target.value)}
-          fullWidth
+      <TextField
+        size="small"
+        label="Полное ФИО"
+        value={fio}
+        onChange={(e) => setFio(e.target.value)}
+        fullWidth
+      />
+
+      <FormControl size="small" fullWidth>
+        <InputLabel id="admin-form-org-label">Подразделение</InputLabel>
+        <Select
+          labelId="admin-form-org-label"
+          id="admin-form-org"
+          label="Подразделение"
+          value={orgId}
+          onChange={(e) => setOrgId(Number(e.target.value))}
+        >
+          {orgChoices.map((o) => (
+            <MenuItem key={o.id} value={o.id} title={o.fullnm || ''}>
+              {o.nm}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <TextField
+        size="small"
+        label="Логин"
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+        fullWidth
+      />
+
+      <TextField
+        size="small"
+        label="Пароль"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        fullWidth
+        autoComplete="new-password"
+        helperText="Для существующего пользователя: оставьте пустым или введите новый пароль. Хэш не подставляется."
+      />
+
+      <TextField
+        size="small"
+        label="Номер телефона"
+        value={telefon}
+        onChange={(e) => setTelefon(e.target.value)}
+        fullWidth
+      />
+
+      <TextField
+        size="small"
+        label="Почта"
+        type="email"
+        value={mail}
+        onChange={(e) => setMail(e.target.value)}
+        fullWidth
+      />
+
+      <TextField
+        size="small"
+        label="Дата подключения"
+        type="date"
+        value={dtenter}
+        onChange={(e) => e.target.value && setDtenter(e.target.value)}
+        fullWidth
+        InputLabelProps={{ shrink: true }}
+      />
+
+      <TextField
+        size="small"
+        label="Дата отключения"
+        type="date"
+        value={dtout}
+        onChange={(e) => e.target.value && setDtout(e.target.value)}
+        fullWidth
+        InputLabelProps={{ shrink: true }}
+      />
+
+      <TextField
+        size="small"
+        label="Примечание"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        fullWidth
+        multiline
+        minRows={4}
+      />
+
+      <Stack direction="row" flexWrap="wrap" alignItems="center" useFlexGap columnGap={2} rowGap={0.5}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={active}
+              onChange={(e) => setActive(e.target.checked)}
+            />
+          }
+          label="Подключен"
         />
-
-        <FormControl size="small" fullWidth>
-          <InputLabel id="admin-form-org-label">Подразделение</InputLabel>
-          <Select
-            labelId="admin-form-org-label"
-            id="admin-form-org"
-            label="Подразделение"
-            value={orgId}
-            onChange={(e) => setOrgId(Number(e.target.value))}
-          >
-            {orgChoices.map((o) => (
-              <MenuItem key={o.id} value={o.id} title={o.fullnm || ''}>
-                {o.nm}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <TextField
-          size="small"
-          label="Логин"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          fullWidth
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={isFirstLogin}
+              onChange={(e) => setIsFirstLogin(e.target.checked)}
+            />
+          }
+          label="Первое подключение"
         />
-
-        <TextField
-          size="small"
-          label="Пароль"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          autoComplete="new-password"
-          helperText="Для существующего пользователя: оставьте пустым или введите новый пароль. Хэш не подставляется."
-        />
-
-        <TextField
-          size="small"
-          label="Номер телефона"
-          value={telefon}
-          onChange={(e) => setTelefon(e.target.value)}
-          fullWidth
-        />
-
-        <TextField
-          size="small"
-          label="Почта"
-          type="email"
-          value={mail}
-          onChange={(e) => setMail(e.target.value)}
-          fullWidth
-        />
-
-        <DatePicker
-          label="Дата подключения"
-          value={dtenter}
-          onChange={(v) => v && setDtenter(v)}
-          renderInput={(params) => <TextField size="small" fullWidth {...params} />}
-        />
-
-        <DatePicker
-          label="Дата отключения"
-          value={dtout}
-          onChange={(v) => v && setDtout(v)}
-          renderInput={(params) => <TextField size="small" fullWidth {...params} />}
-        />
-
-        <TextField
-          size="small"
-          label="Примечание"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          fullWidth
-          multiline
-          minRows={4}
-        />
-
-        <Stack direction="row" flexWrap="wrap" alignItems="center" useFlexGap columnGap={2} rowGap={0.5}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={active}
-                onChange={(e) => setActive(e.target.checked)}
-              />
-            }
-            label="Подключен"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={isFirstLogin}
-                onChange={(e) => setIsFirstLogin(e.target.checked)}
-              />
-            }
-            label="Первое подключение"
-          />
-        </Stack>
       </Stack>
-    </LocalizationProvider>
+    </Stack>
   )
 }
