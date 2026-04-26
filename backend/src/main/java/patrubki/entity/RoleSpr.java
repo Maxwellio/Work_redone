@@ -13,6 +13,7 @@ import javax.persistence.Table;
 public class RoleSpr {
 
     @Id
+    @Column(name = "role_id")
     private Integer id;
 
     @Column(name = "nm", nullable = false, length = 255)

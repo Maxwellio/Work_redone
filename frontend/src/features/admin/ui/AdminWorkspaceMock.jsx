@@ -1,8 +1,14 @@
 import SearchIcon from '@mui/icons-material/Search'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
+import FormControl from '@mui/material/FormControl'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -13,8 +19,10 @@ import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import '../../../styles/Home.css'
+import './admin-workspace.css'
+import { fetchAdminOrgChoices } from '../api/adminReferences'
 import { fetchAdminUsers } from '../api/adminUsers'
+import { NM_ADMIN, NM_USER } from '../constants'
 import { AdminUserFormPanel } from './AdminUserFormPanel'
 
 const tableRowClickable = {
@@ -44,6 +52,11 @@ export function AdminWorkspaceMock() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedUsersId, setSelectedUsersId] = useState(null)
+  const [orgChoices, setOrgChoices] = useState([])
+  const [orgRefsLoading, setOrgRefsLoading] = useState(true)
+  const [orgRefsError, setOrgRefsError] = useState(null)
+  const [orgFilterId, setOrgFilterId] = useState(null)
+  const [roleFilter, setRoleFilter] = useState('none')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -63,10 +76,42 @@ export function AdminWorkspaceMock() {
     load()
   }, [load])
 
+  useEffect(() => {
+    let cancel = false
+    async function run() {
+      setOrgRefsLoading(true)
+      setOrgRefsError(null)
+      try {
+        const data = await fetchAdminOrgChoices()
+        if (!cancel) setOrgChoices(Array.isArray(data) ? data : [])
+      } catch (e) {
+        if (!cancel) {
+          setOrgRefsError(e instanceof Error ? e.message : 'Не удалось загрузить подразделения')
+          setOrgChoices([])
+        }
+      } finally {
+        if (!cancel) setOrgRefsLoading(false)
+      }
+    }
+    run()
+    return () => {
+      cancel = true
+    }
+  }, [])
+
   const filtered = useMemo(() => {
+    let list = users
+    if (orgFilterId != null) {
+      list = list.filter((u) => u.orgId === orgFilterId)
+    }
+    if (roleFilter === 'admin') {
+      list = list.filter((u) => u.roleName === NM_ADMIN)
+    } else if (roleFilter === 'user') {
+      list = list.filter((u) => u.roleName === NM_USER)
+    }
     const q = searchQuery.trim().toLowerCase()
-    if (!q) return users
-    return users.filter((u) => {
+    if (!q) return list
+    return list.filter((u) => {
       const hay = [
         u.userName,
         u.fio,
@@ -81,7 +126,7 @@ export function AdminWorkspaceMock() {
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [users, searchQuery])
+  }, [users, orgFilterId, roleFilter, searchQuery])
 
   const selected = useMemo(
     () => users.find((u) => u.usersId === selectedUsersId) ?? null,
@@ -97,10 +142,11 @@ export function AdminWorkspaceMock() {
     >
       <Box
         sx={(theme) => ({
-          flex: { md: '7 1 0' },
+          flex: { md: '8 1 0' },
           minWidth: 0,
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
           borderRight: { md: `1px solid ${theme.palette.divider}` },
           borderBottom: { xs: `1px solid ${theme.palette.divider}`, md: 'none' },
         })}
@@ -138,7 +184,57 @@ export function AdminWorkspaceMock() {
               maxWidth: { sm: 400 },
             }}
           />
+          <FormControl size="small" sx={{ minWidth: 240 }} disabled={orgRefsLoading}>
+            <InputLabel id="admin-toolbar-org-label">Подразделение</InputLabel>
+            <Select
+              labelId="admin-toolbar-org-label"
+              id="admin-toolbar-org"
+              label="Подразделение"
+              value={orgFilterId == null ? '' : orgFilterId}
+              onChange={(e) => {
+                const v = e.target.value
+                setOrgFilterId(v === '' ? null : Number(v))
+              }}
+            >
+              <MenuItem value="">
+                <em>Все подразделения</em>
+              </MenuItem>
+              {orgChoices.map((o) => (
+                <MenuItem key={o.id} value={o.id} title={o.fullnm || ''}>
+                  {o.nm}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={roleFilter === 'admin'}
+                onChange={(_, c) => setRoleFilter(c ? 'admin' : 'none')}
+              />
+            }
+            label="Только администраторы"
+            sx={{ m: 0, ml: 0.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={roleFilter === 'user'}
+                onChange={(_, c) => setRoleFilter(c ? 'user' : 'none')}
+              />
+            }
+            label="Только пользователи"
+            sx={{ m: 0 }}
+          />
         </Stack>
+
+        {orgRefsError && (
+          <Box sx={{ px: 2, py: 0.5 }}>
+            <Alert severity="warning" sx={{ py: 0.5 }}>{orgRefsError}</Alert>
+          </Box>
+        )}
 
         {error && (
           <Box sx={{ px: 2, py: 1 }}>
@@ -152,22 +248,16 @@ export function AdminWorkspaceMock() {
           </Box>
         ) : (
           <TableContainer
-            className="home-table-wrap"
+            className="admin-user-table-container"
             sx={{
               flex: 1,
               minHeight: 0,
-              m: 0,
               mt: 1,
               mx: 2,
               mb: 2,
-              overflow: 'auto',
-              bgcolor: 'background.paper',
-              border: '1px solid',
-              borderColor: 'secondary.main',
-              borderRadius: 1,
             }}
           >
-            <Table className="home-table" size="small" stickyHeader>
+            <Table className="admin-user-table" size="small">
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: 56 }}>ID</TableCell>
@@ -211,15 +301,7 @@ export function AdminWorkspaceMock() {
                         <TableCell align="center">{activeLabel(row.active)}</TableCell>
                         <TableCell>{formatDate(row.dtenter)}</TableCell>
                         <TableCell>{formatDate(row.dtout)}</TableCell>
-                        <TableCell
-                          sx={{
-                            maxWidth: 220,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                          title={row.note || ''}
-                        >
+                        <TableCell className="admin-user-table__note">
                           {row.note || '—'}
                         </TableCell>
                       </TableRow>
@@ -232,18 +314,20 @@ export function AdminWorkspaceMock() {
         )}
       </Box>
 
-      <Box
-        sx={{
-          flex: { md: '3 1 0' },
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          p: 2,
-          overflow: 'auto',
-        }}
-      >
-        <AdminUserFormPanel selectedUser={selected} />
-      </Box>
+      {selected != null && (
+        <Box
+          sx={{
+            flex: { md: '2 1 0' },
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            p: 2,
+            overflow: 'auto',
+          }}
+        >
+          <AdminUserFormPanel selectedUser={selected} />
+        </Box>
+      )}
     </Stack>
   )
 }

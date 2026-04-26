@@ -1,21 +1,28 @@
+import CloseIcon from '@mui/icons-material/Close'
 import Checkbox from '@mui/material/Checkbox'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
+import IconButton from '@mui/material/IconButton'
 import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
 import { fetchAdminOrgChoices, fetchAdminRoles } from '../api/adminReferences'
+import { NM_USER } from '../constants'
 
-const NM_USER = 'Пользователь'
 const DEFAULT_ORG_ID = 30
 
-/** Returns today's date as YYYY-MM-DD string. */
+/** Сегодня в локальном календаре, YYYY-MM-DD (согласовано с `input type=date`, без сдвига к UTC). */
 function today() {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 /**
@@ -196,25 +203,49 @@ export function AdminUserFormPanel({ selectedUser }) {
         fullWidth
       />
 
-      <TextField
-        size="small"
-        label="Дата подключения"
-        type="date"
-        value={dtenter}
-        onChange={(e) => e.target.value && setDtenter(e.target.value)}
-        fullWidth
-        InputLabelProps={{ shrink: true }}
-      />
+      <Stack direction="row" spacing={0.5} alignItems="flex-start">
+        <TextField
+          size="small"
+          label="Дата подключения"
+          type="date"
+          value={dtenter}
+          onChange={(e) => setDtenter(e.target.value)}
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+        <Tooltip title="Сбросить на сегодня">
+          <IconButton
+            size="small"
+            aria-label="Сбросить дату подключения на сегодня"
+            onClick={() => setDtenter(today())}
+            sx={{ mt: 0.5 }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
 
-      <TextField
-        size="small"
-        label="Дата отключения"
-        type="date"
-        value={dtout}
-        onChange={(e) => e.target.value && setDtout(e.target.value)}
-        fullWidth
-        InputLabelProps={{ shrink: true }}
-      />
+      <Stack direction="row" spacing={0.5} alignItems="flex-start">
+        <TextField
+          size="small"
+          label="Дата отключения"
+          type="date"
+          value={dtout}
+          onChange={(e) => setDtout(e.target.value)}
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+        <Tooltip title="Сбросить на сегодня">
+          <IconButton
+            size="small"
+            aria-label="Сбросить дату отключения на сегодня"
+            onClick={() => setDtout(today())}
+            sx={{ mt: 0.5 }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
 
       <TextField
         size="small"
