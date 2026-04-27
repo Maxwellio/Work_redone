@@ -4,6 +4,6 @@ export function fetchAdminRoles() {
   return requestJson('/admin/roles')
 }
 
-export function fetchAdminOrgChoices() {
-  return requestJson('/admin/organizations/choices')
+export function fetchAdminOrgStruct() {
+  return requestJson('/admin/organizations/struct')
 }

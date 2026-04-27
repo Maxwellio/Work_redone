@@ -20,7 +20,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import './admin-workspace.css'
-import { fetchAdminOrgChoices } from '../api/adminReferences'
+import { ensureAdminOrgStruct } from '../api/adminReferenceCache'
 import { fetchAdminUsers } from '../api/adminUsers'
 import { NM_ADMIN, NM_USER } from '../constants'
 import { AdminUserFormPanel } from './AdminUserFormPanel'
@@ -81,17 +81,13 @@ export function AdminWorkspaceMock() {
     async function run() {
       setOrgRefsLoading(true)
       setOrgRefsError(null)
-      try {
-        const data = await fetchAdminOrgChoices()
-        if (!cancel) setOrgChoices(Array.isArray(data) ? data : [])
-      } catch (e) {
-        if (!cancel) {
-          setOrgRefsError(e instanceof Error ? e.message : 'Не удалось загрузить подразделения')
-          setOrgChoices([])
-        }
-      } finally {
-        if (!cancel) setOrgRefsLoading(false)
+      const r = await ensureAdminOrgStruct()
+      if (cancel) return
+      setOrgChoices(r.data)
+      if (!r.ok) {
+        setOrgRefsError(r.error ?? 'Не удалось загрузить подразделения')
       }
+      setOrgRefsLoading(false)
     }
     run()
     return () => {
@@ -247,70 +243,79 @@ export function AdminWorkspaceMock() {
             <CircularProgress size={32} />
           </Box>
         ) : (
-          <TableContainer
-            className="admin-user-table-container"
+          <Box
             sx={{
               flex: 1,
               minHeight: 0,
-              mt: 1,
-              mx: 2,
-              mb: 2,
+              display: 'flex',
+              flexDirection: 'column',
+              pt: 1,
+              px: 2,
+              pb: 2,
             }}
           >
-            <Table className="admin-user-table" size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ width: 56 }}>ID</TableCell>
-                  <TableCell>Логин</TableCell>
-                  <TableCell>ФИО</TableCell>
-                  <TableCell>Почта</TableCell>
-                  <TableCell>Телефон</TableCell>
-                  <TableCell>Роль</TableCell>
-                  <TableCell align="center">Активен</TableCell>
-                  <TableCell>Подключён</TableCell>
-                  <TableCell>Отключён</TableCell>
-                  <TableCell>Заметка</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filtered.length === 0 ? (
+            <TableContainer
+              className="admin-user-table-container"
+              sx={{
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
+              <Table className="admin-user-table" size="small">
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={10}>
-                      <Typography variant="body2" color="text.secondary">
-                        {users.length === 0 ? 'Нет пользователей' : 'Ничего не найдено'}
-                      </Typography>
-                    </TableCell>
+                    <TableCell sx={{ width: 56 }}>ID</TableCell>
+                    <TableCell>Логин</TableCell>
+                    <TableCell>ФИО</TableCell>
+                    <TableCell>Почта</TableCell>
+                    <TableCell>Телефон</TableCell>
+                    <TableCell>Роль</TableCell>
+                    <TableCell align="center">Активен</TableCell>
+                    <TableCell>Подключён</TableCell>
+                    <TableCell>Отключён</TableCell>
+                    <TableCell>Заметка</TableCell>
                   </TableRow>
-                ) : (
-                  filtered.map((row) => {
-                    const isSelected = row.usersId === selectedUsersId
-                    return (
-                      <TableRow
-                        key={row.usersId}
-                        data-row-id={row.usersId}
-                        selected={isSelected}
-                        onClick={() => setSelectedUsersId(isSelected ? null : row.usersId)}
-                        sx={tableRowClickable}
-                      >
-                        <TableCell>{row.usersId}</TableCell>
-                        <TableCell>{row.userName}</TableCell>
-                        <TableCell>{row.fio ?? '—'}</TableCell>
-                        <TableCell>{row.mail ?? '—'}</TableCell>
-                        <TableCell>{row.telefon ?? '—'}</TableCell>
-                        <TableCell>{row.roleName ?? '—'}</TableCell>
-                        <TableCell align="center">{activeLabel(row.active)}</TableCell>
-                        <TableCell>{formatDate(row.dtenter)}</TableCell>
-                        <TableCell>{formatDate(row.dtout)}</TableCell>
-                        <TableCell className="admin-user-table__note">
-                          {row.note || '—'}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10}>
+                        <Typography variant="body2" color="text.secondary">
+                          {users.length === 0 ? 'Нет пользователей' : 'Ничего не найдено'}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filtered.map((row) => {
+                      const isSelected = row.usersId === selectedUsersId
+                      return (
+                        <TableRow
+                          key={row.usersId}
+                          data-row-id={row.usersId}
+                          selected={isSelected}
+                          onClick={() => setSelectedUsersId(isSelected ? null : row.usersId)}
+                          sx={tableRowClickable}
+                        >
+                          <TableCell>{row.usersId}</TableCell>
+                          <TableCell>{row.userName}</TableCell>
+                          <TableCell>{row.fio ?? '—'}</TableCell>
+                          <TableCell>{row.mail ?? '—'}</TableCell>
+                          <TableCell>{row.telefon ?? '—'}</TableCell>
+                          <TableCell>{row.roleName ?? '—'}</TableCell>
+                          <TableCell align="center">{activeLabel(row.active)}</TableCell>
+                          <TableCell>{formatDate(row.dtenter)}</TableCell>
+                          <TableCell>{formatDate(row.dtout)}</TableCell>
+                          <TableCell className="admin-user-table__note">
+                            {row.note || '—'}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
         )}
       </Box>
 

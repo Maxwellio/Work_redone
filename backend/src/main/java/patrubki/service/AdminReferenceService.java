@@ -32,7 +32,7 @@ public class AdminReferenceService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdminOrgChoiceDto> listOrganizationChoices() {
+    public List<AdminOrgChoiceDto> listOrganizationStruct() {
         return orgStruRepository.findByIdInOrderByIdAsc(ORG_CHOICE_IDS).stream()
                 .map(o -> new AdminOrgChoiceDto(o.getId(), o.getNm(), o.getFullnm()))
                 .collect(Collectors.toList());

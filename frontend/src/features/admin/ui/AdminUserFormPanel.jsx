@@ -11,7 +11,7 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
-import { fetchAdminOrgChoices, fetchAdminRoles } from '../api/adminReferences'
+import { ensureAdminOrgStruct, ensureAdminRoles } from '../api/adminReferenceCache'
 import { NM_USER } from '../constants'
 
 const DEFAULT_ORG_ID = 30
@@ -70,18 +70,17 @@ export function AdminUserFormPanel({ selectedUser }) {
     async function run() {
       setRefsLoading(true)
       setRefsError(null)
-      try {
-        const [r, o] = await Promise.all([fetchAdminRoles(), fetchAdminOrgChoices()])
-        if (cancel) return
-        setRoles(Array.isArray(r) ? r : [])
-        setOrgChoices(Array.isArray(o) ? o : [])
-      } catch (e) {
-        if (!cancel) {
-          setRefsError(e instanceof Error ? e.message : 'Не удалось загрузить справочники')
-        }
-      } finally {
-        if (!cancel) setRefsLoading(false)
+      const [rRoles, rOrg] = await Promise.all([ensureAdminRoles(), ensureAdminOrgStruct()])
+      if (cancel) return
+      setRoles(rRoles.data)
+      setOrgChoices(rOrg.data)
+      if (!rRoles.ok || !rOrg.ok) {
+        const parts = [rRoles.ok ? null : rRoles.error, rOrg.ok ? null : rOrg.error].filter(Boolean)
+        setRefsError(parts.length > 0 ? parts.join(' ') : 'Не удалось загрузить справочники')
+      } else {
+        setRefsError(null)
       }
+      setRefsLoading(false)
     }
     run()
     return () => {

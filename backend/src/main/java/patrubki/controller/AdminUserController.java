@@ -33,8 +33,8 @@ public class AdminUserController {
         return adminReferenceService.listRoles();
     }
 
-    @GetMapping("/organizations/choices")
-    public List<AdminOrgChoiceDto> listOrganizationChoices() {
-        return adminReferenceService.listOrganizationChoices();
+    @GetMapping("/organizations/struct")
+    public List<AdminOrgChoiceDto> listOrganizationStruct() {
+        return adminReferenceService.listOrganizationStruct();
     }
 }
