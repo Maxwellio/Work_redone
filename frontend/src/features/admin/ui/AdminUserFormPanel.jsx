@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'
+import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -27,9 +28,9 @@ function today() {
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
- * @param {{ selectedUser: object | null }} props
+ * @param {{ selectedUser: object | null, isNewUserDraft?: boolean }} props
  */
-export function AdminUserFormPanel({ selectedUser }) {
+export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
   const [roles, setRoles] = useState([])
   const [orgChoices, setOrgChoices] = useState([])
   const [refsLoading, setRefsLoading] = useState(true)
@@ -107,9 +108,9 @@ export function AdminUserFormPanel({ selectedUser }) {
     }
   }, [selectedUser, roles, applyDefaultsForAdd])
 
-  const title = selectedUser
-    ? `Пользователь #${selectedUser.usersId}`
-    : 'Новый пользователь (значения по умолчанию)'
+  const title = isNewUserDraft
+    ? 'Новый пользователь'
+    : `Пользователь #${selectedUser.usersId}`
 
   if (refsLoading) {
     return <Typography color="text.secondary">Загрузка формы…</Typography>
@@ -278,6 +279,18 @@ export function AdminUserFormPanel({ selectedUser }) {
           label="Первое подключение"
         />
       </Stack>
+
+      <Button
+        type="button"
+        variant="contained"
+        size="medium"
+        fullWidth
+        onClick={() => {
+          // TODO: сохранение на сервер
+        }}
+      >
+        Сохранить
+      </Button>
     </Stack>
   )
 }

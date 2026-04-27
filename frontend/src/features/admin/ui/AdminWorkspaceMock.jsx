@@ -1,6 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControl from '@mui/material/FormControl'
@@ -57,6 +58,7 @@ export function AdminWorkspaceMock() {
   const [orgRefsError, setOrgRefsError] = useState(null)
   const [orgFilterId, setOrgFilterId] = useState(null)
   const [roleFilter, setRoleFilter] = useState('none')
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -224,6 +226,18 @@ export function AdminWorkspaceMock() {
             label="Только пользователи"
             sx={{ m: 0 }}
           />
+          <Button
+            type="button"
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setIsAddUserOpen(true)
+              setSelectedUsersId(null)
+            }}
+            sx={{ ml: { xs: 0, sm: 'auto' }, flexShrink: 0 }}
+          >
+            Добавить пользователя
+          </Button>
         </Stack>
 
         {orgRefsError && (
@@ -293,7 +307,14 @@ export function AdminWorkspaceMock() {
                           key={row.usersId}
                           data-row-id={row.usersId}
                           selected={isSelected}
-                          onClick={() => setSelectedUsersId(isSelected ? null : row.usersId)}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedUsersId(null)
+                            } else {
+                              setIsAddUserOpen(false)
+                              setSelectedUsersId(row.usersId)
+                            }
+                          }}
                           sx={tableRowClickable}
                         >
                           <TableCell>{row.usersId}</TableCell>
@@ -319,7 +340,7 @@ export function AdminWorkspaceMock() {
         )}
       </Box>
 
-      {selected != null && (
+      {(selected != null || isAddUserOpen) && (
         <Box
           sx={{
             flex: { md: '2 1 0' },
@@ -330,7 +351,10 @@ export function AdminWorkspaceMock() {
             overflow: 'auto',
           }}
         >
-          <AdminUserFormPanel selectedUser={selected} />
+          <AdminUserFormPanel
+            selectedUser={selected}
+            isNewUserDraft={isAddUserOpen && selected == null}
+          />
         </Box>
       )}
     </Stack>
