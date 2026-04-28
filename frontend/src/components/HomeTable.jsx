@@ -17,6 +17,7 @@ function HomeTable({
   getRowId,
   formatCell,
   onSelectRow,
+  onRowDoubleClick,
 }) {
   return (
     <TableContainer className="home-table-wrap" sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'secondary.main', borderRadius: 1 }}>
@@ -47,6 +48,7 @@ function HomeTable({
                   data-row-id={id}
                   selected={selectedRowId === id}
                   onClick={() => onSelectRow(selectedRowId === id ? null : id)}
+                  onDoubleClick={() => onRowDoubleClick?.(id)}
                   sx={{ cursor: 'pointer' }}
                 >
                   {columns.map((col) => (

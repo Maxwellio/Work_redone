@@ -10,6 +10,12 @@ import '../styles/Home.css'
 function Home() {
   const home = useHomePage()
   const { activeTab, data, actions } = home
+  const handleRowDoubleClick = (id) => {
+    data.setSelectedRowId(id)
+    setTimeout(() => {
+      home.handleEdit()
+    }, 0)
+  }
 
   const chrome = (
     <>
@@ -45,6 +51,7 @@ function Home() {
           getRowId={getRowId}
           formatCell={formatCell}
           onSelectRow={data.setSelectedRowId}
+          onRowDoubleClick={handleRowDoubleClick}
         />
 
         <HomeModals
