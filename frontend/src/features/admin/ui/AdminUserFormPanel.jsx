@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'
+import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import FormControl from '@mui/material/FormControl'
@@ -12,6 +13,7 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
+import { saveAdminUser } from '../api/adminUsers'
 import { ensureAdminOrgStruct, ensureAdminRoles } from '../api/adminReferenceCache'
 import { NM_USER } from '../constants'
 
@@ -28,9 +30,9 @@ function today() {
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
- * @param {{ selectedUser: object | null, isNewUserDraft?: boolean }} props
+ * @param {{ selectedUser: object | null, isNewUserDraft?: boolean, onSaved?: () => Promise<void> | void }} props
  */
-export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
+export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSaved }) {
   const [roles, setRoles] = useState([])
   const [orgChoices, setOrgChoices] = useState([])
   const [refsLoading, setRefsLoading] = useState(true)
@@ -47,6 +49,8 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
   const [note, setNote] = useState('')
   const [active, setActive] = useState(true)
   const [isFirstLogin, setIsFirstLogin] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
 
   const applyDefaultsForAdd = useCallback((roleList) => {
     if (!roleList || roleList.length === 0) return
@@ -105,6 +109,33 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
     }
   }, [selectedUser, roles, applyDefaultsForAdd])
 
+  const handleSave = useCallback(async () => {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await saveAdminUser({
+        usersId: selectedUser?.usersId ?? null,
+        roleId: roleId === '' ? null : Number(roleId),
+        orgId: orgId == null ? null : Number(orgId),
+        fio,
+        userName,
+        password,
+        dtenter: dtenter || null,
+        dtout: dtout || null,
+        note,
+        active,
+        isFirstLogin,
+      })
+      if (onSaved) {
+        await onSaved()
+      }
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Не удалось сохранить пользователя')
+    } finally {
+      setSaving(false)
+    }
+  }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, roleId, selectedUser?.usersId, userName])
+
   const title = isNewUserDraft
     ? 'Новый пользователь'
     : `Пользователь #${selectedUser.usersId}`
@@ -121,6 +152,8 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
       <Typography variant="subtitle2" color="text.secondary">
         {title}
       </Typography>
+
+      {saveError && <Alert severity="error">{saveError}</Alert>}
 
       <FormControl size="small" fullWidth>
         <InputLabel id="admin-form-role-label">Роль пользователя программы</InputLabel>
@@ -273,11 +306,10 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
         variant="contained"
         size="medium"
         fullWidth
-        onClick={() => {
-          // TODO: сохранение на сервер
-        }}
+        disabled={saving}
+        onClick={handleSave}
       >
-        Сохранить
+        {saving ? 'Сохранение…' : 'Сохранить'}
       </Button>
     </Stack>
   )

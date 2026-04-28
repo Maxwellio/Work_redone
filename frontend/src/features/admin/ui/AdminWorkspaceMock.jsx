@@ -130,6 +130,12 @@ export function AdminWorkspaceMock() {
     [users, selectedUsersId],
   )
 
+  const handleUserSaved = useCallback(async () => {
+    await load()
+    setSelectedUsersId(null)
+    setIsAddUserOpen(false)
+  }, [load])
+
   return (
     <Stack
       direction={{ xs: 'column', md: 'row' }}
@@ -230,8 +236,12 @@ export function AdminWorkspaceMock() {
             variant="outlined"
             size="small"
             onClick={() => {
-              setIsAddUserOpen(true)
-              setSelectedUsersId(null)
+              if (isAddUserOpen && selectedUsersId == null) {
+                setIsAddUserOpen(false)
+              } else {
+                setIsAddUserOpen(true)
+                setSelectedUsersId(null)
+              }
             }}
             sx={{ ml: { xs: 0, sm: 'auto' }, flexShrink: 0 }}
           >
@@ -351,6 +361,7 @@ export function AdminWorkspaceMock() {
           <AdminUserFormPanel
             selectedUser={selected}
             isNewUserDraft={isAddUserOpen && selected == null}
+            onSaved={handleUserSaved}
           />
         </Box>
       )}

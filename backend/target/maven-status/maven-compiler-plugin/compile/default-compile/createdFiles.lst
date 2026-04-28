@@ -85,3 +85,4 @@ patrubki\dto\CurrentUserDto.class
 patrubki\dto\NtkTransitionRowDto.class
 patrubki\dto\HydrotestDto.class
 patrubki\dto\NtkDto.class
+patrubki\dto\AdminUserSaveDto.class
