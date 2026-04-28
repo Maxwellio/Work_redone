@@ -113,7 +113,6 @@ export function AdminWorkspaceMock() {
       const hay = [
         u.userName,
         u.fio,
-        u.mail,
         u.telefon,
         u.roleName,
         u.note,
@@ -281,7 +280,6 @@ export function AdminWorkspaceMock() {
                     <TableCell sx={{ width: 56 }}>ID</TableCell>
                     <TableCell>Логин</TableCell>
                     <TableCell>ФИО</TableCell>
-                    <TableCell>Почта</TableCell>
                     <TableCell>Телефон</TableCell>
                     <TableCell>Роль</TableCell>
                     <TableCell align="center">Активен</TableCell>
@@ -293,7 +291,7 @@ export function AdminWorkspaceMock() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10}>
+                      <TableCell colSpan={9}>
                         <Typography variant="body2" color="text.secondary">
                           {users.length === 0 ? 'Нет пользователей' : 'Ничего не найдено'}
                         </Typography>
@@ -320,7 +318,6 @@ export function AdminWorkspaceMock() {
                           <TableCell>{row.usersId}</TableCell>
                           <TableCell>{row.userName}</TableCell>
                           <TableCell>{row.fio ?? '—'}</TableCell>
-                          <TableCell>{row.mail ?? '—'}</TableCell>
                           <TableCell>{row.telefon ?? '—'}</TableCell>
                           <TableCell>{row.roleName ?? '—'}</TableCell>
                           <TableCell align="center">{activeLabel(row.active)}</TableCell>

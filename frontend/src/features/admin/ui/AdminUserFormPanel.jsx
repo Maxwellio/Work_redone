@@ -42,7 +42,6 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
   const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
   const [telefon, setTelefon] = useState('')
-  const [mail, setMail] = useState('')
   const [dtenter, setDtenter] = useState(() => today())
   const [dtout, setDtout] = useState('2100-01-01')
   const [note, setNote] = useState('')
@@ -58,7 +57,6 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
     setUserName('')
     setPassword('')
     setTelefon('')
-    setMail('')
     setDtenter(today())
     setDtout('2100-01-01')
     setNote('')
@@ -97,7 +95,6 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
       setUserName(selectedUser.userName ?? '')
       setPassword('')
       setTelefon(selectedUser.telefon ?? '')
-      setMail(selectedUser.mail ?? '')
       setDtenter(selectedUser.dtenter ? selectedUser.dtenter.slice(0, 10) : today())
       setDtout(selectedUser.dtout ? selectedUser.dtout.slice(0, 10) : '2100-01-01')
       setNote(selectedUser.note ?? '')
@@ -191,15 +188,6 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false }) {
         label="Номер телефона"
         value={telefon}
         onChange={(e) => setTelefon(e.target.value)}
-        fullWidth
-      />
-
-      <TextField
-        size="small"
-        label="Почта"
-        type="email"
-        value={mail}
-        onChange={(e) => setMail(e.target.value)}
         fullWidth
       />
 

@@ -33,9 +33,6 @@ public class AdminUserListItemDto {
     @JsonProperty("dtout")
     private final LocalDate dtout;
 
-    @JsonProperty("mail")
-    private final String mail;
-
     @JsonProperty("userName")
     private final String userName;
 
@@ -57,7 +54,6 @@ public class AdminUserListItemDto {
             Integer active,
             LocalDate dtenter,
             LocalDate dtout,
-            String mail,
             String userName,
             String fio,
             String telefon,
@@ -70,7 +66,6 @@ public class AdminUserListItemDto {
         this.active = active;
         this.dtenter = dtenter;
         this.dtout = dtout;
-        this.mail = mail;
         this.userName = userName;
         this.fio = fio;
         this.telefon = telefon;
@@ -107,10 +102,6 @@ public class AdminUserListItemDto {
 
     public LocalDate getDtout() {
         return dtout;
-    }
-
-    public String getMail() {
-        return mail;
     }
 
     public String getUserName() {

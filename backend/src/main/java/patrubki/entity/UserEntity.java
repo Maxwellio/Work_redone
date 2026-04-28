@@ -39,9 +39,6 @@ public class UserEntity {
     @Column(name = "dtout")
     private LocalDate dtout;
 
-    @Column(name = "mail", length = 500)
-    private String mail;
-
     @Column(name = "fio", length = 500)
     private String fio;
 
@@ -113,14 +110,6 @@ public class UserEntity {
 
     public void setDtout(LocalDate dtout) {
         this.dtout = dtout;
-    }
-
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
     }
 
     public String getFio() {

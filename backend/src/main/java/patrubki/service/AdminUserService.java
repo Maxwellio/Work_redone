@@ -35,7 +35,6 @@ public class AdminUserService {
                 u.getActive(),
                 u.getDtenter(),
                 u.getDtout(),
-                u.getMail(),
                 u.getUserName(),
                 u.getFio(),
                 u.getTelefon(),
