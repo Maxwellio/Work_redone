@@ -140,6 +140,9 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     ? 'Новый пользователь'
     : `Пользователь #${selectedUser.usersId}`
 
+  const isAddSaveReady = fio.trim() !== '' && userName.trim() !== '' && password.trim() !== ''
+  const isSaveDisabled = saving || (isNewUserDraft && !isAddSaveReady)
+
   if (refsLoading) {
     return <Typography color="text.secondary">Загрузка формы…</Typography>
   }
@@ -306,7 +309,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         variant="contained"
         size="medium"
         fullWidth
-        disabled={saving}
+        disabled={isSaveDisabled}
         onClick={handleSave}
       >
         {saving ? 'Сохранение…' : 'Сохранить'}
