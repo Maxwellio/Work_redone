@@ -120,6 +120,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         fio,
         userName,
         password,
+        telefon,
         dtenter: dtenter || null,
         dtout: dtout || null,
         note,
@@ -134,7 +135,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     } finally {
       setSaving(false)
     }
-  }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, roleId, selectedUser?.usersId, userName])
+  }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, roleId, selectedUser?.usersId, telefon, userName])
 
   const title = isNewUserDraft
     ? 'Новый пользователь'

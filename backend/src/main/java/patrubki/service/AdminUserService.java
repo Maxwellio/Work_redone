@@ -38,7 +38,7 @@ public class AdminUserService {
     public Integer saveUser(AdminUserSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                    "call substitute.add_edit_users(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "call substitute.add_edit_users(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getUsersId(), Types.INTEGER);
             cs.setObject(2, dto.getRoleId(), Types.INTEGER);
@@ -46,11 +46,12 @@ public class AdminUserService {
             cs.setString(4, trimToNull(dto.getFio()));
             cs.setString(5, trimToNull(dto.getUserName()));
             cs.setString(6, resolvePasswordForSave(dto.getPassword()));
-            cs.setObject(7, dto.getDtenter(), Types.DATE);
-            cs.setObject(8, dto.getDtout(), Types.DATE);
-            cs.setString(9, trimToNull(dto.getNote()));
-            cs.setObject(10, Boolean.TRUE.equals(dto.getActive()) ? 1 : 0, Types.INTEGER);
-            cs.setObject(11, dto.getIsFirstLogin(), Types.BOOLEAN);
+            cs.setString(7, trimToNull(dto.getTelefon()));
+            cs.setObject(8, dto.getDtenter(), Types.DATE);
+            cs.setObject(9, dto.getDtout(), Types.DATE);
+            cs.setString(10, trimToNull(dto.getNote()));
+            cs.setObject(11, Boolean.TRUE.equals(dto.getActive()) ? 1 : 0, Types.INTEGER);
+            cs.setObject(12, dto.getIsFirstLogin(), Types.BOOLEAN);
             cs.execute();
             return extractId(cs.getObject(1), dto.getUsersId());
         });

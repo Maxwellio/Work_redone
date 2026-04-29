@@ -24,6 +24,9 @@ public class AdminUserSaveDto {
     @JsonProperty("password")
     private String password;
 
+    @JsonProperty("telefon")
+    private String telefon;
+
     @JsonProperty("dtenter")
     private LocalDate dtenter;
 
@@ -85,6 +88,14 @@ public class AdminUserSaveDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getTelefon() {
+        return telefon;
+    }
+
+    public void setTelefon(String telefon) {
+        this.telefon = telefon;
     }
 
     public LocalDate getDtenter() {

@@ -2,6 +2,7 @@ patrubki\dto\SubstituteDetailLargeFormCalcRequestDto.class
 patrubki\entity\Fiting.class
 patrubki\dto\AdminUserListItemDto.class
 patrubki\dto\MakeSubstituteDetailSaveDto.class
+patrubki\service\UserPasswordService.class
 patrubki\dto\package-info.class
 patrubki\dto\OperationStructureSprDto.class
 patrubki\service\FitingService.class
@@ -50,6 +51,7 @@ patrubki\dto\SubstituteDetailLargeFormCalcResponseDto.class
 patrubki\entity\MakeSubstituteMain.class
 patrubki\dto\SubstituteDetailCalcTvpRequestDto.class
 patrubki\dto\FitingDto.class
+patrubki\dto\ChangePasswordRequestDto.class
 patrubki\repository\OperationStructureSprRepository.class
 patrubki\repository\package-info.class
 patrubki\dto\AdminRoleOptionDto.class
@@ -77,6 +79,7 @@ patrubki\entity\FitingDetailNtkId.class
 patrubki\dto\MakeSubstituteMainDto.class
 patrubki\entity\Hydrotest.class
 patrubki\repository\PreformTypRepository.class
+patrubki\controller\UserPasswordController.class
 patrubki\entity\Party.class
 patrubki\repository\UserRepository.class
 patrubki\controller\SpaForwardController.class
