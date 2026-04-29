@@ -20,12 +20,14 @@ export function useFittingForm({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [editingRowId, setEditingRowId] = useState(null)
   const [formData, setFormData] = useState(EMPTY_FITTING_FORM_PATRUBOK)
   const [saveError, setSaveError] = useState(null)
 
   const openAdd = () => {
     setSaveError(null)
     setIsEditMode(false)
+    setEditingRowId(null)
     const emptyForm = activeTab === 1 ? EMPTY_FITTING_FORM_PATRUBOK : EMPTY_FITTING_FORM_TRUBA
     const initialForm = { ...emptyForm }
     if (activeTab === 1) {
@@ -38,15 +40,17 @@ export function useFittingForm({
     setIsModalOpen(true)
   }
 
-  const openEdit = () => {
-    if (selectedRowId == null) {
+  const openEdit = (rowIdOverride) => {
+    const targetRowId = rowIdOverride ?? selectedRowId
+    if (targetRowId == null) {
       window.alert('Выберите запись для редактирования')
       return
     }
-    const selectedRow = listData.find((row) => getRowId(row, activeTab) === selectedRowId)
+    const selectedRow = listData.find((row) => getRowId(row, activeTab) === targetRowId)
     if (!selectedRow) return
     setSaveError(null)
     setIsEditMode(true)
+    setEditingRowId(targetRowId)
     const mapped = mapFittingToForm(selectedRow)
     if (activeTab === 1) {
       const id = mapped.idPreform
@@ -61,6 +65,7 @@ export function useFittingForm({
   const close = () => {
     setSaveError(null)
     setIsModalOpen(false)
+    setEditingRowId(null)
     const emptyForm = activeTab === 1 ? EMPTY_FITTING_FORM_PATRUBOK : EMPTY_FITTING_FORM_TRUBA
     setFormData(emptyForm)
   }
@@ -79,7 +84,7 @@ export function useFittingForm({
       return null
     }
     const payload = {
-      id: isEditMode ? selectedRowId : null,
+      id: isEditMode ? (editingRowId ?? selectedRowId) : null,
       tip,
       nm: source.nm || null,
       d: parseNum(source.d),

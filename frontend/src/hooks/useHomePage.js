@@ -252,10 +252,10 @@ export function useHomePage() {
     else if (activeTab === 3) hydrotestForm.openAdd()
   }
 
-  const handleEdit = () => {
-    if (activeTab === 0) substituteForm.openEdit()
-    else if (activeTab === 1 || activeTab === 2) fittingForm.openEdit()
-    else if (activeTab === 3) hydrotestForm.openEdit()
+  const handleEdit = (rowIdOverride) => {
+    if (activeTab === 0) substituteForm.openEdit(rowIdOverride)
+    else if (activeTab === 1 || activeTab === 2) fittingForm.openEdit(rowIdOverride)
+    else if (activeTab === 3) hydrotestForm.openEdit(rowIdOverride)
   }
 
   const handleOpenTransitions = () => {

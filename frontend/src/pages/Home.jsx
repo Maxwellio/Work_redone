@@ -12,9 +12,7 @@ function Home() {
   const { activeTab, data, actions } = home
   const handleRowDoubleClick = (id) => {
     data.setSelectedRowId(id)
-    setTimeout(() => {
-      home.handleEdit()
-    }, 0)
+    home.handleEdit(id)
   }
 
   const chrome = (

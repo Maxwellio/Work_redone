@@ -15,25 +15,29 @@ export function useSubstituteForm({
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
+  const [editingRowId, setEditingRowId] = useState(null)
   const [formData, setFormData] = useState(EMPTY_SUBSTITUTE_FORM)
   const [saveError, setSaveError] = useState(null)
 
   const openAdd = () => {
     setSaveError(null)
     setIsEditMode(false)
+    setEditingRowId(null)
     setFormData(EMPTY_SUBSTITUTE_FORM)
     setIsModalOpen(true)
   }
 
-  const openEdit = () => {
-    if (selectedRowId == null) {
+  const openEdit = (rowIdOverride) => {
+    const targetRowId = rowIdOverride ?? selectedRowId
+    if (targetRowId == null) {
       window.alert('Выберите запись для редактирования')
       return
     }
-    const selectedRow = listData.find((row) => getRowId(row, activeTab) === selectedRowId)
+    const selectedRow = listData.find((row) => getRowId(row, activeTab) === targetRowId)
     if (!selectedRow) return
     setSaveError(null)
     setIsEditMode(true)
+    setEditingRowId(targetRowId)
     setFormData(mapSubstituteToForm(selectedRow))
     setIsModalOpen(true)
   }
@@ -41,6 +45,7 @@ export function useSubstituteForm({
   const close = () => {
     setSaveError(null)
     setIsModalOpen(false)
+    setEditingRowId(null)
     setFormData(EMPTY_SUBSTITUTE_FORM)
   }
 
@@ -63,7 +68,7 @@ export function useSubstituteForm({
       return null
     }
     const payload = {
-      id: isEditMode ? selectedRowId : null,
+      id: isEditMode ? (editingRowId ?? selectedRowId) : null,
       nmSub1: source.nmSub1 || null,
       nmSub2: source.nmSub2 || null,
       nmSub3: source.nmSub3 || null,
