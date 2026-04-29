@@ -35,6 +35,10 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
+  if (user?.isFirstLogin) {
+    return <Navigate to="/login" replace />
+  }
+
   return children
 }
 

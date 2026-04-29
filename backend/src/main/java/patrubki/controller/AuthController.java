@@ -37,10 +37,10 @@ public class AuthController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         
-        Integer userId = userRepository.findByUserName(username)
-                .map(user -> user.getUsersId())
-                .orElse(null);
-        
-        return ResponseEntity.ok(new CurrentUserDto(username, roles, userId));
+        var user = userRepository.findByUserName(username).orElse(null);
+        Integer userId = user != null ? user.getUsersId() : null;
+        Boolean isFirstLogin = user != null ? user.getIsFirstLogin() : null;
+
+        return ResponseEntity.ok(new CurrentUserDto(username, roles, userId, isFirstLogin));
     }
 }

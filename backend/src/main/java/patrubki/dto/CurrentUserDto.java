@@ -10,11 +10,13 @@ public class CurrentUserDto {
     private final String username;
     private final List<String> roles;
     private final Integer userId;
+    private final Boolean isFirstLogin;
 
-    public CurrentUserDto(String username, List<String> roles, Integer userId) {
+    public CurrentUserDto(String username, List<String> roles, Integer userId, Boolean isFirstLogin) {
         this.username = username;
         this.roles = roles != null ? List.copyOf(roles) : List.of();
         this.userId = userId;
+        this.isFirstLogin = isFirstLogin;
     }
 
     public String getUsername() {
@@ -27,5 +29,9 @@ public class CurrentUserDto {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public Boolean getIsFirstLogin() {
+        return isFirstLogin;
     }
 }

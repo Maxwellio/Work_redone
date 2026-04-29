@@ -7,6 +7,9 @@ import { userHasAdminRole } from '../utils/userRoles'
  */
 function AdminRoleRoute({ children }) {
   const { user } = useAuth()
+  if (user?.isFirstLogin) {
+    return <Navigate to="/login" replace />
+  }
   if (!userHasAdminRole(user)) {
     return <Navigate to="/" replace />
   }

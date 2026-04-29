@@ -26,7 +26,13 @@ const passwordRulesTooltipContent = (
   </Box>
 )
 
-function ChangePasswordForm({ onSubmit, onCancel }) {
+function ChangePasswordForm({
+  onSubmit,
+  onCancel,
+  requireCurrentPassword = true,
+  submitLabel = 'Ок',
+  cancelLabel = 'Отмена',
+}) {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
@@ -51,7 +57,7 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
       : undefined
 
   const isSubmitDisabled =
-    !currentPassword ||
+    (requireCurrentPassword && !currentPassword) ||
     !newPassword ||
     !confirmNewPassword ||
     !isNewPasswordValid ||
@@ -75,27 +81,29 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Stack spacing={2}>
-        <TextField
-          label="Текущий пароль"
-          type={showCurrentPassword ? 'text' : 'password'}
-          fullWidth
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label={showCurrentPassword ? 'Скрыть пароль' : 'Показать пароль'}
-                  onClick={() => setShowCurrentPassword((v) => !v)}
-                  edge="end"
-                  tabIndex={-1}
-                >
-                  {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
+        {requireCurrentPassword && (
+          <TextField
+            label="Текущий пароль"
+            type={showCurrentPassword ? 'text' : 'password'}
+            fullWidth
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label={showCurrentPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                    onClick={() => setShowCurrentPassword((v) => !v)}
+                    edge="end"
+                    tabIndex={-1}
+                  >
+                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        )}
 
         <Tooltip title={passwordRulesTooltipContent} placement="top" arrow enterTouchDelay={0}>
           <Box
@@ -168,10 +176,10 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
 
         <Stack direction="row" spacing={1} justifyContent="flex-end">
           <Button variant="text" onClick={handleCancel}>
-            Отмена
+            {cancelLabel}
           </Button>
           <Button type="submit" variant="contained" disabled={isSubmitDisabled}>
-            Ок
+            {submitLabel}
           </Button>
         </Stack>
       </Stack>

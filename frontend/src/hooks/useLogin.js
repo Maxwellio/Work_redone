@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
-import { login as apiLogin } from '../api'
+import { changePassword, login as apiLogin, logout as apiLogout } from '../api'
 import { userHasAdminRole } from '../utils/userRoles'
 
 export function useLogin(fetchUser, navigate) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [changePasswordError, setChangePasswordError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   const [sessionChecked, setSessionChecked] = useState(false)
+  const [firstLoginPending, setFirstLoginPending] = useState(false)
+  const [firstLoginOldPassword, setFirstLoginOldPassword] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -34,6 +38,11 @@ export function useLogin(fetchUser, navigate) {
         return
       }
       const u = await fetchUser()
+      if (u?.isFirstLogin) {
+        setFirstLoginPending(true)
+        setFirstLoginOldPassword(password)
+        return
+      }
       navigate(userHasAdminRole(u) ? '/admin' : '/', { replace: true })
     } catch {
       setError('Ошибка соединения. Проверьте подключение.')
@@ -42,14 +51,50 @@ export function useLogin(fetchUser, navigate) {
     }
   }
 
+  const handleFirstLoginPasswordSubmit = async ({ currentPassword, newPassword }) => {
+    setChangePasswordError('')
+    setChangingPassword(true)
+    try {
+      const oldPassword = firstLoginOldPassword || currentPassword || ''
+      await changePassword(oldPassword, newPassword)
+      setFirstLoginOldPassword('')
+      setFirstLoginPending(false)
+      setPassword('')
+      const u = await fetchUser()
+      navigate(userHasAdminRole(u) ? '/admin' : '/', { replace: true })
+    } catch (e) {
+      setChangePasswordError(e?.message || 'Не удалось сменить пароль')
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
+  const handleCancelFirstLogin = async () => {
+    try {
+      await apiLogout()
+    } catch (_) {
+      // ignore logout errors, page reload will reset state
+    } finally {
+      setFirstLoginOldPassword('')
+      setFirstLoginPending(false)
+      setPassword('')
+      window.location.reload()
+    }
+  }
+
   return {
     username,
     password,
     error,
+    changePasswordError,
     submitting,
+    changingPassword,
     sessionChecked,
+    firstLoginPending,
     setUsername,
     setPassword,
     handleSubmit,
+    handleFirstLoginPasswordSubmit,
+    handleCancelFirstLogin,
   }
 }
