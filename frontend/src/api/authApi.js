@@ -26,3 +26,29 @@ export async function logout() {
   if (!res.ok) throw new Error(`logout failed: ${res.status}`)
   return res.json()
 }
+
+export async function changePassword(oldPassword, newPassword) {
+  const res = await request('/user/change-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ oldPassword, newPassword }),
+  })
+
+  if (!res.ok) {
+    let message = `changePassword failed: ${res.status}`
+    try {
+      const data = await res.json()
+      if (data?.error) {
+        message = data.error
+      }
+    } catch (_) {
+      // ignore parse errors for non-json responses
+    }
+    throw new Error(message)
+  }
+
+  return res.json()
+}

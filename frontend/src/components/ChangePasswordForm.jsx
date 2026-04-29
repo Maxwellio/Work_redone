@@ -17,10 +17,11 @@ const passwordRulesTooltipContent = (
       Пароль должен:
     </Typography>
     <Typography variant="caption" color="inherit" display="block" component="span">
-      • иметь минимум 6 символов
+      • иметь минимум 14 символов
       <br />• содержать хотя бы 1 заглавную (A-Z)
       <br />• содержать хотя бы 1 строчную (a-z)
       <br />• содержать хотя бы 1 цифру (0-9)
+      <br />• содержать хотя бы 1 спецсимвол (например, !@#$%^&*)
     </Typography>
   </Box>
 )
@@ -35,10 +36,11 @@ function ChangePasswordForm({ onSubmit, onCancel }) {
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false)
 
   const newPasswordMissingCriteria = []
-  if (newPassword.length < 6) newPasswordMissingCriteria.push('минимум 6 символов')
+  if (newPassword.length < 14) newPasswordMissingCriteria.push('минимум 14 символов')
   if (!/[A-Z]/.test(newPassword)) newPasswordMissingCriteria.push('заглавная латинская буква A-Z')
   if (!/[a-z]/.test(newPassword)) newPasswordMissingCriteria.push('строчная латинская буква a-z')
   if (!/[0-9]/.test(newPassword)) newPasswordMissingCriteria.push('минимум 1 цифра 0-9')
+  if (!/[^A-Za-z0-9]/.test(newPassword)) newPasswordMissingCriteria.push('минимум 1 спецсимвол')
 
   const isNewPasswordValid = newPasswordMissingCriteria.length === 0
   const isConfirmMismatch = Boolean(confirmNewPassword) && confirmNewPassword !== newPassword

@@ -7,6 +7,7 @@ import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useAuth } from '../context/AuthContext'
+import { changePassword } from '../api'
 import { userHasAdminRole } from '../utils/userRoles'
 import ChangePasswordDialog from './ChangePasswordDialog'
 import '../styles/Layout.css'
@@ -124,9 +125,13 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
         <ChangePasswordDialog
           open={isChangePasswordOpen}
           onClose={handleCloseChangePassword}
-          onSubmit={() => {
-            // функционал смены пароля будет добавлен позже
-            handleCloseChangePassword()
+          onSubmit={async ({ currentPassword, newPassword }) => {
+            try {
+              await changePassword(currentPassword, newPassword)
+              handleCloseChangePassword()
+            } catch (error) {
+              window.alert(error?.message || 'Не удалось сменить пароль')
+            }
           }}
         />
         {chrome}
