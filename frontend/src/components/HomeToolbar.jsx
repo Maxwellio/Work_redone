@@ -42,7 +42,7 @@ function HomeToolbar({
           <Button variant="contained" color="primary" size="small" onClick={onAdd}>
             Добавить
           </Button>
-          <Button variant="contained" color="primary" size="small" onClick={onEdit}>
+          <Button variant="contained" color="primary" size="small" onClick={() => onEdit()}>
             Редактировать
           </Button>
         </>
