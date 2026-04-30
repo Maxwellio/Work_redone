@@ -44,13 +44,21 @@ public class UserPasswordService {
             throw new IllegalStateException("Не удалось определить идентификатор пользователя");
         }
 
-        String oldPasswordHash = passwordEncoder.encode(oldPassword);
+        // BCrypt produces a different salt on every encode() call, so comparing
+        // a freshly-encoded hash to the stored one in the DB will always fail.
+        // We must verify the old password here (Java side) and then pass the
+        // already-stored hash to the procedure so the DB equality check succeeds.
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Текущий пароль указан неверно");
+        }
+
+        String currentPasswordHash = user.getPassword();
         String newPasswordHash = passwordEncoder.encode(newPassword);
 
         jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall("call substitute.change_password(?, ?, ?)");
             cs.setInt(1, userId);
-            cs.setString(2, oldPasswordHash);
+            cs.setString(2, currentPasswordHash);
             cs.setString(3, newPasswordHash);
             cs.execute();
             return null;
