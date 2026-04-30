@@ -52,14 +52,12 @@ public class UserPasswordService {
             throw new IllegalArgumentException("Текущий пароль указан неверно");
         }
 
-        String currentPasswordHash = user.getPassword();
         String newPasswordHash = passwordEncoder.encode(newPassword);
 
         jdbcTemplate.execute((Connection conn) -> {
-            CallableStatement cs = conn.prepareCall("call substitute.change_password(?, ?, ?)");
+            CallableStatement cs = conn.prepareCall("call substitute.change_password(?, ?)");
             cs.setInt(1, userId);
-            cs.setString(2, currentPasswordHash);
-            cs.setString(3, newPasswordHash);
+            cs.setString(2, newPasswordHash);
             cs.execute();
             return null;
         });
