@@ -59,7 +59,7 @@ function HomeTable({
                   selected={selectedRowId === id}
                   onClick={() => onSelectRow(selectedRowId === id ? null : id)}
                   onDoubleClick={() => onRowDoubleClick?.(id)}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{ cursor: 'pointer', userSelect: 'none' }}
                 >
                   {columns.map((col) => (
                     <TableCell key={col.key}>
