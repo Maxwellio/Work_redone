@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState } from 'react'
+import Box from '@mui/material/Box'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -10,7 +11,6 @@ import { useAuth } from '../context/AuthContext'
 import { changePassword } from '../api'
 import { userHasAdminRole } from '../utils/userRoles'
 import ChangePasswordDialog from './ChangePasswordDialog'
-import '../styles/Layout.css'
 
 function Layout({ children, chrome, title = 'Патрубки', flush = false }) {
   const navigate = useNavigate()
@@ -45,9 +45,26 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
   }
 
   return (
-    <div className="layout">
-      <div
-        className={`layout-sticky${onAdminRoute ? ' layout-sticky--admin' : ''}`}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Box
+        sx={(theme) => ({
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: theme.palette.background.paper,
+          ...(onAdminRoute && {
+            borderBottom: '1px solid #d4cfc4',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
+          }),
+        })}
       >
         <AppBar position="static" color="primary">
           <Toolbar>
@@ -135,11 +152,21 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
           }}
         />
         {chrome}
-      </div>
-      <main className={`layout-main${flush ? ' layout-main--flush' : ''}`}>
+      </Box>
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          padding: flush ? 0 : undefined,
+          ...(!flush && { px: 3, py: 3 }),
+        }}
+      >
         {children}
-      </main>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

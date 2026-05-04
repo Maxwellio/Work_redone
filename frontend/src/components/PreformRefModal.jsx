@@ -12,9 +12,11 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
-import '../styles/TransitionsRefModal.css'
+import { useTheme } from '@mui/material/styles'
+import { refModalTableContainerSx, refModalTableSx, tablePlaceholderMessageSx } from '../theme'
 
 function PreformRefModal({ open, onClose, list, loading, error }) {
+  const theme = useTheme()
   const formatCell = (value) => (value == null ? '—' : String(value))
   const sorted = [...(list || [])].sort((a, b) => (a.idPreform ?? 0) - (b.idPreform ?? 0))
 
@@ -26,20 +28,18 @@ function PreformRefModal({ open, onClose, list, loading, error }) {
           <Close />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers className="transitions-ref-modal__body">
-        <TableContainer className="transitions-ref-modal__table-wrap">
+      <DialogContent dividers sx={{ px: 3, py: 2 }}>
+        <TableContainer sx={refModalTableContainerSx}>
           {loading && (
-            <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-              Загрузка…
-            </Box>
+            <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>
           )}
           {error && (
-            <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+            <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>
               {error}
             </Box>
           )}
           {!loading && !error && (
-            <Table size="small" className="transitions-ref-modal__table">
+            <Table size="small" sx={(t) => refModalTableSx(t)}>
               <TableHead>
                 <TableRow>
                   <TableCell>Наименование</TableCell>

@@ -7,7 +7,7 @@
 ## Правила разработки (feature-based и стили)
 
 - **Слои:** UI в `ui/`, страницы и точки входа в `pages/`, HTTP-вызовы в `api/`. По мере роста фичи добавлять `hooks/`, `model/` рядом с фичей, не смешивать доменную логику основного приложения без необходимости.
-- **Стили:** базово через MUI (`sx`, токены темы), но для табличной сетки в админке используется локальный файл [`ui/admin-workspace.css`](ui/admin-workspace.css) (плоская таблица без скруглений и без sticky-оверлея).
+- **Стили:** только MUI (`sx`, токены [`theme.js`](../../theme.js)): плоская таблица пользователей задаётся через `adminTableWrapSx` / `adminDenseTableSx` и `sx` в [`ui/AdminWorkspaceMock.jsx`](ui/AdminWorkspaceMock.jsx) (без скруглений контейнера, без sticky-шапки).
 - **Импорты из приложения:** допустимы общие части (`components/Layout`, `context/AuthContext`, [`api/http`](../../api/http.js) и т.д.).
 
 ## Дерево каталогов
@@ -27,7 +27,6 @@ features/admin/
     AdminPageBody.jsx
     AdminUserFormPanel.jsx
     AdminWorkspaceMock.jsx
-    admin-workspace.css
 ```
 
 ## Основная рабочая зона
@@ -56,7 +55,7 @@ features/admin/
 | GET | `/api/admin/roles` | Все роли из `spr_role` (селект «Роль»). |
 | GET | `/api/admin/organizations/struct` | Подразделения только `id` 30 и 99 (селект «Подразделение»). |
 
-- **Таблица слева:** колонок подразделения нет; `orgId` приходит в JSON строки. Клик по строке — выбор/снятие. Таблица оформлена отдельным стилем [`ui/admin-workspace.css`](ui/admin-workspace.css): плоская сетка, без скруглений, без sticky-залипания шапки поверх рамки.
+- **Таблица слева:** колонок подразделения нет; `orgId` приходит в JSON строки. Клик по строке — выбор/снятие. Плоская сетка без скруглений контейнера и без sticky-шапки — через [`theme.js`](../../theme.js) (`adminDenseTableSx`, `adminTableWrapSx`) и `AdminWorkspaceMock.jsx`.
 - **Фильтры в панели слева:** строка поиска + селект «Подразделение» (с первой опцией **«Все подразделения»**) + два взаимоисключающих чекбокса «Только администраторы» / «Только пользователи». Фильтры комбинируются по логике AND.
 - **Пароль:** в API не отдаётся; в форме при выбранном пользователе поле пустое.
 - **Даты в форме:** нативные `TextField type="date"` (без сторонних date-picker), `today()` считается в локальном часовом поясе. Справа от каждого поля есть кнопка-крестик для сброса даты на текущую.
@@ -70,11 +69,10 @@ features/admin/
 | `api/adminUsers.js` | `GET /api/admin/users` + `POST /api/admin/users/save`. | готово |
 | `api/adminReferences.js` | `GET /api/admin/roles`, `GET /api/admin/organizations/struct`. | готово |
 | `api/adminReferenceCache.js` | `ensureAdminRoles`, `ensureAdminOrgStruct` — один запрос на сессию, дедуп параллельных вызовов. | готово |
-| `pages/AdminPage.jsx` | Корневая страница: `Layout` с заголовком «Админ-панель» (без `chrome` под `AppBar`, класс `layout-sticky--admin` в `Layout` для визуального разделения), дочерний контент с `Outlet` внутри `AdminPageBody`. | готово |
+| `pages/AdminPage.jsx` | Корневая страница: `Layout` с заголовком «Админ-панель» (без `chrome` под `AppBar`, на маршруте `/admin` у `Layout` включается оформление «полосы» под `AppBar` через `sx`), дочерний контент с `Outlet` внутри `AdminPageBody`. | готово |
 | `ui/AdminPageBody.jsx` | Секция: `AdminWorkspaceMock`, вложенный `Outlet` для будущих подмаршрутов. | готово |
 | `ui/AdminUserFormPanel.jsx` | Правая панель: поля пользователя, сохранение через API, показ ошибки сохранения, блокировка кнопки в `saving`, правило активации кнопки в add-режиме (`ФИО/Логин/Пароль` после `trim`). | готово |
 | `ui/AdminWorkspaceMock.jsx` | Левая зона: таблица, фильтры, кнопка «Добавить пользователя»; правая форма при выбранной строке/режиме добавления; после `onSaved` обновляет список и закрывает панель. | готово |
-| `ui/admin-workspace.css` | Локальные стили админ-таблицы (плоская сетка и контейнер). | готово |
 | `README.md` | Конвенции, дерево, реестр, маршрутизация, безопасность. | обновлён |
 | [`src/components/AdminRoleRoute.jsx`](../../components/AdminRoleRoute.jsx) (вне фичи) | Гард: `/admin` только при **`ROLE_ADMIN`**; иначе редирект на `/`. | готово |
 | [`src/utils/userRoles.js`](../../utils/userRoles.js) (вне фичи) | `userHasAdminRole(user)` — по `GET /api/current-user`. | готово |
@@ -101,6 +99,7 @@ features/admin/
 
 - **`typography.adminPageStub`**
 - **`components.MuiPaper.variants` → `adminShell`**
+- **`adminTableWrapSx`**, **`adminDenseTableSx`** — экспортируемые фрагменты для плоской таблицы пользователей
 
 ## Безопасность
 

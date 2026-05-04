@@ -4,7 +4,6 @@ import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-import '../styles/Home.css'
 
 function HomeToolbar({
   activeTab,
@@ -36,7 +35,19 @@ function HomeToolbar({
   }
 
   return (
-    <Box className="home-toolbar">
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        flexWrap: 'wrap',
+        py: 1.5,
+        px: 3,
+        borderBottom: 1,
+        borderColor: 'secondary.main',
+        bgcolor: 'background.paper',
+      }}
+    >
       {(activeTab === 0 || activeTab === 1 || activeTab === 2 || activeTab === 3) && (
         <>
           <Button variant="contained" color="primary" size="small" onClick={onAdd}>

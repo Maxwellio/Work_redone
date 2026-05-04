@@ -19,19 +19,13 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { alpha, useTheme } from '@mui/material/styles'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import './admin-workspace.css'
+import { adminDenseTableSx, adminTableWrapSx } from '../../../theme'
 import { ensureAdminOrgStruct } from '../api/adminReferenceCache'
 import { fetchAdminUsers } from '../api/adminUsers'
 import { NM_ADMIN, NM_USER } from '../constants'
 import { AdminUserFormPanel } from './AdminUserFormPanel'
-
-const tableRowClickable = {
-  cursor: 'pointer',
-  '&:hover': { background: 'var(--color-sand-light)' },
-  '&.Mui-selected': { background: 'rgba(0, 142, 185, 0.08)' },
-  '&.Mui-selected:hover': { background: 'rgba(0, 142, 185, 0.12)' },
-}
 
 function formatDate(isoOrNull) {
   if (isoOrNull == null || isoOrNull === '') return '—'
@@ -48,6 +42,16 @@ function activeLabel(active) {
  * orgId приходит в данных для будущих экранов, в таблице не показывается.
  */
 export function AdminWorkspaceMock() {
+  const theme = useTheme()
+  const tableRowClickableSx = useMemo(
+    () => ({
+      cursor: 'pointer',
+      '&:hover': { backgroundColor: theme.palette.secondary.light },
+      '&.Mui-selected': { backgroundColor: alpha(theme.palette.primary.main, 0.08) },
+      '&.Mui-selected:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.12) },
+    }),
+    [theme],
+  )
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -277,14 +281,8 @@ export function AdminWorkspaceMock() {
               pb: 2,
             }}
           >
-            <TableContainer
-              className="admin-user-table-container"
-              sx={{
-                flex: 1,
-                minHeight: 0,
-              }}
-            >
-              <Table className="admin-user-table" size="small">
+            <TableContainer sx={(t) => adminTableWrapSx(t)}>
+              <Table size="small" sx={(t) => adminDenseTableSx(t)}>
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ width: 56 }}>ID</TableCell>
@@ -323,7 +321,7 @@ export function AdminWorkspaceMock() {
                               setSelectedUsersId(row.usersId)
                             }
                           }}
-                          sx={tableRowClickable}
+                          sx={tableRowClickableSx}
                         >
                           <TableCell>{row.usersId}</TableCell>
                           <TableCell>{row.userName}</TableCell>
@@ -333,7 +331,14 @@ export function AdminWorkspaceMock() {
                           <TableCell align="center">{activeLabel(row.active)}</TableCell>
                           <TableCell>{formatDate(row.dtenter)}</TableCell>
                           <TableCell>{formatDate(row.dtout)}</TableCell>
-                          <TableCell className="admin-user-table__note">
+                          <TableCell
+                            sx={{
+                              whiteSpace: 'normal',
+                              wordBreak: 'break-word',
+                              overflowWrap: 'anywhere',
+                              verticalAlign: 'top',
+                            }}
+                          >
                             {row.note || '—'}
                           </TableCell>
                         </TableRow>

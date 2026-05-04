@@ -14,7 +14,8 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Close from '@mui/icons-material/Close'
-import '../styles/TransitionsRefModal.css'
+import { useTheme } from '@mui/material/styles'
+import { refModalTableContainerSx, refModalTableSx, tablePlaceholderMessageSx } from '../theme'
 
 function TransitionsRefModal({
   open,
@@ -29,6 +30,7 @@ function TransitionsRefModal({
   onOk,
   showOkButton = true,
 }) {
+  const theme = useTheme()
   const formatCell = (value) => (value == null ? '—' : String(value))
   const groupsSorted = [...groups].sort((a, b) => (a.idGroupOperations ?? 0) - (b.idGroupOperations ?? 0))
   const operationsSorted = [...operations].sort((a, b) => (a.idOperations ?? 0) - (b.idOperations ?? 0))
@@ -41,6 +43,11 @@ function TransitionsRefModal({
   useEffect(() => {
     setSelectedOperationId(null)
   }, [selectedGroupId])
+
+  const rowPointerSx = {
+    cursor: 'pointer',
+    '&:hover': { backgroundColor: theme.palette.secondary.light },
+  }
 
   return (
     <Dialog
@@ -57,25 +64,33 @@ function TransitionsRefModal({
           <Close />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers className="transitions-ref-modal__body">
-        <Box className="transitions-ref-modal__columns">
-          <Box className="transitions-ref-modal__column">
-            <Typography variant="subtitle1" fontWeight={600} className="transitions-ref-modal__column-title">
+      <DialogContent
+        dividers
+        sx={{ px: 3, py: 2 }}
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1.5fr' },
+            gap: 3,
+            minHeight: { sm: 280 },
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ m: '0 0 0.5rem' }}>
               Группа
             </Typography>
-            <TableContainer className="transitions-ref-modal__table-wrap">
+            <TableContainer sx={refModalTableContainerSx}>
               {loadingRefData && (
-                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                  Загрузка…
-                </Box>
+                <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>
               )}
               {!loadingRefData && errorRefData && (
-                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+                <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>
                   {errorRefData}
                 </Box>
               )}
               {!loadingRefData && !errorRefData && (
-                <Table size="small" className="transitions-ref-modal__table">
+                <Table size="small" sx={(t) => refModalTableSx(t)}>
                   <TableHead>
                     <TableRow>
                       <TableCell>Группа</TableCell>
@@ -87,10 +102,7 @@ function TransitionsRefModal({
                         key={g.idGroupOperations}
                         selected={selectedGroupId === g.idGroupOperations}
                         onClick={() => onSelectGroup(selectedGroupId === g.idGroupOperations ? null : g.idGroupOperations)}
-                        sx={{
-                          cursor: 'pointer',
-                          '&:hover': { background: 'var(--color-sand-light)' },
-                        }}
+                        sx={rowPointerSx}
                       >
                         <TableCell>{formatCell(g.nmGroupOperations)}</TableCell>
                       </TableRow>
@@ -101,28 +113,24 @@ function TransitionsRefModal({
             </TableContainer>
           </Box>
 
-          <Box className="transitions-ref-modal__column">
-            <Typography variant="subtitle1" fontWeight={600} className="transitions-ref-modal__column-title">
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <Typography variant="subtitle1" fontWeight={600} sx={{ m: '0 0 0.5rem' }}>
               Операции
             </Typography>
-            <TableContainer className="transitions-ref-modal__table-wrap">
+            <TableContainer sx={refModalTableContainerSx}>
               {loadingRefData && (
-                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                  Загрузка…
-                </Box>
+                <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>
               )}
               {!loadingRefData && errorRefData && (
-                <Box className="home-table-message home-table-message_error" sx={{ p: 2, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
+                <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>
                   {errorRefData}
                 </Box>
               )}
               {!loadingRefData && !errorRefData && selectedGroupId == null && (
-                <Box className="home-table-message" sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-                  Выберите группу слева
-                </Box>
+                <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Выберите группу слева</Box>
               )}
               {!loadingRefData && !errorRefData && selectedGroupId != null && (
-                <Table size="small" className="transitions-ref-modal__table">
+                <Table size="small" sx={(t) => refModalTableSx(t)}>
                   <TableHead>
                     <TableRow>
                       <TableCell>Наименование перехода</TableCell>
@@ -135,10 +143,7 @@ function TransitionsRefModal({
                         key={op.idOperations}
                         selected={selectedOperationId === op.idOperations}
                         onClick={() => setSelectedOperationId(op.idOperations)}
-                        sx={{
-                          cursor: 'pointer',
-                          '&:hover': { background: 'var(--color-sand-light)' },
-                        }}
+                        sx={rowPointerSx}
                       >
                         <TableCell>{formatCell(op.nmOperations)}</TableCell>
                         <TableCell>{formatCell(op.tk)}</TableCell>

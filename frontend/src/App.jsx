@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
+import GlobalStyles from '@mui/material/GlobalStyles'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -7,11 +8,12 @@ import AdminRoleRoute from './components/AdminRoleRoute'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import { AdminPage, AdminIndexOutletFallback } from './features/admin'
-import { theme } from './theme'
+import { globalLegacyAnchorStyles, theme } from './theme'
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <GlobalStyles styles={(t) => globalLegacyAnchorStyles(t)} />
       <CssBaseline />
       <AuthProvider>
       <Routes>

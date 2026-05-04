@@ -18,7 +18,8 @@ import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getFittingDetails } from '../api'
 import { deleteFittingDetail, saveFittingDetail } from '../api/transitionDetailsApi'
-import '../styles/Home.css'
+import { useTheme } from '@mui/material/styles'
+import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
 
 const COLUMNS = [
   { key: 'seqNumOper', label: '№' },
@@ -55,6 +56,7 @@ function FittingTransitionsModal({
   onTransitionsListChange,
   transitionsListRefreshKey = 0,
 }) {
+  const theme = useTheme()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -207,11 +209,13 @@ function FittingTransitionsModal({
       </DialogTitle>
 
       <DialogContent dividers>
-        <TableContainer
-          sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'secondary.main', borderRadius: 1 }}
-        >
-          {error && <Box className="home-table-message home-table-message_error">{error}</Box>}
-          {loading && <Box className="home-table-message">Загрузка…</Box>}
+        <TableContainer sx={refModalTableContainerSx}>
+          {error && (
+            <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>{error}</Box>
+          )}
+          {loading && !error && (
+            <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>
+          )}
           {!loading && !error && (
             <Table
               size="small"
@@ -246,7 +250,7 @@ function FittingTransitionsModal({
                       sx={{
                         cursor: 'pointer',
                         // Hover-подсветка как на `Home` (включая выбранную строку).
-                        '&:hover': { background: 'var(--color-sand-light)' },
+                        '&:hover': { backgroundColor: theme.palette.secondary.light },
                       }}
                     >
                       {COLUMNS.map((col) => (

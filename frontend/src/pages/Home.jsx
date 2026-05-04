@@ -4,8 +4,8 @@ import HomeToolbar from '../components/HomeToolbar'
 import HomeTable from '../components/HomeTable'
 import HomeTabs from '../components/HomeTabs'
 import { useHomePage } from '../hooks/useHomePage'
+import Box from '@mui/material/Box'
 import { formatCell, getRowId } from '../utils/format'
-import '../styles/Home.css'
 
 function Home() {
   const home = useHomePage()
@@ -38,7 +38,7 @@ function Home() {
 
   return (
     <Layout chrome={chrome}>
-      <div className="home">
+      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <HomeTable
           columns={home.columns}
           listData={data.listData}
@@ -85,7 +85,7 @@ function Home() {
           hydrotestForm={home.hydrotestForm}
           transitionsRef={home.transitionsRef}
         />
-      </div>
+      </Box>
     </Layout>
   )
 }

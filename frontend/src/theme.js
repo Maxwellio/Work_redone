@@ -70,5 +70,139 @@ export const theme = createTheme({
         },
       },
     },
+    MuiLink: {
+      defaultProps: {
+        underline: 'hover',
+      },
+    },
   },
 })
+
+/** Ссылки вне компонента `Link`/MUI (сырой тег `<a>`), как в корпоративном index.css */
+export function globalLegacyAnchorStyles(theme) {
+  return {
+    'html': {
+      fontSize: `${theme.typography.htmlFontSize}px`,
+    },
+    '#root': {
+      minHeight: '100vh',
+    },
+    'body': {
+      minHeight: '100vh',
+    },
+    'a, a:link': {
+      color: theme.palette.primary.main,
+      textDecoration: 'none',
+    },
+    'a:hover': {
+      color: theme.palette.primary.dark,
+      textDecoration: 'underline',
+    },
+  }
+}
+
+/** Общие паттерны таблиц без отдельного CSS */
+
+export function homeGridTableSx(theme) {
+  return {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: theme.typography.body1.fontSize,
+    '& thead .MuiTableCell-head': {
+      backgroundColor: theme.palette.secondary.light,
+      borderBottom: `1px solid ${theme.palette.secondary.main}`,
+      borderRight: `1px solid ${theme.palette.secondary.main}`,
+      fontWeight: 600,
+      color: theme.palette.text.primary,
+      py: '0.75rem',
+      px: '1rem',
+      '&:last-of-type': { borderRight: 'none' },
+    },
+    '& tbody .MuiTableCell-root': {
+      py: '0.7rem',
+      px: '1rem',
+      borderBottom: `1px solid ${theme.palette.secondary.main}`,
+      borderRight: `1px solid ${theme.palette.secondary.main}`,
+      color: theme.palette.text.primary,
+      '&:last-of-type': { borderRight: 'none' },
+    },
+    '& tbody tr:hover': {
+      backgroundColor: theme.palette.secondary.light,
+    },
+  }
+}
+
+/** Таблица в модалках справочников (без sticky-шапки) */
+export function refModalTableSx(theme) {
+  return {
+    width: '100%',
+    borderCollapse: 'collapse',
+    '& thead .MuiTableCell-root': {
+      backgroundColor: theme.palette.secondary.light,
+      borderBottom: `1px solid ${theme.palette.secondary.main}`,
+      borderRight: `1px solid ${theme.palette.secondary.main}`,
+      '&:last-of-type': { borderRight: 'none' },
+    },
+    '& tbody .MuiTableCell-root': {
+      borderBottom: `1px solid ${theme.palette.secondary.main}`,
+      borderRight: `1px solid ${theme.palette.secondary.main}`,
+      '&:last-of-type': { borderRight: 'none' },
+    },
+  }
+}
+
+/** Плоская сетка пользователей в админке (border-radius 0) */
+export function adminDenseTableSx(theme) {
+  return {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '0.875rem',
+    tableLayout: 'auto',
+    '& .MuiTableCell-root': {
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      borderRight: `1px solid ${theme.palette.divider}`,
+      padding: '0.5rem 0.6rem',
+      color: theme.palette.text.primary,
+      '&:last-of-type': {
+        borderRight: 'none',
+      },
+    },
+    '& .MuiTableHead-root .MuiTableCell-root': {
+      fontWeight: 600,
+      backgroundColor: theme.palette.secondary.light,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+  }
+}
+
+export function tablePlaceholderMessageSx(theme, { emphasized = false, nestedInWrap = false } = {}) {
+  return {
+    p: nestedInWrap ? 2 : 3,
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+    ...(emphasized && { fontWeight: 500 }),
+  }
+}
+
+export function adminTableWrapSx(theme) {
+  return {
+    boxSizing: 'border-box',
+    borderRadius: 0,
+    border: `1px solid ${theme.palette.secondary.main}`,
+    backgroundColor: theme.palette.background.paper,
+    overflow: 'auto',
+    flex: 1,
+    minHeight: 0,
+  }
+}
+
+/** Контейнер таблицы в модалках справочников (не admin) */
+export const refModalTableContainerSx = {
+  flex: 1,
+  minHeight: 0,
+  overflow: 'auto',
+  bgcolor: 'background.paper',
+  border: '1px solid',
+  borderColor: 'secondary.main',
+  borderRadius: 1,
+}

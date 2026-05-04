@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import Box from '@mui/material/Box'
 import { useAuth } from '../context/AuthContext'
 
 /**
@@ -25,9 +26,9 @@ function ProtectedRoute({ children }) {
 
   if (!initialCheckDone || (loading && user === null)) {
     return (
-      <div className="protected-loading" style={{ padding: '1rem', textAlign: 'center' }}>
+      <Box sx={{ p: 2, textAlign: 'center' }}>
         Проверка авторизации…
-      </div>
+      </Box>
     )
   }
 

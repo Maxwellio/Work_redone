@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext'
 import ChangePasswordForm from '../components/ChangePasswordForm'
 import { useLogin } from '../hooks/useLogin'
 import { userHasAdminRole } from '../utils/userRoles'
-import '../styles/Login.css'
 
 /**
  * Страница входа: форма логин/пароль, вызов POST /api/login (form-urlencoded),
@@ -37,8 +36,17 @@ function Login() {
 
   if (!sessionChecked) {
     return (
-      <Box className="login-page">
-        <Card className="login-card">
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+          bgcolor: 'background.default',
+        }}
+      >
+        <Card sx={{ width: '100%', maxWidth: 360 }}>
           <CardContent>
             <Typography variant="body2" color="text.secondary">
               Проверка авторизации…
@@ -56,14 +64,23 @@ function Login() {
   const showFirstLoginChangePassword = firstLoginPending || Boolean(user?.isFirstLogin)
 
   return (
-    <Box className="login-page">
-      <Card className="login-card">
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2,
+        bgcolor: 'background.default',
+      }}
+    >
+      <Card sx={{ width: '100%', maxWidth: 360 }}>
         <CardContent>
-          <Typography variant="h6" component="h2" className="login-title">
+          <Typography variant="h6" component="h2" sx={{ m: '0 0 1.5rem', textAlign: 'center' }}>
             {showFirstLoginChangePassword ? 'Смена пароля' : 'Вход'}
           </Typography>
           {showFirstLoginChangePassword ? (
-            <Box className="login-form">
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 При первом входе в ПС необходимо сменить выданный пароль
               </Typography>
@@ -91,7 +108,7 @@ function Login() {
               />
             </Box>
           ) : (
-            <form className="login-form" onSubmit={handleSubmit}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column' }}>
               <TextField
                 fullWidth
                 label="Логин"
@@ -141,7 +158,7 @@ function Login() {
               >
                 {submitting ? 'Вход…' : 'Войти'}
               </Button>
-            </form>
+            </Box>
           )}
         </CardContent>
       </Card>
