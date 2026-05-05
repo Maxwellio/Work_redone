@@ -1,5 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getOperationGroups, getOperations } from '../api'
+import {
+  ensureOperationGroups,
+  ensureOperations,
+  isOperationReferenceCacheWarm,
+} from '../api/staticReferenceCache'
+
+function operationsToByGroup(ops) {
+  if (!Array.isArray(ops)) return {}
+  return ops.reduce((acc, op) => {
+    const groupId = op?.idGroupOperations
+    if (groupId == null) return acc
+    const key = String(groupId)
+    if (!acc[key]) acc[key] = []
+    acc[key].push(op)
+    return acc
+  }, {})
+}
 
 export function useTransitionsRef(open, disallowedGroupIds = []) {
   const [groups, setGroups] = useState([])
@@ -22,48 +38,47 @@ export function useTransitionsRef(open, disallowedGroupIds = []) {
     if (!open) {
       return
     }
-    let isMounted = true
-    beginLoadingRef()
+    let cancelled = false
+    const warm = isOperationReferenceCacheWarm()
 
-    getOperationGroups()
-      .then(async (data) => {
-        if (!isMounted) return
-        const groupsSafe = Array.isArray(data) ? data : []
-        setGroups(groupsSafe)
-        if (!groupsSafe.length) return
+    if (!warm) {
+      setLoadingRefData(true)
+      setErrorRefData(null)
+      setGroups([])
+      setOperationsByGroup({})
+    } else {
+      setErrorRefData(null)
+      setLoadingRefData(false)
+    }
+    setSelectedGroupId(null)
 
-        // Загружаем все операции одним запросом и группируем на клиенте.
-        try {
-          const ops = await getOperations()
-          if (!isMounted) return
-          const map = Array.isArray(ops)
-            ? ops.reduce((acc, op) => {
-                const groupId = op?.idGroupOperations
-                if (groupId == null) return acc
-                const key = String(groupId)
-                if (!acc[key]) acc[key] = []
-                acc[key].push(op)
-                return acc
-              }, {})
-            : {}
-          setOperationsByGroup(map)
-        } catch {
-          // Если операции не удалось загрузить, оставляем группы, а операции будут пустыми.
-          if (!isMounted) return
-          setOperationsByGroup({})
-        }
-      })
-      .catch((err) => {
-        if (!isMounted) return
-        setErrorRefData(err.message || 'Ошибка загрузки переходов')
-      })
-      .finally(() => {
-        if (!isMounted) return
+    ;(async () => {
+      const [gRes, oRes] = await Promise.all([ensureOperationGroups(), ensureOperations()])
+      if (cancelled) return
+
+      if (!gRes.ok) {
+        setErrorRefData(gRes.error || 'Ошибка загрузки переходов')
+        setGroups([])
+        setOperationsByGroup({})
         setLoadingRefData(false)
-      })
+        return
+      }
+
+      const groupsSafe = gRes.data || []
+      setGroups(groupsSafe)
+      if (!groupsSafe.length) {
+        setOperationsByGroup({})
+        setLoadingRefData(false)
+        return
+      }
+
+      const map = oRes.ok ? operationsToByGroup(oRes.data) : {}
+      setOperationsByGroup(map)
+      setLoadingRefData(false)
+    })()
 
     return () => {
-      isMounted = false
+      cancelled = true
     }
   }, [open])
 

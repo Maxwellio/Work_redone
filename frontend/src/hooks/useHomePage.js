@@ -351,7 +351,6 @@ export function useHomePage() {
       }
     }
 
-    transitionsRef.beginLoadingRef()
     setResetTransitionsRefContextOnClose(false)
     setTransitionsRefContext({
       ownerType: ctx.ownerType ?? null,
