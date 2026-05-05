@@ -313,7 +313,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         disabled={isSaveDisabled}
         onClick={handleSave}
       >
-        {saving ? 'Сохранение…' : 'Сохранить'}
+        {saving ? 'Сохранение…' : isNewUserDraft ? 'Добавить' : 'Сохранить'}
       </Button>
     </Stack>
   )
