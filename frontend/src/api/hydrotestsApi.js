@@ -33,6 +33,20 @@ export async function calcHydroTime(id) {
   }
 }
 
+/** @param {{ id: number | null, d: number | null, l: number | null, th: number | null, testtime: number | null, mass: number | null, l1: number | null, l2: number | null }} payload */
+export async function calcHydroNvForm(payload) {
+  const res = await request('/hydrotests/calc-nv', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка расчёта нормы времени')
+  }
+  return res.json()
+}
+
 export async function deleteHydrotest(id) {
   const res = await request(`/hydrotests/${id}`, {
     method: 'DELETE',

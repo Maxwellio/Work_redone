@@ -55,6 +55,7 @@ patrubki\dto\ChangePasswordRequestDto.class
 patrubki\repository\OperationStructureSprRepository.class
 patrubki\repository\package-info.class
 patrubki\dto\AdminRoleOptionDto.class
+patrubki\dto\HydrotestNvCalcRequestDto.class
 patrubki\dto\OperationStructureGroupDto.class
 patrubki\service\OperationStructureGroupService.class
 patrubki\dto\PreformTypDto.class

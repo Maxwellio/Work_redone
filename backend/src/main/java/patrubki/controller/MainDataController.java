@@ -28,6 +28,7 @@ import patrubki.dto.OperationStructureSprDto;
 import patrubki.dto.PartyDto;
 import patrubki.dto.PreformTypDto;
 import patrubki.dto.FitingSaveDto;
+import patrubki.dto.HydrotestNvCalcRequestDto;
 import patrubki.dto.HydrotestSaveDto;
 import patrubki.dto.SubstituteSaveDto;
 import patrubki.dto.SubstituteDetailCalcTvpRequestDto;
@@ -190,6 +191,14 @@ public class MainDataController {
     public ResponseEntity<Void> calcHydroTime(@PathVariable Integer id) {
         hydrotestService.calcHydroTime(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hydrotests/calc-nv")
+    public ResponseEntity<java.util.Map<String, BigDecimal>> calcHydroNv(@RequestBody HydrotestNvCalcRequestDto body) {
+        BigDecimal nv = hydrotestService.calcHydroNvForm(body);
+        java.util.HashMap<String, BigDecimal> out = new java.util.HashMap<>();
+        out.put("nv", nv);
+        return ResponseEntity.ok(out);
     }
 
     @DeleteMapping("/hydrotests/{id}")

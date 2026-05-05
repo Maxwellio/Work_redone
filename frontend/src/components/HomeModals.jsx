@@ -79,6 +79,7 @@ function HomeModals({
         saveError={hydrotestForm.saveError}
         onClose={hydrotestForm.close}
         onSave={hydrotestForm.handleSave}
+        onCalcNv={hydrotestForm.calcNvFromDraft}
       />
 
       <TransitionsRefModal

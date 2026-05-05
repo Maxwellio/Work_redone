@@ -3,12 +3,15 @@ package patrubki.service;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.HydrotestDto;
+import patrubki.dto.HydrotestNvCalcRequestDto;
 import patrubki.dto.HydrotestSaveDto;
 import patrubki.entity.Hydrotest;
 import patrubki.repository.HydrotestRepository;
 
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
@@ -58,6 +61,21 @@ public class HydrotestService {
             cs.execute();
             return null;
         });
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calcHydroNvForm(HydrotestNvCalcRequestDto dto) {
+        return jdbcTemplate.queryForObject(
+                "select substitute.calculate_hydro_nv_form(?,?,?,?,?,?,?,?)",
+                BigDecimal.class,
+                dto.getId(),
+                dto.getD(),
+                dto.getL(),
+                dto.getTh(),
+                dto.getTesttime(),
+                dto.getMass(),
+                dto.getL1(),
+                dto.getL2());
     }
 
     public List<HydrotestDto> findAllOrderByNh(String search) {

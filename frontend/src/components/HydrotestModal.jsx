@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography'
 import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const NUMERIC_FIELDS = new Set(['d', 'th', 'l', 'testtime', 'mass', 'l1', 'l2'])
 
@@ -22,11 +23,13 @@ function HydrotestModal({
   saveError,
   onClose,
   onSave,
+  onCalcNv,
 }) {
   const titleEdit = 'Редактирование гидроиспытания'
   const titleAdd = 'Добавление гидроиспытания'
   const title = isEditMode ? titleEdit : titleAdd
   const [draft, setDraft] = useState(initialFormData)
+  const [calcLoading, setCalcLoading] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -49,6 +52,19 @@ function HydrotestModal({
     }
 
     setDraft((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleCalcNv = async () => {
+    if (!onCalcNv || calcLoading) return
+    setCalcLoading(true)
+    try {
+      const nv = await onCalcNv(draft)
+      if (nv != null) {
+        setDraft((prev) => ({ ...prev, nv }))
+      }
+    } finally {
+      setCalcLoading(false)
+    }
   }
 
   return (
@@ -147,9 +163,18 @@ function HydrotestModal({
           <Typography variant="body2" color="text.secondary">{saveError}</Typography>
         </Box>
       )}
-      <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)}>Ок</Button>
-        <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>Отмена</Button>
+      <DialogActions sx={{ px: 3, py: 2, gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={handleCalcNv}
+          disabled={!onCalcNv || calcLoading}
+          startIcon={calcLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
+        >
+          Рассчитать норму времени
+        </Button>
+        <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)} disabled={calcLoading}>Ок</Button>
+        <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose} disabled={calcLoading}>Отмена</Button>
       </DialogActions>
     </Dialog>
   )

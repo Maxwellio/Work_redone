@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { saveHydrotest } from '../api'
+import { calcHydroNvForm, saveHydrotest } from '../api'
 import { EMPTY_HYDROTEST_FORM, mapHydrotestToForm } from '../models/forms'
 import { getRowId, parseNum } from '../utils/format'
 
@@ -80,6 +80,28 @@ export function useHydrotestForm({
     }
   }
 
+  const calcNvFromDraft = async (draft) => {
+    setSaveError(null)
+    const payload = {
+      id: isEditMode ? (editingRowId ?? selectedRowId) : null,
+      d: parseNum(draft.d),
+      l: parseNum(draft.l),
+      th: parseNum(draft.th),
+      testtime: parseNum(draft.testtime),
+      mass: parseNum(draft.mass),
+      l1: parseNum(draft.l1),
+      l2: parseNum(draft.l2),
+    }
+    try {
+      const data = await calcHydroNvForm(payload)
+      const nv = data?.nv
+      return nv != null ? String(nv) : ''
+    } catch (err) {
+      setSaveError(err.message || 'Ошибка расчёта нормы времени')
+      return null
+    }
+  }
+
   return {
     isModalOpen,
     isEditMode,
@@ -89,5 +111,6 @@ export function useHydrotestForm({
     openEdit,
     close,
     handleSave,
+    calcNvFromDraft,
   }
 }
