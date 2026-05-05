@@ -22,7 +22,7 @@ import {
   isIrazmUsedInLargeFormCalc,
   isValueMeasUsedInLargeFormCalc,
 } from '../utils/operationCategory'
-import { computedNumericFieldSx } from '../styles/computedFieldSx'
+import { computedNumericFieldSx } from '../theme'
 
 const disabledReadonlyFieldSx = {
   '& .MuiOutlinedInput-root.Mui-disabled': {

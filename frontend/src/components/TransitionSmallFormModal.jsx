@@ -13,7 +13,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Close from '@mui/icons-material/Close'
 import Calculate from '@mui/icons-material/Calculate'
 import { calcFittingDetailTvp, calcSubstituteDetailTvp } from '../api'
-import { computedNumericFieldSx } from '../styles/computedFieldSx'
+import { computedNumericFieldSx } from '../theme'
 
 const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'seqNumOper'])
 
