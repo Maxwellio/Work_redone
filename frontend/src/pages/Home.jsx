@@ -50,6 +50,8 @@ function Home() {
           formatCell={formatCell}
           onSelectRow={data.setSelectedRowId}
           onRowDoubleClick={handleRowDoubleClick}
+          pendingScrollToId={data.pendingScrollToId}
+          onScrollComplete={() => data.setPendingScrollToId(null)}
         />
 
         <HomeModals
