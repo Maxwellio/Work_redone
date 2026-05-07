@@ -88,14 +88,15 @@ export function useSubstituteForm({
     try {
       const { id } = await saveSubstitute(payload)
       setIsModalOpen(false)
-      if (id != null && id > 0) {
+      if (openTransitions && id != null && id > 0 && typeof onOpenTransitions === 'function') {
+        // loadData() и setPendingScrollToId() не вызываем здесь:
+        // они будут вызваны в closeSubstituteTransitions при закрытии формы переходов
         setSelectedRowId(id)
-        if (openTransitions && typeof onOpenTransitions === 'function') {
-          // loadData() и setPendingScrollToId() не вызываем здесь:
-          // они будут вызваны в closeSubstituteTransitions при закрытии формы переходов
-          onOpenTransitions({ idSubstitutePrepared: id, name: buildSubstituteName(source) })
-        } else {
-          await loadData()
+        onOpenTransitions({ idSubstitutePrepared: id, name: buildSubstituteName(source) })
+      } else {
+        await loadData()
+        if (id != null && id > 0) {
+          setSelectedRowId(id)
           setPendingScrollToId(id)
         }
       }
