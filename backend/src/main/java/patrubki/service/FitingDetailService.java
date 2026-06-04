@@ -54,6 +54,7 @@ public class FitingDetailService {
 
     @Transactional
     public Integer save(FitingDetailSaveDto dto) {
+        List<Integer> idNtkForSave = resolveIdNtkForSave(dto);
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
                 "call substitute.add_edit_fiting_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -71,7 +72,7 @@ public class FitingDetailService {
             cs.setObject(11, dto.getMasCur(), Types.NUMERIC);
             cs.setObject(12, dto.getLCur(), Types.NUMERIC);
             cs.setObject(13, dto.getSeqNumOper(), Types.INTEGER);
-            Integer[] ntkIds = toDistinctIntegerArray(dto.getIdNtk());
+            Integer[] ntkIds = toDistinctIntegerArray(idNtkForSave);
             java.sql.Array ntkArray = conn.createArrayOf("integer", ntkIds);
             cs.setArray(14, ntkArray);
             cs.setObject(15, dto.getIdUserCreator(), Types.INTEGER);
@@ -199,6 +200,16 @@ public class FitingDetailService {
                 return rs.getBigDecimal(1);
             }
         }
+    }
+
+    private List<Integer> resolveIdNtkForSave(FitingDetailSaveDto dto) {
+        if (dto.getId() != null && dto.getIdNtk() == null) {
+            return fitingDetailNtkRepository.findByIdFitingDetailOrderByIdNtkAsc(dto.getId()).stream()
+                    .map(FitingDetailNtk::getIdNtk)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        return dto.getIdNtk();
     }
 
     private static Integer[] toDistinctIntegerArray(List<Integer> idNtk) {
