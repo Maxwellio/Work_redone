@@ -193,6 +193,44 @@ function FittingTransitionsModal({
     }
   }
 
+  const openEditForRow = (row) => {
+    onOpenTransitionsRefModal?.({
+      ownerType: 'fitting',
+      tip,
+      mode: 'edit',
+      selectedOperationId: row.idOperations ?? null,
+      selectedOperationName: row.nmOperations ?? '',
+      transitionDraft: {
+        masCur: row.masCur ?? '',
+        lCur: row.lCur ?? '',
+        tVp: row.tVp ?? '',
+        seqNumOper: row.seqNumOper ?? '',
+        d: row.d ?? '',
+        l: row.l ?? '',
+        irazm: row.irazm ?? '',
+        valueMeas: row.valueMeas ?? '',
+        depthCut: row.depthCut ?? '',
+        i: row.i ?? '',
+        s: row.s ?? '',
+        n: row.n ?? '',
+        vRez: row.vRez ?? '',
+        tMach: row.tMach ?? '',
+        tSum: row.tSum ?? '',
+      },
+      transitionRecordId: row.idFitingDetail ?? row.idOperations ?? null,
+    })
+  }
+
+  const handleEditSelectedTransition = () => {
+    if (!selectedRowKey) {
+      window.alert('Выберите переход')
+      return
+    }
+    const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+    if (!selectedRow) return
+    openEditForRow(selectedRow)
+  }
+
   return (
     <Dialog
       open={open}
@@ -247,8 +285,14 @@ function FittingTransitionsModal({
                       key={rowKey}
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
+                      onDoubleClick={() => {
+                        if (deleting || moving) return
+                        setSelectedRowKey(rowKey)
+                        openEditForRow(row)
+                      }}
                       sx={{
                         cursor: 'pointer',
+                        userSelect: 'none',
                         // Hover-подсветка как на `Home` (включая выбранную строку).
                         '&:hover': { backgroundColor: theme.palette.secondary.light },
                       }}
@@ -314,39 +358,7 @@ function FittingTransitionsModal({
           variant="contained"
           color="primary"
           disabled={deleting || moving}
-          onClick={() => {
-            if (!selectedRowKey) {
-              window.alert('Выберите переход')
-              return
-            }
-            const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
-            if (!selectedRow) return
-            onOpenTransitionsRefModal?.({
-              ownerType: 'fitting',
-              tip,
-              mode: 'edit',
-              selectedOperationId: selectedRow.idOperations ?? null,
-              selectedOperationName: selectedRow.nmOperations ?? '',
-              transitionDraft: {
-                masCur: selectedRow.masCur ?? '',
-                lCur: selectedRow.lCur ?? '',
-                tVp: selectedRow.tVp ?? '',
-                seqNumOper: selectedRow.seqNumOper ?? '',
-                d: selectedRow.d ?? '',
-                l: selectedRow.l ?? '',
-                irazm: selectedRow.irazm ?? '',
-                valueMeas: selectedRow.valueMeas ?? '',
-                depthCut: selectedRow.depthCut ?? '',
-                i: selectedRow.i ?? '',
-                s: selectedRow.s ?? '',
-                n: selectedRow.n ?? '',
-                vRez: selectedRow.vRez ?? '',
-                tMach: selectedRow.tMach ?? '',
-                tSum: selectedRow.tSum ?? '',
-              },
-              transitionRecordId: selectedRow.idFitingDetail ?? selectedRow.idOperations ?? null,
-            })
-          }}
+          onClick={handleEditSelectedTransition}
         >
           Изменить переход
         </Button>
