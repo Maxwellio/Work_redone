@@ -17,7 +17,7 @@ import Close from '@mui/icons-material/Close'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getFittingDetails } from '../api'
-import { deleteFittingDetail, saveFittingDetail } from '../api/transitionDetailsApi'
+import { copyFittingDetail, deleteFittingDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import { useTheme } from '@mui/material/styles'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
 
@@ -63,6 +63,7 @@ function FittingTransitionsModal({
   const [selectedRowKey, setSelectedRowKey] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [moving, setMoving] = useState(false)
+  const [copying, setCopying] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -165,6 +166,29 @@ function FittingTransitionsModal({
       window.alert(err.message || 'Ошибка изменения порядка переходов')
     } finally {
       setMoving(false)
+    }
+  }
+
+  const handleCopyTransition = async () => {
+    if (!selectedRowKey) {
+      window.alert('Выберите переход')
+      return
+    }
+    const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+    if (!selectedRow) return
+    const pk = selectedRow.idFitingDetail
+    if (pk == null || pk <= 0) {
+      window.alert('Нельзя копировать: отсутствует идентификатор записи')
+      return
+    }
+    setCopying(true)
+    try {
+      await copyFittingDetail(pk)
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка копирования')
+    } finally {
+      setCopying(false)
     }
   }
 
@@ -286,7 +310,7 @@ function FittingTransitionsModal({
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
                       onDoubleClick={() => {
-                        if (deleting || moving) return
+                        if (deleting || moving || copying) return
                         setSelectedRowKey(rowKey)
                         openEditForRow(row)
                       }}
@@ -324,7 +348,7 @@ function FittingTransitionsModal({
             variant="outlined"
             color="inherit"
             startIcon={<ArrowUpward />}
-            disabled={deleting || moving || !canMoveUp}
+            disabled={deleting || moving || copying || !canMoveUp}
             onClick={() => handleMoveTransition(-1)}
           >
             Вверх
@@ -333,7 +357,7 @@ function FittingTransitionsModal({
             variant="outlined"
             color="inherit"
             startIcon={<ArrowDownward />}
-            disabled={deleting || moving || !canMoveDown}
+            disabled={deleting || moving || copying || !canMoveDown}
             onClick={() => handleMoveTransition(1)}
           >
             Вниз
@@ -342,7 +366,7 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'fitting',
@@ -357,15 +381,23 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={handleEditSelectedTransition}
         >
           Изменить переход
         </Button>
         <Button
           variant="outlined"
+          color="primary"
+          disabled={deleting || moving || copying || !selectedRowKey}
+          onClick={handleCopyTransition}
+        >
+          Копировать переход
+        </Button>
+        <Button
+          variant="outlined"
           color="error"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={handleDeleteTransition}
         >
           Удалить переход
@@ -374,7 +406,7 @@ function FittingTransitionsModal({
           variant="outlined"
           color="inherit"
           startIcon={<Close />}
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={onClose}
         >
           Закрыть

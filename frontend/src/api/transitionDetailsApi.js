@@ -71,6 +71,22 @@ export async function deleteFittingDetail(id) {
   await handleDeleteResponse(res)
 }
 
+export async function copySubstituteDetail(id) {
+  const res = await request(`/substitute-details/${id}/copy`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+  })
+  await handleDeleteResponse(res)
+}
+
+export async function copyFittingDetail(id) {
+  const res = await request(`/fitting-details/${id}/copy`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+  })
+  await handleDeleteResponse(res)
+}
+
 export async function calcSubstituteDetailTvp({ idOperations, massPreform, lPreform }) {
   const res = await request('/substitute-details/calc-tvp', {
     method: 'POST',

@@ -249,6 +249,12 @@ public class MainDataController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/fitting-details/{id}/copy")
+    public ResponseEntity<Void> copyFittingDetail(@PathVariable Integer id) {
+        fitingDetailService.copyById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/fitting-details/calc-tvp")
     public ResponseEntity<java.util.Map<String, BigDecimal>> calcFittingDetailTvp(@RequestBody FitingDetailCalcTvpRequestDto body) {
         BigDecimal tVp = fitingDetailService.calcFitTvp(
@@ -286,6 +292,12 @@ public class MainDataController {
     @DeleteMapping("/substitute-details/{id}")
     public ResponseEntity<Void> deleteSubstituteDetail(@PathVariable Integer id) {
         makeSubstituteDetailService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/substitute-details/{id}/copy")
+    public ResponseEntity<Void> copySubstituteDetail(@PathVariable Integer id) {
+        makeSubstituteDetailService.copyById(id);
         return ResponseEntity.noContent().build();
     }
 

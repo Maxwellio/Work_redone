@@ -81,6 +81,19 @@ public class MakeSubstituteDetailService {
         repository.deleteById(id);
     }
 
+    @Transactional
+    public void copyById(Integer idMakeSubstitute) {
+        if (!repository.existsById(idMakeSubstitute)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall("call substitute.copy_substitute_detail(?)");
+            cs.setObject(1, idMakeSubstitute, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     @Transactional(readOnly = true)
     public BigDecimal calcSubTvp(Integer idOperations, BigDecimal massPreform, BigDecimal lPreform) {
         return jdbcTemplate.queryForObject(

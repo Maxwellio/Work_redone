@@ -17,7 +17,7 @@ import Close from '@mui/icons-material/Close'
 import ArrowUpward from '@mui/icons-material/ArrowUpward'
 import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getSubstituteDetails } from '../api'
-import { deleteSubstituteDetail, saveSubstituteDetail } from '../api/transitionDetailsApi'
+import { copySubstituteDetail, deleteSubstituteDetail, saveSubstituteDetail } from '../api/transitionDetailsApi'
 import { useTheme } from '@mui/material/styles'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
 
@@ -62,6 +62,7 @@ function SubstituteTransitionsModal({
   const [selectedRowKey, setSelectedRowKey] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [moving, setMoving] = useState(false)
+  const [copying, setCopying] = useState(false)
 
   useEffect(() => {
     if (!open) {
@@ -162,6 +163,29 @@ function SubstituteTransitionsModal({
       window.alert(err.message || 'Ошибка изменения порядка переходов')
     } finally {
       setMoving(false)
+    }
+  }
+
+  const handleCopyTransition = async () => {
+    if (!selectedRowKey) {
+      window.alert('Выберите переход')
+      return
+    }
+    const selectedRow = rowsSorted.find((r) => getRowKey(r) === selectedRowKey)
+    if (!selectedRow) return
+    const pk = selectedRow.idMakeSubstitute
+    if (pk == null || pk <= 0) {
+      window.alert('Нельзя копировать: отсутствует идентификатор записи')
+      return
+    }
+    setCopying(true)
+    try {
+      await copySubstituteDetail(pk)
+      onTransitionsListChange?.()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка копирования')
+    } finally {
+      setCopying(false)
     }
   }
 
@@ -276,7 +300,7 @@ function SubstituteTransitionsModal({
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
                       onDoubleClick={() => {
-                        if (deleting || moving) return
+                        if (deleting || moving || copying) return
                         setSelectedRowKey(rowKey)
                         openEditForRow(row)
                       }}
@@ -314,7 +338,7 @@ function SubstituteTransitionsModal({
             variant="outlined"
             color="inherit"
             startIcon={<ArrowUpward />}
-            disabled={deleting || moving || !canMoveUp}
+            disabled={deleting || moving || copying || !canMoveUp}
             onClick={() => handleMoveTransition(-1)}
           >
             Вверх
@@ -323,7 +347,7 @@ function SubstituteTransitionsModal({
             variant="outlined"
             color="inherit"
             startIcon={<ArrowDownward />}
-            disabled={deleting || moving || !canMoveDown}
+            disabled={deleting || moving || copying || !canMoveDown}
             onClick={() => handleMoveTransition(1)}
           >
             Вниз
@@ -332,7 +356,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={() =>
             onOpenTransitionsRefModal?.({
               ownerType: 'substitute',
@@ -346,15 +370,23 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={handleEditSelectedTransition}
         >
           Изменить переход
         </Button>
         <Button
           variant="outlined"
+          color="primary"
+          disabled={deleting || moving || copying || !selectedRowKey}
+          onClick={handleCopyTransition}
+        >
+          Копировать переход
+        </Button>
+        <Button
+          variant="outlined"
           color="error"
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={handleDeleteTransition}
         >
           Удалить переход
@@ -363,7 +395,7 @@ function SubstituteTransitionsModal({
           variant="outlined"
           color="inherit"
           startIcon={<Close />}
-          disabled={deleting || moving}
+          disabled={deleting || moving || copying}
           onClick={onClose}
         >
           Закрыть

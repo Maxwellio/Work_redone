@@ -89,6 +89,19 @@ public class FitingDetailService {
         repository.deleteById(id);
     }
 
+    @Transactional
+    public void copyById(Integer idFitingDetail) {
+        if (!repository.existsById(idFitingDetail)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall("call substitute.copy_fiting_detail(?)");
+            cs.setObject(1, idFitingDetail, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     @Transactional(readOnly = true)
     public BigDecimal calcFitTvp(Integer idOperations, BigDecimal massPreform, BigDecimal lPreform) {
         return jdbcTemplate.queryForObject(
