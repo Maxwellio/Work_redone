@@ -1,4 +1,5 @@
 import { calcFitTime, calcHydroTime, calcSubTime, deleteFitting, deleteHydrotest, deleteSubstitute, downloadReport } from '../api'
+import { useConfirm } from '../context/ConfirmContext'
 import { getRowId } from '../utils/format'
 
 export function useHomeActions({
@@ -9,6 +10,8 @@ export function useHomeActions({
   setSelectedRowId,
   setPendingScrollToId,
 }) {
+  const confirm = useConfirm()
+
   const handleDelete = async () => {
     if (selectedRowId == null) {
       window.alert('Для удаления нужно выбрать запись.')
@@ -28,7 +31,7 @@ export function useHomeActions({
             ? selectedRow.nh
             : selectedRow.nm
     const message = `Вы уверены, что хотите удалить ${prefixes[activeTab] || ''}${name || ''}?`
-    if (!window.confirm(message)) return
+    if (!(await confirm(message))) return
 
     try {
       if (activeTab === 0) await deleteSubstitute(selectedRowId)

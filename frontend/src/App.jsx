@@ -3,6 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import GlobalStyles from '@mui/material/GlobalStyles'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ConfirmProvider } from './context/ConfirmContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoleRoute from './components/AdminRoleRoute'
 import Home from './pages/Home'
@@ -15,32 +16,34 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyles styles={(t) => globalLegacyAnchorStyles(t)} />
       <CssBaseline />
-      <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminRoleRoute>
-                <AdminPage />
-              </AdminRoleRoute>
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<AdminIndexOutletFallback />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AuthProvider>
+      <ConfirmProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminRoleRoute>
+                    <AdminPage />
+                  </AdminRoleRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminIndexOutletFallback />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AuthProvider>
+      </ConfirmProvider>
     </ThemeProvider>
   )
 }

@@ -19,6 +19,7 @@ import ArrowDownward from '@mui/icons-material/ArrowDownward'
 import { getFittingDetails } from '../api'
 import { copyFittingDetail, deleteFittingDetail, saveFittingDetail } from '../api/transitionDetailsApi'
 import { useTheme } from '@mui/material/styles'
+import { useConfirm } from '../context/ConfirmContext'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
 
 const COLUMNS = [
@@ -57,6 +58,7 @@ function FittingTransitionsModal({
   transitionsListRefreshKey = 0,
 }) {
   const theme = useTheme()
+  const confirm = useConfirm()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -204,7 +206,7 @@ function FittingTransitionsModal({
       window.alert('Нельзя удалить: отсутствует идентификатор записи')
       return
     }
-    if (!window.confirm('Удалить выбранный переход?')) return
+    if (!(await confirm('Удалить выбранный переход?'))) return
     setDeleting(true)
     try {
       await deleteFittingDetail(pk)
