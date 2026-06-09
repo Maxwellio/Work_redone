@@ -14,6 +14,7 @@ import patrubki.repository.MakeSubstituteMainRepository;
 import patrubki.repository.PreformTypRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
@@ -46,7 +47,7 @@ public class MakeSubstituteMainService {
     public Integer saveSubstitute(SubstituteSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_substitute(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "call substitute.add_edit_substitute(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setString(2, dto.getNmSub1());
@@ -64,6 +65,11 @@ public class MakeSubstituteMainService {
             cs.setObject(14, dto.getPh(), Types.NUMERIC);
             cs.setObject(15, dto.getMassPreform(), Types.NUMERIC);
             cs.setObject(16, dto.getIdUserCreator(), Types.INTEGER);
+            if (dto.getId() == null) {
+                cs.setObject(17, LocalDate.now(), Types.DATE);
+            } else {
+                cs.setNull(17, Types.DATE);
+            }
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });
@@ -154,6 +160,7 @@ public class MakeSubstituteMainService {
         dto.setNmSub4(e.getNmSub4());
         dto.setNmSub5(e.getNmSub5());
         dto.setIdUserCreator(e.getIdUserCreator());
+        dto.setCreatedAt(e.getCreatedAt());
         if (e.getIdPreform() != null) {
             preformTypRepository.findById(e.getIdPreform()).ifPresent(p -> dto.setNmPreform(p.getNmPreform()));
         }

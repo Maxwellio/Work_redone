@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "hydrotest", schema = "substitute")
@@ -43,6 +44,9 @@ public class Hydrotest {
 
     @Column(name = "id_user_creator")
     private Integer idUserCreator;
+
+    @Column(name = "created_at")
+    private LocalDate createdAt;
 
     public Integer getIdHydrotest() {
         return idHydrotest;
@@ -130,5 +134,13 @@ public class Hydrotest {
 
     public void setIdUserCreator(Integer idUserCreator) {
         this.idUserCreator = idUserCreator;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 }

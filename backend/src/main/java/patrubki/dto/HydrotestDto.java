@@ -2,6 +2,7 @@ package patrubki.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class HydrotestDto {
 
@@ -37,6 +38,9 @@ public class HydrotestDto {
     
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
+
+    @JsonProperty("createdAt")
+    private LocalDate createdAt;
 
     public Integer getIdHydrotest() {
         return idHydrotest;
@@ -124,5 +128,13 @@ public class HydrotestDto {
 
     public void setIdUserCreator(Integer idUserCreator) {
         this.idUserCreator = idUserCreator;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -1,3 +1,5 @@
+import { formatDate } from '../utils/format'
+
 export const TABS = [
   { id: 0, label: 'Переводники' },
   { id: 1, label: 'Патрубки' },
@@ -16,6 +18,7 @@ export const COLUMNS = {
     { key: 'dSubstituteIn', label: 'D переходника вн.' },
     { key: 'lSubstitute', label: 'L переходника' },
     { key: 'transitionCount', label: 'Переходов' },
+    { key: 'createdAt', label: 'Дата создания', getValue: (row) => formatDate(row.createdAt) },
   ],
   1: [
     { key: 'idFiting', label: '№' },
@@ -25,6 +28,7 @@ export const COLUMNS = {
     { key: 'mass', label: 'Масса' },
     { key: 'l', label: 'L' },
     { key: 'transitionCount', label: 'Переходов' },
+    { key: 'createdAt', label: 'Дата создания', getValue: (row) => formatDate(row.createdAt) },
   ],
   2: [
     { key: 'idFiting', label: '№' },
@@ -34,6 +38,7 @@ export const COLUMNS = {
     { key: 'mass', label: 'Масса' },
     { key: 'l', label: 'L' },
     { key: 'transitionCount', label: 'Переходов' },
+    { key: 'createdAt', label: 'Дата создания', getValue: (row) => formatDate(row.createdAt) },
   ],
   3: [
     { key: 'idHydrotest', label: '№' },
@@ -43,5 +48,6 @@ export const COLUMNS = {
     { key: 'th', label: 'Толщ.' },
     { key: 'testtime', label: 'Время исп.' },
     { key: 'mass', label: 'Масса' },
+    { key: 'createdAt', label: 'Дата создания', getValue: (row) => formatDate(row.createdAt) },
   ],
 }

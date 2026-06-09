@@ -2,6 +2,7 @@ package patrubki.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class FitingDto {
 
@@ -52,6 +53,9 @@ public class FitingDto {
 
     @JsonProperty("transitionCount")
     private long transitionCount;
+
+    @JsonProperty("createdAt")
+    private LocalDate createdAt;
 
     public Integer getIdFiting() {
         return idFiting;
@@ -179,5 +183,13 @@ public class FitingDto {
 
     public void setTransitionCount(long transitionCount) {
         this.transitionCount = transitionCount;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDate createdAt) {
+        this.createdAt = createdAt;
     }
 }

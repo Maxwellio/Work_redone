@@ -4,6 +4,11 @@ export function getRowId(row, activeTab) {
   return row.idHydrotest
 }
 
+export function formatDate(isoOrNull) {
+  if (isoOrNull == null || isoOrNull === '') return '—'
+  return typeof isoOrNull === 'string' ? isoOrNull.slice(0, 10) : String(isoOrNull)
+}
+
 export function formatCell(value) {
   if (value == null) return '—'
   if (typeof value === 'number' || typeof value === 'string') return String(value)

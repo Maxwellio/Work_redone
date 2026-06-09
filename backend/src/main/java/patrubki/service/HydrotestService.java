@@ -12,6 +12,7 @@ import patrubki.entity.Hydrotest;
 import patrubki.repository.HydrotestRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
@@ -32,7 +33,7 @@ public class HydrotestService {
     public Integer saveHydrotest(HydrotestSaveDto dto) {
         Integer id = jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_hydro(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "call substitute.add_edit_hydro(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setString(2, dto.getNh());
@@ -44,6 +45,11 @@ public class HydrotestService {
             cs.setObject(8, dto.getL1(), Types.NUMERIC);
             cs.setObject(9, dto.getL2(), Types.NUMERIC);
             cs.setObject(10, dto.getIdUserCreator(), Types.INTEGER);
+            if (dto.getId() == null) {
+                cs.setObject(11, LocalDate.now(), Types.DATE);
+            } else {
+                cs.setNull(11, Types.DATE);
+            }
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });
@@ -112,6 +118,7 @@ public class HydrotestService {
         dto.setL2(e.getL2());
         dto.setNv(e.getNv());
         dto.setIdUserCreator(e.getIdUserCreator());
+        dto.setCreatedAt(e.getCreatedAt());
         return dto;
     }
 
