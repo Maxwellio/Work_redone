@@ -19,6 +19,7 @@ function Home() {
     <>
       <HomeToolbar
         activeTab={activeTab}
+        selectedRowId={data.selectedRowId}
         searchQuery={home.searchQuery}
         showMyRecords={home.showMyRecords}
         onAdd={home.handleAdd}

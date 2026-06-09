@@ -383,7 +383,7 @@ function FittingTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving || copying}
+          disabled={deleting || moving || copying || !selectedRowKey}
           onClick={handleEditSelectedTransition}
         >
           Изменить переход
@@ -399,7 +399,7 @@ function FittingTransitionsModal({
         <Button
           variant="outlined"
           color="error"
-          disabled={deleting || moving || copying}
+          disabled={deleting || moving || copying || !selectedRowKey}
           onClick={handleDeleteTransition}
         >
           Удалить переход

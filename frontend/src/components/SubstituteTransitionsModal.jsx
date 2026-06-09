@@ -372,7 +372,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="contained"
           color="primary"
-          disabled={deleting || moving || copying}
+          disabled={deleting || moving || copying || !selectedRowKey}
           onClick={handleEditSelectedTransition}
         >
           Изменить переход
@@ -388,7 +388,7 @@ function SubstituteTransitionsModal({
         <Button
           variant="outlined"
           color="error"
-          disabled={deleting || moving || copying}
+          disabled={deleting || moving || copying || !selectedRowKey}
           onClick={handleDeleteTransition}
         >
           Удалить переход

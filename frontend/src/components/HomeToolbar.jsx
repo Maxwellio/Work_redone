@@ -7,6 +7,7 @@ import TextField from '@mui/material/TextField'
 
 function HomeToolbar({
   activeTab,
+  selectedRowId,
   searchQuery,
   showMyRecords,
   onAdd,
@@ -22,6 +23,7 @@ function HomeToolbar({
 }) {
   const [refMenuAnchor, setRefMenuAnchor] = useState(null)
   const transitionsLabel = 'Переходы'
+  const hasSelection = selectedRowId != null
 
   const handleRefMenuOpen = (e) => setRefMenuAnchor(e.currentTarget)
   const handleRefMenuClose = () => setRefMenuAnchor(null)
@@ -53,7 +55,7 @@ function HomeToolbar({
           <Button variant="contained" color="primary" size="small" onClick={onAdd}>
             Добавить
           </Button>
-          <Button variant="contained" color="primary" size="small" onClick={() => onEdit()}>
+          <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={() => onEdit()}>
             Редактировать
           </Button>
         </>
@@ -63,18 +65,19 @@ function HomeToolbar({
           variant="contained"
           color="primary"
           size="small"
+          disabled={!hasSelection}
           onClick={onTransitions}
         >
           {transitionsLabel}
         </Button>
       )}
-      <Button variant="contained" color="primary" size="small" onClick={onDelete}>
+      <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={onDelete}>
         Удалить
       </Button>
-      <Button variant="contained" color="primary" size="small" onClick={onCalcNorms}>
+      <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={onCalcNorms}>
         Расчёт норм времени
       </Button>
-      <Button variant="contained" color="primary" size="small" onClick={onPrint}>
+      <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={onPrint}>
         Печать отчёта
       </Button>
       <Button
