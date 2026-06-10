@@ -81,18 +81,6 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [activeTab])
 
-  useEffect(() => {
-    if (pendingScrollToId == null) return
-    const timer = setTimeout(() => {
-      const element = document.querySelector(`[data-row-id="${pendingScrollToId}"]`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
-      setPendingScrollToId(null)
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [pendingScrollToId, listData])
-
   const preformTypesFiltered = useMemo(
     () =>
       preformTypes

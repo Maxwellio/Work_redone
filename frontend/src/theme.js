@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme, alpha } from '@mui/material/styles'
 
 export const theme = createTheme({
   palette: {
@@ -218,6 +218,84 @@ export function computedNumericFieldSx(theme) {
     },
     '& .MuiInputLabel-root': {
       color: theme.palette.text.secondary,
+    },
+  }
+}
+
+/** DataGrid на главной странице — аналог homeGridTableSx с виртуализацией */
+export function homeDataGridSx(theme) {
+  const border = `1px solid ${theme.palette.secondary.main}`
+  return {
+    border: 'none',
+    borderRadius: 0,
+    flex: 1,
+    minHeight: 0,
+    fontSize: theme.typography.body1.fontSize,
+
+    // Header background and typography
+    '& .MuiDataGrid-columnHeaders': {
+      backgroundColor: theme.palette.secondary.light,
+    },
+    '& .MuiDataGrid-columnHeader': {
+      backgroundColor: theme.palette.secondary.light,
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+    },
+    // Column separator between headers (left border on every header except first)
+    '& .MuiDataGrid-columnHeader + .MuiDataGrid-columnHeader': {
+      borderLeft: border,
+    },
+    '& .MuiDataGrid-columnHeaderTitle': {
+      fontWeight: 600,
+      color: theme.palette.text.primary,
+      fontSize: theme.typography.body1.fontSize,
+    },
+    // Hide resize handle (matches static column look of current table)
+    '& .MuiDataGrid-columnSeparator': {
+      display: 'none',
+    },
+    // Hide sort button icons (sorting is disabled)
+    '& .MuiDataGrid-iconButtonContainer': {
+      display: 'none',
+    },
+    // Scrollbar area filler in header — no extra border
+    '& .MuiDataGrid-scrollbarFiller': {
+      borderLeft: 'none',
+    },
+
+    // Data cells
+    '& .MuiDataGrid-cell': {
+      color: theme.palette.text.primary,
+      paddingLeft: '1rem',
+      paddingRight: '1rem',
+      fontSize: theme.typography.body1.fontSize,
+    },
+    // Column separator between cells (same pattern as header)
+    '& .MuiDataGrid-cell + .MuiDataGrid-cell': {
+      borderLeft: border,
+    },
+
+    // Row appearance
+    '& .MuiDataGrid-row': {
+      cursor: 'pointer',
+      userSelect: 'none',
+    },
+    '& .MuiDataGrid-row:hover': {
+      backgroundColor: `${theme.palette.secondary.light} !important`,
+    },
+    '& .MuiDataGrid-row.Mui-selected': {
+      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    },
+    '& .MuiDataGrid-row.Mui-selected:hover': {
+      backgroundColor: `${alpha(theme.palette.primary.main, 0.12)} !important`,
+    },
+
+    // Remove focus outline from cells and headers
+    '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+      outline: 'none',
+    },
+    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
+      outline: 'none',
     },
   }
 }
