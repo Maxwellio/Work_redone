@@ -11,10 +11,13 @@ import patrubki.repository.FitingDetailRepository;
 import patrubki.repository.FitingRepository;
 import patrubki.repository.PreformTypRepository;
 
+import patrubki.util.YearMonthRangeUtil;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,18 +75,24 @@ public class FitingService {
         });
     }
 
-    public List<FitingDto> findByTipOrderByNm(int tip, String search) {
+    public List<FitingDto> findByTipOrderByNm(int tip, String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam);
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, createdFrom, createdTo);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
                 .collect(Collectors.toList());
     }
 
-    public List<FitingDto> findByTipOrderByNm(int tip, String search, Integer userId) {
+    public List<FitingDto> findByTipOrderByNm(int tip, String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId);
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId, createdFrom, createdTo);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))

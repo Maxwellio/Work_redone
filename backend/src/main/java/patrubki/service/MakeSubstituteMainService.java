@@ -13,10 +13,13 @@ import patrubki.repository.MakeSubstituteDetailRepository;
 import patrubki.repository.MakeSubstituteMainRepository;
 import patrubki.repository.PreformTypRepository;
 
+import patrubki.util.YearMonthRangeUtil;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,18 +82,24 @@ public class MakeSubstituteMainService {
         });
     }
 
-    public List<MakeSubstituteMainDto> findAllOrderByName(String search) {
+    public List<MakeSubstituteMainDto> findAllOrderByName(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam);
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, createdFrom, createdTo);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
                 .collect(Collectors.toList());
     }
 
-    public List<MakeSubstituteMainDto> findAllOrderByName(String search, Integer userId) {
+    public List<MakeSubstituteMainDto> findAllOrderByName(String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, userId);
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, userId, createdFrom, createdTo);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))

@@ -32,6 +32,8 @@ function Home() {
         onPrint={actions.handlePrint}
         onToggleMyRecords={home.toggleMyRecords}
         onSearchChange={home.setSearchQuery}
+        monthFilter={home.monthFilter}
+        onMonthFilterChange={home.setMonthFilter}
       />
       <HomeTabs activeTab={activeTab} onChange={home.handleTabChange} />
     </>

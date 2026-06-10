@@ -11,10 +11,13 @@ import patrubki.dto.HydrotestSaveDto;
 import patrubki.entity.Hydrotest;
 import patrubki.repository.HydrotestRepository;
 
+import patrubki.util.YearMonthRangeUtil;
+
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,16 +81,22 @@ public class HydrotestService {
                 dto.getL2());
     }
 
-    public List<HydrotestDto> findAllOrderByNh(String search) {
+    public List<HydrotestDto> findAllOrderByNh(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findAllOrderByNhAsc(searchParam).stream()
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        return repository.findAllOrderByNhAsc(searchParam, createdFrom, createdTo).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-    public List<HydrotestDto> findAllOrderByNh(String search, Integer userId) {
+    public List<HydrotestDto> findAllOrderByNh(String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
-        return repository.findAllOrderByNhAsc(searchParam, userId).stream()
+        LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
+        LocalDate createdFrom = range != null ? range[0] : null;
+        LocalDate createdTo = range != null ? range[1] : null;
+        return repository.findAllOrderByNhAsc(searchParam, userId, createdFrom, createdTo).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

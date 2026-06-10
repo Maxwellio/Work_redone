@@ -1,7 +1,7 @@
 import { buildQuery, request } from './http'
 
-export async function getFittings(tip, search, userId) {
-  const query = buildQuery({ tip, search, userId })
+export async function getFittings(tip, search, userId, yearMonth) {
+  const query = buildQuery({ tip, search, userId, yearMonth })
   const res = await request(`/fittings${query}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },

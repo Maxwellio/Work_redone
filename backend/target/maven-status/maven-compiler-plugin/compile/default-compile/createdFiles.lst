@@ -83,6 +83,7 @@ patrubki\repository\PreformTypRepository.class
 patrubki\controller\UserPasswordController.class
 patrubki\entity\Party.class
 patrubki\repository\UserRepository.class
+patrubki\util\YearMonthRangeUtil.class
 patrubki\controller\SpaForwardController.class
 patrubki\entity\OperationStructureGroup.class
 patrubki\dto\CurrentUserDto.class

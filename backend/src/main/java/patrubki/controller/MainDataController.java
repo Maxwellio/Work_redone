@@ -93,32 +93,35 @@ public class MainDataController {
     @GetMapping("/substitutes")
     public ResponseEntity<List<MakeSubstituteMainDto>> getSubstitutes(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer userId) {
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) String yearMonth) {
         if (userId != null) {
-            return ResponseEntity.ok(substituteService.findAllOrderByName(search, userId));
+            return ResponseEntity.ok(substituteService.findAllOrderByName(search, userId, yearMonth));
         }
-        return ResponseEntity.ok(substituteService.findAllOrderByName(search));
+        return ResponseEntity.ok(substituteService.findAllOrderByName(search, yearMonth));
     }
 
     @GetMapping("/fittings")
     public ResponseEntity<List<FitingDto>> getFittings(
             @RequestParam int tip,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer userId) {
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) String yearMonth) {
         if (userId != null) {
-            return ResponseEntity.ok(fitingService.findByTipOrderByNm(tip, search, userId));
+            return ResponseEntity.ok(fitingService.findByTipOrderByNm(tip, search, userId, yearMonth));
         }
-        return ResponseEntity.ok(fitingService.findByTipOrderByNm(tip, search));
+        return ResponseEntity.ok(fitingService.findByTipOrderByNm(tip, search, yearMonth));
     }
 
     @GetMapping("/hydrotests")
     public ResponseEntity<List<HydrotestDto>> getHydrotests(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer userId) {
+            @RequestParam(required = false) Integer userId,
+            @RequestParam(required = false) String yearMonth) {
         if (userId != null) {
-            return ResponseEntity.ok(hydrotestService.findAllOrderByNh(search, userId));
+            return ResponseEntity.ok(hydrotestService.findAllOrderByNh(search, userId, yearMonth));
         }
-        return ResponseEntity.ok(hydrotestService.findAllOrderByNh(search));
+        return ResponseEntity.ok(hydrotestService.findAllOrderByNh(search, yearMonth));
     }
 
     @GetMapping("/preform-types")

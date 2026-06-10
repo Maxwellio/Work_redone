@@ -1,7 +1,7 @@
 import { buildQuery, request } from './http'
 
-export async function getHydrotests(search, userId) {
-  const query = buildQuery({ search, userId })
+export async function getHydrotests(search, userId, yearMonth) {
+  const query = buildQuery({ search, userId, yearMonth })
   const res = await request(`/hydrotests${query}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },

@@ -1,14 +1,19 @@
 import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
+import Tooltip from '@mui/material/Tooltip'
+import CloseIcon from '@mui/icons-material/Close'
 
 function HomeToolbar({
   activeTab,
   selectedRowId,
   searchQuery,
+  monthFilter,
   showMyRecords,
   onAdd,
   onEdit,
@@ -20,6 +25,7 @@ function HomeToolbar({
   onPrint,
   onToggleMyRecords,
   onSearchChange,
+  onMonthFilterChange,
 }) {
   const [refMenuAnchor, setRefMenuAnchor] = useState(null)
   const transitionsLabel = 'Переходы'
@@ -93,15 +99,42 @@ function HomeToolbar({
       >
         Мои записи
       </Button>
-      <TextField
-        type="search"
-        size="small"
-        placeholder="Поиск по записям"
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        aria-label="Поиск по записям"
-        sx={{ ml: 'auto', minWidth: 200 }}
-      />
+      <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Stack direction="row" spacing={0.5} alignItems="flex-start">
+          <TextField
+            type="month"
+            size="small"
+            label="Месяц"
+            value={monthFilter}
+            onChange={(e) => onMonthFilterChange(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 160 }}
+            aria-label="Фильтр по месяцу"
+          />
+          <Tooltip title="Сбросить фильтр по месяцу">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Сбросить фильтр по месяцу"
+                onClick={() => onMonthFilterChange('')}
+                disabled={!monthFilter}
+                sx={{ mt: 0.5 }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Stack>
+        <TextField
+          type="search"
+          size="small"
+          placeholder="Поиск по записям"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          aria-label="Поиск по записям"
+          sx={{ minWidth: 200 }}
+        />
+      </Box>
       <Button variant="contained" color="primary" size="small" onClick={handleRefMenuOpen} aria-haspopup="true" aria-expanded={!!refMenuAnchor}>
         Справочники
       </Button>

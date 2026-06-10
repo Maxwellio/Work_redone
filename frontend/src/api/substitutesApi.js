@@ -1,7 +1,7 @@
 import { buildQuery, request } from './http'
 
-export async function getSubstitutes(search, userId) {
-  const query = buildQuery({ search, userId })
+export async function getSubstitutes(search, userId, yearMonth) {
+  const query = buildQuery({ search, userId, yearMonth })
   const res = await request(`/substitutes${query}`, {
     method: 'GET',
     headers: { Accept: 'application/json' },

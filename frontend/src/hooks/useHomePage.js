@@ -46,6 +46,7 @@ export function useHomePage() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
+  const [monthFilter, setMonthFilter] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
   const [resetTransitionsRefContextOnClose, setResetTransitionsRefContextOnClose] = useState(false)
@@ -99,6 +100,7 @@ export function useHomePage() {
   const data = useHomeData({
     activeTab,
     searchQuery,
+    monthFilter,
     showMyRecords,
     user,
   })
@@ -667,6 +669,8 @@ export function useHomePage() {
     handleTabChange,
     searchQuery,
     setSearchQuery,
+    monthFilter,
+    setMonthFilter,
     showMyRecords,
     toggleMyRecords: () => setShowMyRecords((prev) => !prev),
     isTransitionsRefModalOpen,

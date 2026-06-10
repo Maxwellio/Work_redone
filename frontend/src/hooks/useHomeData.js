@@ -4,7 +4,7 @@ import { ensureParty, ensurePreformTypes } from '../api/staticReferenceCache'
 
 const DEBOUNCE_MS = 350
 
-export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
+export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords, user }) {
   const [selectedRowId, setSelectedRowId] = useState(null)
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [listData, setListData] = useState([])
@@ -33,14 +33,15 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     setError(null)
     try {
       const userId = showMyRecords && user?.userId ? user.userId : null
+      const yearMonth = monthFilter || null
       if (activeTab === 0) {
-        const data = await getSubstitutes(debouncedSearch, userId)
+        const data = await getSubstitutes(debouncedSearch, userId, yearMonth)
         setListData(data)
       } else if (activeTab === 1 || activeTab === 2) {
-        const data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId)
+        const data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId, yearMonth)
         setListData(data)
       } else {
-        const data = await getHydrotests(debouncedSearch, userId)
+        const data = await getHydrotests(debouncedSearch, userId, yearMonth)
         setListData(data)
       }
     } catch (err) {
@@ -54,7 +55,7 @@ export function useHomeData({ activeTab, searchQuery, showMyRecords, user }) {
     return () => {
       isCurrent = false
     }
-  }, [activeTab, debouncedSearch, showMyRecords, user])
+  }, [activeTab, debouncedSearch, monthFilter, showMyRecords, user])
 
   useEffect(() => {
     const cleanup = loadData()
