@@ -15,7 +15,7 @@ import Calculate from '@mui/icons-material/Calculate'
 import { calcFittingDetailTvp, calcSubstituteDetailTvp } from '../api'
 import { computedNumericFieldSx } from '../theme'
 
-const NUMERIC_FIELDS = new Set(['masCur', 'lCur', 'seqNumOper'])
+const NUMERIC_FIELDS = new Set(['masCur', 'lCur'])
 
 function TransitionSmallFormModal({
   open,
@@ -34,7 +34,6 @@ function TransitionSmallFormModal({
     masCur: '',
     lCur: '',
     tVp: '',
-    seqNumOper: '',
   })
 
   useEffect(() => {
@@ -45,7 +44,6 @@ function TransitionSmallFormModal({
         masCur: initialValues.masCur ?? '',
         lCur: initialValues.lCur ?? '',
         tVp: initialValues.tVp ?? '',
-        seqNumOper: initialValues.seqNumOper ?? '',
       })
       return
     }
@@ -53,7 +51,6 @@ function TransitionSmallFormModal({
       masCur: '',
       lCur: '',
       tVp: '',
-      seqNumOper: initialValues?.seqNumOper != null ? String(initialValues.seqNumOper) : '',
     })
   }, [open, idOperations, isEditMode, initialValues])
 
@@ -169,14 +166,6 @@ function TransitionSmallFormModal({
                 </InputAdornment>
               ),
             }}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            label="Порядковый номер операции"
-            type="number"
-            value={draft.seqNumOper}
-            onChange={handleFieldChange('seqNumOper')}
           />
         </Stack>
       </DialogContent>

@@ -42,7 +42,6 @@ const NUMERIC_FIELDS = new Set([
   'i',
   's',
   'n',
-  'seqNumOper',
 ])
 
 const emptyDraft = () => ({
@@ -57,7 +56,6 @@ const emptyDraft = () => ({
   vRez: '',
   tMach: '',
   tVp: '',
-  seqNumOper: '',
   tSum: '',
 })
 
@@ -105,15 +103,11 @@ function TransitionLargeFormModal({
         vRez: initialValues.vRez ?? '',
         tMach: initialValues.tMach ?? '',
         tVp: initialValues.tVp ?? '',
-        seqNumOper: initialValues.seqNumOper ?? '',
         tSum: initialValues.tSum ?? '',
       })
       return
     }
-    setDraft({
-      ...emptyDraft(),
-      seqNumOper: initialValues?.seqNumOper != null ? String(initialValues.seqNumOper) : '',
-    })
+    setDraft(emptyDraft())
   }, [open, idOperations, isEditMode, initialValues, irazmEnabled, valueMeasEnabled])
 
   useEffect(() => {
@@ -367,14 +361,6 @@ function TransitionLargeFormModal({
               </InputAdornment>
             ),
           }}
-        />
-        <TextField
-          fullWidth
-          size="small"
-          label="Порядковый номер операции"
-          type="number"
-          value={draft.seqNumOper}
-          onChange={handleFieldChange('seqNumOper')}
         />
       </Stack>
     </Box>

@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { calcFitTime, calcSubTime } from '../api'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
-import { getSubstituteDetails } from '../api/operationsApi'
-import { getFittingDetails } from '../api/fittingsApi'
 import { COLUMNS } from '../models/tableConfig'
 import { useFittingForm } from './useFittingForm'
 import { useHomeActions } from './useHomeActions'
@@ -30,16 +28,6 @@ function parseIntOrNull(v) {
   const n = parseNum(v)
   if (n == null) return null
   return Math.round(n)
-}
-
-/** Следующий порядковый номер операции: max(seqNumOper) + 1, или 1 если переходов нет. */
-function computeNextSeqNumOper(rows) {
-  const nums = (Array.isArray(rows) ? rows : [])
-    .map((r) => r.seqNumOper)
-    .map((v) => (v == null || v === '' ? NaN : Number(v)))
-    .filter((n) => Number.isFinite(n))
-  const maxSeq = nums.length ? Math.max(...nums) : 0
-  return maxSeq + 1
 }
 
 export function useHomePage() {
@@ -478,29 +466,9 @@ export function useHomePage() {
     const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
     const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
 
-    let initialValues = null
-    let nextSeqNumOper = null
-    if (modeEdit) {
-      initialValues = {
-        seqNumOper: ctx.transitionDraft?.seqNumOper ?? '',
-      }
-    } else {
-      try {
-        let list = []
-        if (ownerType === 'substitute' && idSubstitutePrepared != null) {
-          list = await getSubstituteDetails(idSubstitutePrepared)
-        } else if (ownerType === 'fitting' && idFiting != null) {
-          list = await getFittingDetails(idFiting)
-        }
-        const nextSeq = computeNextSeqNumOper(list)
-        nextSeqNumOper = nextSeq
-        initialValues = { seqNumOper: String(nextSeq) }
-      } catch (e) {
-        console.error('Не удалось загрузить переходы для автонумерации', e)
-        initialValues = null
-        nextSeqNumOper = null
-      }
-    }
+    const initialValues = modeEdit
+      ? { seqNumOper: ctx.transitionDraft?.seqNumOper ?? '' }
+      : null
 
     const payloadBase = {
       open: true,
@@ -538,7 +506,7 @@ export function useHomePage() {
           operationId: selectedOperationId,
           isEditMode: modeEdit,
           transitionRecordId: ctx.transitionRecordId ?? null,
-          seqNumOper: modeEdit ? parseIntOrNull(ctx.transitionDraft?.seqNumOper) : nextSeqNumOper,
+          seqNumOper: modeEdit ? parseIntOrNull(ctx.transitionDraft?.seqNumOper) : null,
         })
         setTransitionsListRefreshKey((k) => k + 1)
       } catch (err) {
@@ -562,6 +530,7 @@ export function useHomePage() {
       throw new Error('Недостаточно данных для сохранения')
     }
     const idUserCreator = s.isEditMode ? null : user?.userId ?? null
+    const seqNumOper = s.isEditMode ? parseIntOrNull(s.initialValues?.seqNumOper) : null
     const emptyGeom = {
       d: null,
       l: null,
@@ -583,7 +552,7 @@ export function useHomePage() {
         ...emptyGeom,
         masCur: parseNum(draft.masCur),
         lCur: parseNum(draft.lCur),
-        seqNumOper: parseIntOrNull(draft.seqNumOper),
+        seqNumOper,
         idUserCreator,
       })
     } else if (s.ownerType === 'fitting') {
@@ -597,7 +566,7 @@ export function useHomePage() {
         ...emptyGeom,
         masCur: parseNum(draft.masCur),
         lCur: parseNum(draft.lCur),
-        seqNumOper: parseIntOrNull(draft.seqNumOper),
+        seqNumOper,
         idUserCreator,
       })
     }
@@ -612,6 +581,7 @@ export function useHomePage() {
       throw new Error('Недостаточно данных для сохранения')
     }
     const idUserCreator = s.isEditMode ? null : user?.userId ?? null
+    const seqNumOper = s.isEditMode ? parseIntOrNull(s.initialValues?.seqNumOper) : null
     const payloadBase = {
       d: parseNum(draft.d),
       l: parseNum(draft.l),
@@ -625,7 +595,7 @@ export function useHomePage() {
       s: parseNum(draft.s),
       masCur: null,
       lCur: null,
-      seqNumOper: parseIntOrNull(draft.seqNumOper),
+      seqNumOper,
       idUserCreator,
     }
 
