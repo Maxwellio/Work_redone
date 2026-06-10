@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getFittings, getHydrotests, getSubstitutes } from '../api'
 import { ensureParty, ensurePreformTypes } from '../api/staticReferenceCache'
+import {
+  HOME_TABLE_ROW_HEIGHT,
+  HOME_TABLE_VIRTUAL_THRESHOLD,
+} from '../constants/tableLayout'
 import { COLUMNS } from '../models/tableConfig'
+import { getRowId } from '../utils/format'
 import { sortListData } from '../utils/sortListData'
 
 const DEBOUNCE_MS = 350
@@ -18,6 +23,7 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
   const [pendingScrollToId, setPendingScrollToId] = useState(null)
   const [sortField, setSortField] = useState(null)
   const [sortDirection, setSortDirection] = useState('asc')
+  const scrollContainerRef = useRef(null)
 
   const beginLoading = () => {
     setLoading(true)
@@ -86,19 +92,16 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0
+    }
   }, [activeTab])
 
   useEffect(() => {
-    if (pendingScrollToId == null) return
-    const timer = setTimeout(() => {
-      const element = document.querySelector(`[data-row-id="${pendingScrollToId}"]`)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
-      setPendingScrollToId(null)
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [pendingScrollToId, listData])
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0
+    }
+  }, [debouncedSearch, monthFilter])
 
   const preformTypesFiltered = useMemo(
     () =>
@@ -130,6 +133,29 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
     [listData, sortField, sortDirection, activeTab]
   )
 
+  useEffect(() => {
+    if (pendingScrollToId == null) return
+    const timer = setTimeout(() => {
+      const container = scrollContainerRef.current
+      const index = sortedListData.findIndex(
+        (row) => getRowId(row, activeTab) === pendingScrollToId
+      )
+      if (index >= 0) {
+        const virtualized = sortedListData.length > HOME_TABLE_VIRTUAL_THRESHOLD
+        if (virtualized && container) {
+          container.scrollTop = index * HOME_TABLE_ROW_HEIGHT
+        } else {
+          const element = document.querySelector(`[data-row-id="${pendingScrollToId}"]`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+          }
+        }
+      }
+      setPendingScrollToId(null)
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [pendingScrollToId, sortedListData, activeTab])
+
   return {
     selectedRowId,
     setSelectedRowId,
@@ -150,5 +176,6 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
     beginLoading,
     pendingScrollToId,
     setPendingScrollToId,
+    scrollContainerRef,
   }
 }
