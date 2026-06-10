@@ -12,7 +12,6 @@ import patrubki.repository.FitingRepository;
 import patrubki.repository.PreformTypRepository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Types;
@@ -43,7 +42,7 @@ public class FitingService {
     public Integer saveFitting(FitingSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_fiting(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                "call substitute.add_edit_fiting(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setObject(2, dto.getTip(), Types.INTEGER);
@@ -58,11 +57,6 @@ public class FitingService {
             cs.setObject(11, dto.getDStan(), Types.NUMERIC);
             cs.setString(12, dto.getCnt());
             cs.setObject(13, dto.getIdUserCreator(), Types.INTEGER);
-            if (dto.getId() == null) {
-                cs.setObject(14, LocalDate.now(), Types.DATE);
-            } else {
-                cs.setNull(14, Types.DATE);
-            }
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });

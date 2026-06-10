@@ -6,7 +6,10 @@ export function getRowId(row, activeTab) {
 
 export function formatDate(isoOrNull) {
   if (isoOrNull == null || isoOrNull === '') return '—'
-  return typeof isoOrNull === 'string' ? isoOrNull.slice(0, 10) : String(isoOrNull)
+  const s = typeof isoOrNull === 'string' ? isoOrNull.slice(0, 10) : String(isoOrNull).slice(0, 10)
+  const [y, m, d] = s.split('-')
+  if (!y || !m || !d) return s
+  return `${d.padStart(2, '0')}.${m.padStart(2, '0')}.${y}`
 }
 
 export function formatCell(value) {
