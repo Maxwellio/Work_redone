@@ -4,6 +4,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
+import TableSortLabel from '@mui/material/TableSortLabel'
 import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
 import { homeGridTableSx, tablePlaceholderMessageSx } from '../theme'
@@ -19,6 +20,9 @@ function HomeTable({
   formatCell,
   onSelectRow,
   onRowDoubleClick,
+  sortField,
+  sortDirection,
+  onSort,
 }) {
   const theme = useTheme()
   return (
@@ -45,7 +49,24 @@ function HomeTable({
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                <TableCell key={col.key}>{col.label}</TableCell>
+                <TableCell
+                  key={col.key}
+                  sortDirection={sortField === col.key ? sortDirection : false}
+                  sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
+                >
+                  {col.sortable ? (
+                    <TableSortLabel
+                      active={sortField === col.key}
+                      direction={sortField === col.key ? sortDirection : 'asc'}
+                      hideSortIcon={sortField !== col.key}
+                      onClick={() => onSort(col.key)}
+                    >
+                      {col.label}
+                    </TableSortLabel>
+                  ) : (
+                    col.label
+                  )}
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>

@@ -44,7 +44,7 @@ function Home() {
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <HomeTable
           columns={home.columns}
-          listData={data.listData}
+          listData={data.sortedListData}
           activeTab={activeTab}
           selectedRowId={data.selectedRowId}
           loading={data.loading}
@@ -53,6 +53,9 @@ function Home() {
           formatCell={formatCell}
           onSelectRow={data.setSelectedRowId}
           onRowDoubleClick={handleRowDoubleClick}
+          sortField={data.sortField}
+          sortDirection={data.sortDirection}
+          onSort={data.handleSort}
         />
 
         <HomeModals

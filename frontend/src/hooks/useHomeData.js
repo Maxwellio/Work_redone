@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getFittings, getHydrotests, getSubstitutes } from '../api'
 import { ensureParty, ensurePreformTypes } from '../api/staticReferenceCache'
+import { COLUMNS } from '../models/tableConfig'
+import { sortListData } from '../utils/sortListData'
 
 const DEBOUNCE_MS = 350
 
@@ -14,6 +16,8 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
   const [preformError, setPreformError] = useState(null)
   const [partyList, setPartyList] = useState([])
   const [pendingScrollToId, setPendingScrollToId] = useState(null)
+  const [sortField, setSortField] = useState(null)
+  const [sortDirection, setSortDirection] = useState('asc')
 
   const beginLoading = () => {
     setLoading(true)
@@ -76,6 +80,8 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
 
   useEffect(() => {
     setSelectedRowId(null)
+    setSortField(null)
+    setSortDirection('asc')
   }, [activeTab])
 
   useEffect(() => {
@@ -110,10 +116,28 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
     [preformTypes]
   )
 
+  const handleSort = useCallback((field) => {
+    if (sortField === field) {
+      setSortDirection((direction) => (direction === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }, [sortField])
+
+  const sortedListData = useMemo(
+    () => sortListData(listData, sortField, sortDirection, COLUMNS[activeTab]),
+    [listData, sortField, sortDirection, activeTab]
+  )
+
   return {
     selectedRowId,
     setSelectedRowId,
     listData,
+    sortedListData,
+    sortField,
+    sortDirection,
+    handleSort,
     loading,
     error,
     preformError,
