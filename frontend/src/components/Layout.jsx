@@ -12,7 +12,7 @@ import { changePassword } from '../api'
 import { userHasAdminRole } from '../utils/userRoles'
 import ChangePasswordDialog from './ChangePasswordDialog'
 
-function Layout({ children, chrome, title = 'Патрубки', flush = false }) {
+function Layout({ children, chrome, title = 'Патрубки', flush = false, fullHeight = false }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { user, logout } = useAuth()
@@ -47,7 +47,10 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        // fullHeight жёстко ограничивает страницу видимой областью, чтобы
+        // прокручивался внутренний контейнер таблицы (нужно для виртуализации),
+        // а не само окно браузера.
+        ...(fullHeight ? { height: '100vh', overflow: 'hidden' } : { minHeight: '100vh' }),
         display: 'flex',
         flexDirection: 'column',
       }}

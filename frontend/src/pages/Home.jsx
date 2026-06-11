@@ -40,7 +40,7 @@ function Home() {
   )
 
   return (
-    <Layout chrome={chrome}>
+    <Layout chrome={chrome} fullHeight>
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <HomeTable
           columns={home.columns}
