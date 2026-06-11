@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -53,7 +53,7 @@ function TableDataRow({
 }
 
 function VirtualizedTableBody({
-  scrollRef,
+  range,
   listData,
   columns,
   activeTab,
@@ -63,25 +63,11 @@ function VirtualizedTableBody({
   onSelectRow,
   onRowDoubleClick,
 }) {
-  const { startIndex, endIndex, paddingTop, paddingBottom } = useVirtualRange(
-    scrollRef,
-    listData.length,
-    HOME_TABLE_ROW_HEIGHT,
-    HOME_TABLE_OVERSCAN
-  )
+  const { startIndex, endIndex } = range
   const visibleRows = listData.slice(startIndex, endIndex)
 
   return (
     <TableBody>
-      {paddingTop > 0 && (
-        <TableRow aria-hidden sx={{ height: paddingTop, pointerEvents: 'none' }}>
-          <TableCell
-            colSpan={columns.length}
-            padding="none"
-            sx={{ border: 'none', p: 0, height: paddingTop, lineHeight: 0 }}
-          />
-        </TableRow>
-      )}
       {visibleRows.map((row, index) => {
         const id = getRowId(row, activeTab)
         return (
@@ -98,15 +84,6 @@ function VirtualizedTableBody({
           />
         )
       })}
-      {paddingBottom > 0 && (
-        <TableRow aria-hidden sx={{ height: paddingBottom, pointerEvents: 'none' }}>
-          <TableCell
-            colSpan={columns.length}
-            padding="none"
-            sx={{ border: 'none', p: 0, height: paddingBottom, lineHeight: 0 }}
-          />
-        </TableRow>
-      )}
     </TableBody>
   )
 }
@@ -129,14 +106,26 @@ function HomeTable({
 }) {
   const theme = useTheme()
   const localScrollRef = useRef(null)
+  const [scrollElement, setScrollElement] = useState(null)
   const virtualized = listData.length > HOME_TABLE_VIRTUAL_THRESHOLD
+  const virtualRange = useVirtualRange(
+    scrollElement,
+    virtualized ? listData.length : 0,
+    HOME_TABLE_ROW_HEIGHT,
+    HOME_TABLE_OVERSCAN
+  )
+  const virtualBodyHeight = listData.length * HOME_TABLE_ROW_HEIGHT
 
-  const setScrollContainer = (node) => {
-    localScrollRef.current = node
-    if (scrollContainerRef) {
-      scrollContainerRef.current = node
-    }
-  }
+  const setScrollContainer = useCallback(
+    (node) => {
+      setScrollElement(node)
+      localScrollRef.current = node
+      if (scrollContainerRef) {
+        scrollContainerRef.current = node
+      }
+    },
+    [scrollContainerRef]
+  )
 
   return (
     <TableContainer
@@ -159,64 +148,84 @@ function HomeTable({
         <Box sx={tablePlaceholderMessageSx(theme)}>Загрузка…</Box>
       )}
       {!loading && !error && (
-        <Table size="small" stickyHeader sx={(t) => homeGridTableSx(t)}>
-          <TableHead>
-            <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  sortDirection={sortField === col.key ? sortDirection : false}
-                  sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
-                >
-                  {col.sortable ? (
-                    <TableSortLabel
-                      active={sortField === col.key}
-                      direction={sortField === col.key ? sortDirection : 'asc'}
-                      hideSortIcon={sortField !== col.key}
-                      onClick={() => onSort(col.key)}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  ) : (
-                    col.label
-                  )}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          {virtualized ? (
-            <VirtualizedTableBody
-              scrollRef={localScrollRef}
-              listData={listData}
-              columns={columns}
-              activeTab={activeTab}
-              selectedRowId={selectedRowId}
-              getRowId={getRowId}
-              formatCell={formatCell}
-              onSelectRow={onSelectRow}
-              onRowDoubleClick={onRowDoubleClick}
-            />
-          ) : (
-            <TableBody>
-              {listData.map((row) => {
-                const id = getRowId(row, activeTab)
-                return (
-                  <TableDataRow
-                    key={id}
-                    row={row}
-                    id={id}
-                    columns={columns}
-                    selectedRowId={selectedRowId}
-                    formatCell={formatCell}
-                    onSelectRow={onSelectRow}
-                    onRowDoubleClick={onRowDoubleClick}
-                    virtualized={false}
-                  />
-                )
-              })}
-            </TableBody>
-          )}
-        </Table>
+        <Box
+          sx={{
+            position: 'relative',
+            height: virtualized ? virtualBodyHeight : 'auto',
+          }}
+        >
+          <Table
+            size="small"
+            stickyHeader
+            sx={(t) => ({
+              ...homeGridTableSx(t),
+              width: '100%',
+              ...(virtualized && {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: virtualRange.paddingTop,
+              }),
+            })}
+          >
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    sortDirection={sortField === col.key ? sortDirection : false}
+                    sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
+                  >
+                    {col.sortable ? (
+                      <TableSortLabel
+                        active={sortField === col.key}
+                        direction={sortField === col.key ? sortDirection : 'asc'}
+                        hideSortIcon={sortField !== col.key}
+                        onClick={() => onSort(col.key)}
+                      >
+                        {col.label}
+                      </TableSortLabel>
+                    ) : (
+                      col.label
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            {virtualized ? (
+              <VirtualizedTableBody
+                range={virtualRange}
+                listData={listData}
+                columns={columns}
+                activeTab={activeTab}
+                selectedRowId={selectedRowId}
+                getRowId={getRowId}
+                formatCell={formatCell}
+                onSelectRow={onSelectRow}
+                onRowDoubleClick={onRowDoubleClick}
+              />
+            ) : (
+              <TableBody>
+                {listData.map((row) => {
+                  const id = getRowId(row, activeTab)
+                  return (
+                    <TableDataRow
+                      key={id}
+                      row={row}
+                      id={id}
+                      columns={columns}
+                      selectedRowId={selectedRowId}
+                      formatCell={formatCell}
+                      onSelectRow={onSelectRow}
+                      onRowDoubleClick={onRowDoubleClick}
+                      virtualized={false}
+                    />
+                  )
+                })}
+              </TableBody>
+            )}
+          </Table>
+        </Box>
       )}
     </TableContainer>
   )
