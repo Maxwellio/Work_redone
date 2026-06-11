@@ -15,21 +15,27 @@ function computeRange(scrollTop, viewportHeight, itemCount, itemHeight, overscan
   return { startIndex, endIndex, paddingTop, paddingBottom }
 }
 
-export function useVirtualRange(scrollRef, itemCount, itemHeight, overscan = 5) {
+/**
+ * Принимает сам DOM-элемент (из состояния), а не ref-объект: эффект должен
+ * перезапускаться, когда контейнер реально появляется в DOM. С ref-объектом
+ * перезапуска не происходит, и без StrictMode (prod-сборка) подписка на scroll
+ * могла не установиться вовсе.
+ */
+export function useVirtualRange(scrollEl, itemCount, itemHeight, overscan = 5) {
   const [range, setRange] = useState(() =>
     computeRange(0, 0, itemCount, itemHeight, overscan)
   )
   const rafRef = useRef(null)
 
   const updateRange = useCallback(() => {
-    const el = scrollRef.current
-    if (!el) return
-    setRange(computeRange(el.scrollTop, el.clientHeight, itemCount, itemHeight, overscan))
-  }, [scrollRef, itemCount, itemHeight, overscan])
+    if (!scrollEl) return
+    setRange(
+      computeRange(scrollEl.scrollTop, scrollEl.clientHeight, itemCount, itemHeight, overscan)
+    )
+  }, [scrollEl, itemCount, itemHeight, overscan])
 
   useLayoutEffect(() => {
-    const el = scrollRef.current
-    if (!el) return undefined
+    if (!scrollEl) return undefined
 
     updateRange()
 
@@ -41,23 +47,19 @@ export function useVirtualRange(scrollRef, itemCount, itemHeight, overscan = 5) 
       })
     }
 
-    el.addEventListener('scroll', onScroll, { passive: true })
+    scrollEl.addEventListener('scroll', onScroll, { passive: true })
     const resizeObserver = new ResizeObserver(() => updateRange())
-    resizeObserver.observe(el)
+    resizeObserver.observe(scrollEl)
 
     return () => {
-      el.removeEventListener('scroll', onScroll)
+      scrollEl.removeEventListener('scroll', onScroll)
       resizeObserver.disconnect()
       if (rafRef.current != null) {
         cancelAnimationFrame(rafRef.current)
         rafRef.current = null
       }
     }
-  }, [scrollRef, updateRange])
-
-  useLayoutEffect(() => {
-    updateRange()
-  }, [itemCount, updateRange])
+  }, [scrollEl, updateRange])
 
   return range
 }

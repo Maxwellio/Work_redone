@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useState } from 'react'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -53,7 +53,7 @@ function TableDataRow({
 }
 
 function VirtualizedTableBody({
-  scrollRef,
+  scrollEl,
   listData,
   columns,
   activeTab,
@@ -64,7 +64,7 @@ function VirtualizedTableBody({
   onRowDoubleClick,
 }) {
   const { startIndex, endIndex, paddingTop, paddingBottom } = useVirtualRange(
-    scrollRef,
+    scrollEl,
     listData.length,
     HOME_TABLE_ROW_HEIGHT,
     HOME_TABLE_OVERSCAN
@@ -128,15 +128,21 @@ function HomeTable({
   scrollContainerRef,
 }) {
   const theme = useTheme()
-  const localScrollRef = useRef(null)
+  // Элемент храним в состоянии, чтобы виртуализация перезапустилась,
+  // когда контейнер появится в DOM. Колбэк мемоизирован: иначе React
+  // переподвешивает ref на каждом рендере уже после layout-эффектов детей.
+  const [scrollEl, setScrollEl] = useState(null)
   const virtualized = listData.length > HOME_TABLE_VIRTUAL_THRESHOLD
 
-  const setScrollContainer = (node) => {
-    localScrollRef.current = node
-    if (scrollContainerRef) {
-      scrollContainerRef.current = node
-    }
-  }
+  const setScrollContainer = useCallback(
+    (node) => {
+      setScrollEl(node)
+      if (scrollContainerRef) {
+        scrollContainerRef.current = node
+      }
+    },
+    [scrollContainerRef]
+  )
 
   return (
     <TableContainer
@@ -186,7 +192,7 @@ function HomeTable({
           </TableHead>
           {virtualized ? (
             <VirtualizedTableBody
-              scrollRef={localScrollRef}
+              scrollEl={scrollEl}
               listData={listData}
               columns={columns}
               activeTab={activeTab}
