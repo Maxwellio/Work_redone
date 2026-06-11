@@ -53,7 +53,7 @@ function TableDataRow({
 }
 
 function VirtualizedTableBody({
-  scrollRef,
+  range,
   listData,
   columns,
   activeTab,
@@ -63,12 +63,7 @@ function VirtualizedTableBody({
   onSelectRow,
   onRowDoubleClick,
 }) {
-  const { startIndex, endIndex, paddingTop, paddingBottom } = useVirtualRange(
-    scrollRef,
-    listData.length,
-    HOME_TABLE_ROW_HEIGHT,
-    HOME_TABLE_OVERSCAN
-  )
+  const { startIndex, endIndex, paddingTop, paddingBottom } = range
   const visibleRows = listData.slice(startIndex, endIndex)
 
   return (
@@ -130,6 +125,12 @@ function HomeTable({
   const theme = useTheme()
   const localScrollRef = useRef(null)
   const virtualized = listData.length > HOME_TABLE_VIRTUAL_THRESHOLD
+  const virtualRange = useVirtualRange(
+    localScrollRef,
+    virtualized ? listData.length : 0,
+    HOME_TABLE_ROW_HEIGHT,
+    HOME_TABLE_OVERSCAN
+  )
 
   const setScrollContainer = (node) => {
     localScrollRef.current = node
@@ -186,7 +187,7 @@ function HomeTable({
           </TableHead>
           {virtualized ? (
             <VirtualizedTableBody
-              scrollRef={localScrollRef}
+              range={virtualRange}
               listData={listData}
               columns={columns}
               activeTab={activeTab}
