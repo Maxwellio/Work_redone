@@ -78,9 +78,10 @@ public class FitingService {
     public List<FitingDto> findByTipOrderByNm(int tip, String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, createdFrom, createdTo);
+        BigDecimal tipParam = BigDecimal.valueOf(tip);
+        List<Fiting> fits = range != null
+                ? repository.findByTipOrderByNmAscAndCreatedAtBetween(tipParam, searchParam, range[0], range[1])
+                : repository.findByTipOrderByNmAsc(tipParam, searchParam);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
@@ -90,9 +91,10 @@ public class FitingService {
     public List<FitingDto> findByTipOrderByNm(int tip, String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId, createdFrom, createdTo);
+        BigDecimal tipParam = BigDecimal.valueOf(tip);
+        List<Fiting> fits = range != null
+                ? repository.findByTipOrderByNmAscAndCreatedAtBetween(tipParam, searchParam, userId, range[0], range[1])
+                : repository.findByTipOrderByNmAsc(tipParam, searchParam, userId);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))

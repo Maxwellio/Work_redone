@@ -84,9 +84,10 @@ public class HydrotestService {
     public List<HydrotestDto> findAllOrderByNh(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        return repository.findAllOrderByNhAsc(searchParam, createdFrom, createdTo).stream()
+        List<Hydrotest> rows = range != null
+                ? repository.findAllOrderByNhAscAndCreatedAtBetween(searchParam, range[0], range[1])
+                : repository.findAllOrderByNhAsc(searchParam);
+        return rows.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -94,9 +95,10 @@ public class HydrotestService {
     public List<HydrotestDto> findAllOrderByNh(String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        return repository.findAllOrderByNhAsc(searchParam, userId, createdFrom, createdTo).stream()
+        List<Hydrotest> rows = range != null
+                ? repository.findAllOrderByNhAscAndCreatedAtBetween(searchParam, userId, range[0], range[1])
+                : repository.findAllOrderByNhAsc(searchParam, userId);
+        return rows.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

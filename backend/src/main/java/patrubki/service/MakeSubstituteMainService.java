@@ -85,9 +85,9 @@ public class MakeSubstituteMainService {
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, createdFrom, createdTo);
+        List<MakeSubstituteMain> mains = range != null
+                ? repository.findAllOrderByNameAndCreatedAtBetween(searchParam, range[0], range[1])
+                : repository.findAllOrderByName(searchParam);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
@@ -97,9 +97,9 @@ public class MakeSubstituteMainService {
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, userId, createdFrom, createdTo);
+        List<MakeSubstituteMain> mains = range != null
+                ? repository.findAllOrderByNameAndCreatedAtBetween(searchParam, userId, range[0], range[1])
+                : repository.findAllOrderByName(searchParam, userId);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
