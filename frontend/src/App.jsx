@@ -1,6 +1,9 @@
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import GlobalStyles from '@mui/material/GlobalStyles'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import 'dayjs/locale/ru'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ConfirmProvider } from './context/ConfirmContext'
@@ -14,6 +17,7 @@ import { globalLegacyAnchorStyles, theme } from './theme'
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ru">
       <GlobalStyles styles={(t) => globalLegacyAnchorStyles(t)} />
       <CssBaseline />
       <ConfirmProvider>
@@ -44,6 +48,7 @@ function App() {
           </Routes>
         </AuthProvider>
       </ConfirmProvider>
+      </LocalizationProvider>
     </ThemeProvider>
   )
 }
