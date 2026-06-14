@@ -52,6 +52,7 @@ function HomeTable({
                 <TableCell
                   key={col.key}
                   sortDirection={sortField === col.key ? sortDirection : false}
+                  onClick={col.sortable ? () => onSort(col.key) : undefined}
                   sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
                 >
                   {col.sortable ? (
@@ -59,7 +60,7 @@ function HomeTable({
                       active={sortField === col.key}
                       direction={sortField === col.key ? sortDirection : 'asc'}
                       hideSortIcon={sortField !== col.key}
-                      onClick={() => onSort(col.key)}
+                      sx={{ width: '100%' }}
                     >
                       {col.label}
                     </TableSortLabel>
