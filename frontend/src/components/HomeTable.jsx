@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -8,108 +7,7 @@ import TableRow from '@mui/material/TableRow'
 import TableSortLabel from '@mui/material/TableSortLabel'
 import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
-import {
-  HOME_TABLE_OVERSCAN,
-  HOME_TABLE_ROW_HEIGHT,
-  HOME_TABLE_VIRTUAL_THRESHOLD,
-} from '../constants/tableLayout'
-import { useVirtualRange } from '../hooks/useVirtualRange'
-import { homeGridTableSx, homeGridVirtualRowSx, tablePlaceholderMessageSx } from '../theme'
-
-function TableDataRow({
-  row,
-  id,
-  columns,
-  selectedRowId,
-  formatCell,
-  onSelectRow,
-  onRowDoubleClick,
-  virtualized,
-}) {
-  return (
-    <TableRow
-      key={id}
-      data-row-id={id}
-      selected={selectedRowId === id}
-      onClick={() => onSelectRow(selectedRowId === id ? null : id)}
-      onDoubleClick={() => onRowDoubleClick?.(id)}
-      sx={{
-        cursor: 'pointer',
-        userSelect: 'none',
-        ...(virtualized ? homeGridVirtualRowSx(HOME_TABLE_ROW_HEIGHT) : undefined),
-      }}
-    >
-      {columns.map((col) => {
-        const rawValue = col.getValue ? col.getValue(row) : row[col.key]
-        const displayValue = formatCell(rawValue)
-        return (
-          <TableCell key={col.key} title={virtualized ? displayValue : undefined}>
-            {displayValue}
-          </TableCell>
-        )
-      })}
-    </TableRow>
-  )
-}
-
-function VirtualizedTableBody({
-  scrollRef,
-  listData,
-  columns,
-  activeTab,
-  selectedRowId,
-  getRowId,
-  formatCell,
-  onSelectRow,
-  onRowDoubleClick,
-}) {
-  const { startIndex, endIndex, paddingTop, paddingBottom } = useVirtualRange(
-    scrollRef,
-    listData.length,
-    HOME_TABLE_ROW_HEIGHT,
-    HOME_TABLE_OVERSCAN
-  )
-  const visibleRows = listData.slice(startIndex, endIndex)
-
-  return (
-    <TableBody>
-      {paddingTop > 0 && (
-        <TableRow aria-hidden sx={{ height: paddingTop, pointerEvents: 'none' }}>
-          <TableCell
-            colSpan={columns.length}
-            padding="none"
-            sx={{ border: 'none', p: 0, height: paddingTop, lineHeight: 0 }}
-          />
-        </TableRow>
-      )}
-      {visibleRows.map((row, index) => {
-        const id = getRowId(row, activeTab)
-        return (
-          <TableDataRow
-            key={id ?? startIndex + index}
-            row={row}
-            id={id}
-            columns={columns}
-            selectedRowId={selectedRowId}
-            formatCell={formatCell}
-            onSelectRow={onSelectRow}
-            onRowDoubleClick={onRowDoubleClick}
-            virtualized
-          />
-        )
-      })}
-      {paddingBottom > 0 && (
-        <TableRow aria-hidden sx={{ height: paddingBottom, pointerEvents: 'none' }}>
-          <TableCell
-            colSpan={columns.length}
-            padding="none"
-            sx={{ border: 'none', p: 0, height: paddingBottom, lineHeight: 0 }}
-          />
-        </TableRow>
-      )}
-    </TableBody>
-  )
-}
+import { homeGridTableSx, tablePlaceholderMessageSx } from '../theme'
 
 function HomeTable({
   columns,
@@ -125,22 +23,10 @@ function HomeTable({
   sortField,
   sortDirection,
   onSort,
-  scrollContainerRef,
 }) {
   const theme = useTheme()
-  const localScrollRef = useRef(null)
-  const virtualized = listData.length > HOME_TABLE_VIRTUAL_THRESHOLD
-
-  const setScrollContainer = (node) => {
-    localScrollRef.current = node
-    if (scrollContainerRef) {
-      scrollContainerRef.current = node
-    }
-  }
-
   return (
     <TableContainer
-      ref={setScrollContainer}
       sx={{
         flex: 1,
         minHeight: 0,
@@ -184,38 +70,27 @@ function HomeTable({
               ))}
             </TableRow>
           </TableHead>
-          {virtualized ? (
-            <VirtualizedTableBody
-              scrollRef={localScrollRef}
-              listData={listData}
-              columns={columns}
-              activeTab={activeTab}
-              selectedRowId={selectedRowId}
-              getRowId={getRowId}
-              formatCell={formatCell}
-              onSelectRow={onSelectRow}
-              onRowDoubleClick={onRowDoubleClick}
-            />
-          ) : (
-            <TableBody>
-              {listData.map((row) => {
-                const id = getRowId(row, activeTab)
-                return (
-                  <TableDataRow
-                    key={id}
-                    row={row}
-                    id={id}
-                    columns={columns}
-                    selectedRowId={selectedRowId}
-                    formatCell={formatCell}
-                    onSelectRow={onSelectRow}
-                    onRowDoubleClick={onRowDoubleClick}
-                    virtualized={false}
-                  />
-                )
-              })}
-            </TableBody>
-          )}
+          <TableBody>
+            {listData.map((row) => {
+              const id = getRowId(row, activeTab)
+              return (
+                <TableRow
+                  key={id}
+                  data-row-id={id}
+                  selected={selectedRowId === id}
+                  onClick={() => onSelectRow(selectedRowId === id ? null : id)}
+                  onDoubleClick={() => onRowDoubleClick?.(id)}
+                  sx={{ cursor: 'pointer', userSelect: 'none' }}
+                >
+                  {columns.map((col) => (
+                    <TableCell key={col.key}>
+                      {formatCell(col.getValue ? col.getValue(row) : row[col.key])}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )
+            })}
+          </TableBody>
         </Table>
       )}
     </TableContainer>

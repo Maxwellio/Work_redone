@@ -56,7 +56,6 @@ function Home() {
           sortField={data.sortField}
           sortDirection={data.sortDirection}
           onSort={data.handleSort}
-          scrollContainerRef={data.scrollContainerRef}
         />
 
         <HomeModals

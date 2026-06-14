@@ -1,3 +1,0 @@
-export const HOME_TABLE_ROW_HEIGHT = 41
-export const HOME_TABLE_VIRTUAL_THRESHOLD = 50
-export const HOME_TABLE_OVERSCAN = 5

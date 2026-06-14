@@ -103,21 +103,6 @@ export function globalLegacyAnchorStyles(theme) {
 
 /** Общие паттерны таблиц без отдельного CSS */
 
-export function homeGridVirtualRowSx(rowHeight) {
-  return {
-    height: rowHeight,
-    boxSizing: 'border-box',
-    '& .MuiTableCell-root': {
-      py: 0,
-      height: rowHeight,
-      maxHeight: rowHeight,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
-  }
-}
-
 export function homeGridTableSx(theme) {
   return {
     width: '100%',
