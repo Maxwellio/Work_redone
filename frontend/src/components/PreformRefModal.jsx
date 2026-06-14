@@ -1,4 +1,4 @@
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -21,7 +21,7 @@ function PreformRefModal({ open, onClose, list, loading, error }) {
   const sorted = [...(list || [])].sort((a, b) => (a.idPreform ?? 0) - (b.idPreform ?? 0))
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <DraggableDialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Справочник заготовок
         <IconButton onClick={onClose} aria-label="Закрыть" size="small">
@@ -62,7 +62,7 @@ function PreformRefModal({ open, onClose, list, loading, error }) {
           Закрыть
         </Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

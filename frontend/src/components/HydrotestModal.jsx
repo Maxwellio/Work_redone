@@ -1,4 +1,4 @@
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -68,7 +68,7 @@ function HydrotestModal({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <DraggableDialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {title}
         <IconButton onClick={onClose} aria-label="Закрыть" size="small">
@@ -176,7 +176,7 @@ function HydrotestModal({
         <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)} disabled={calcLoading}>Ок</Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose} disabled={calcLoading}>Отмена</Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

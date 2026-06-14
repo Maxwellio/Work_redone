@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -109,7 +109,7 @@ function TransitionSmallFormModal({
   }
 
   return (
-    <Dialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <DraggableDialog open={open} onClose={saving ? undefined : onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {title}
         <IconButton onClick={onClose} aria-label="Закрыть" size="small" disabled={saving}>
@@ -177,7 +177,7 @@ function TransitionSmallFormModal({
           Отменить
         </Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

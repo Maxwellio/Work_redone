@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -438,7 +438,7 @@ function TransitionLargeFormModal({
   ) : null
 
   return (
-    <Dialog
+    <DraggableDialog
       open={open}
       onClose={saving ? undefined : onClose}
       maxWidth={showNtkPanel ? 'xl' : 'md'}
@@ -487,7 +487,7 @@ function TransitionLargeFormModal({
           Отменить
         </Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

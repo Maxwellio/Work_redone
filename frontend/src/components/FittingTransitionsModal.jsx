@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -258,7 +258,7 @@ function FittingTransitionsModal({
   }
 
   return (
-    <Dialog
+    <DraggableDialog
       open={open}
       onClose={onClose}
       maxWidth="xl"
@@ -414,7 +414,7 @@ function FittingTransitionsModal({
           Закрыть
         </Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

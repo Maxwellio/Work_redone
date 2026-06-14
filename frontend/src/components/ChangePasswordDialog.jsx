@@ -1,4 +1,4 @@
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -13,7 +13,7 @@ function ChangePasswordDialog({ open, onClose, onSubmit }) {
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <DraggableDialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>Смена пароля</DialogTitle>
       <DialogContent dividers>
         <ChangePasswordForm onSubmit={handleSubmit} onCancel={onClose} />
@@ -21,7 +21,7 @@ function ChangePasswordDialog({ open, onClose, onSubmit }) {
       <DialogActions>
         <Box sx={{ flexGrow: 1 }} />
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 

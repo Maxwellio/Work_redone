@@ -1,4 +1,4 @@
-import Dialog from '@mui/material/Dialog'
+import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -15,7 +15,7 @@ function ConfirmDialog({
   onCancel,
 }) {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
+    <DraggableDialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body1">{message}</Typography>
@@ -28,7 +28,7 @@ function ConfirmDialog({
           {confirmLabel}
         </Button>
       </DialogActions>
-    </Dialog>
+    </DraggableDialog>
   )
 }
 
