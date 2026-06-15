@@ -1,0 +1,417 @@
+================================================================================
+  РЕКОМЕНДАЦИИ ПО ОПТИМИЗАЦИИ ЗАПРОСОВ БД (PostgreSQL, схема substitute)
+  Проект: patrubki-backend
+  Дата: 2026-06-15
+================================================================================
+
+Общие сведения
+--------------
+- СУБД: PostgreSQL (jdbc:postgresql, ILIKE/LIKE в запросах).
+- DDL в репозитории отсутствует (spring.jpa.hibernate.ddl-auto: validate).
+  Индексы и колонки добавляются SQL-скриптами на стороне БД
+  (или через Flyway/Liquibase при внедрении миграций).
+- Перед созданием индексов проверьте существующие:
+    SELECT indexname, indexdef
+    FROM pg_indexes
+    WHERE schemaname = 'substitute'
+    ORDER BY tablename, indexname;
+
+- После создания индексов — проверка планов:
+    EXPLAIN (ANALYZE, BUFFERS) <ваш запрос>;
+
+- Расширение для полнотекстового поиска по подстроке (рекомендуется один раз на БД):
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+
+================================================================================
+  1. ПЕРЕВОДНИКИ — substitute.make_substitute_main
+================================================================================
+
+Источник запросов
+-----------------
+  MakeSubstituteMainRepository.findAllOrderByName
+  Эндпоинт: GET /api/substitutes
+
+Типичный SQL (упрощённо):
+  SELECT * FROM substitute.make_substitute_main m
+  WHERE (:search IS NULL OR display_name ILIKE '%' || :search || '%')
+    AND (:createdFrom IS NULL OR (m.created_at >= :createdFrom AND m.created_at < :createdTo))
+    AND (:userId IS NULL OR m.id_user_creator = :userId)
+  ORDER BY nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5;
+
+Дополнительные запросы при загрузке списка (MakeSubstituteMainService):
+  - GROUP BY по make_substitute_detail.id_substitute_prepared (подсчёт переходов)
+  - N+1: preformTypRepository.findById для каждой строки (id_preform)
+
+Узкие места
+-----------
+  1. ILIKE '%текст%' на конкатенации nm_sub1..nm_sub5 — полный скан без trigram.
+  2. ORDER BY по 5 колонкам — отдельная сортировка.
+  3. Условия (:param IS NULL OR ...) — планировщик хуже оптимизирует.
+  4. SELECT * — лишние колонки в ответе.
+  5. Нет пагинации — весь список за один запрос.
+
+Рекомендуемые индексы
+---------------------
+
+-- 1.1 Поиск по составному наименованию (pg_trgm)
+--     Сначала добавить вычисляемую колонку (предпочтительно STORED):
+ALTER TABLE substitute.make_substitute_main
+  ADD COLUMN IF NOT EXISTS display_name text GENERATED ALWAYS AS (
+    COALESCE(nm_sub1, '') || ' - ' || COALESCE(nm_sub2, '') || ' - ' ||
+    COALESCE(nm_sub3, '') || ' x ' || COALESCE(nm_sub4, '') || ' - ' || COALESCE(nm_sub5, '')
+  ) STORED;
+
+CREATE INDEX IF NOT EXISTS idx_msm_display_name_trgm
+  ON substitute.make_substitute_main
+  USING gin (display_name gin_trgm_ops);
+
+-- Альтернатива без новой колонки — GIN по выражению:
+-- CREATE INDEX idx_msm_name_expr_trgm ON substitute.make_substitute_main
+--   USING gin ((COALESCE(nm_sub1,'') || ' - ' || COALESCE(nm_sub2,'') || ' - ' ||
+--               COALESCE(nm_sub3,'') || ' x ' || COALESCE(nm_sub4,'') || ' - ' ||
+--               COALESCE(nm_sub5,'')) gin_trgm_ops);
+
+-- 1.2 Фильтр по месяцу (created_at)
+CREATE INDEX IF NOT EXISTS idx_msm_created_at
+  ON substitute.make_substitute_main (created_at);
+
+-- 1.3 «Мои записи» + месяц
+CREATE INDEX IF NOT EXISTS idx_msm_user_created_at
+  ON substitute.make_substitute_main (id_user_creator, created_at);
+
+-- 1.4 Сортировка по наименованию (без поиска)
+CREATE INDEX IF NOT EXISTS idx_msm_name_sort
+  ON substitute.make_substitute_main (nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+-- 1.5 Комбинированные: фильтр + сортировка (типичные сценарии UI)
+CREATE INDEX IF NOT EXISTS idx_msm_created_name
+  ON substitute.make_substitute_main (created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+CREATE INDEX IF NOT EXISTS idx_msm_user_created_name
+  ON substitute.make_substitute_main (id_user_creator, created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+-- 1.6 JOIN со справочником заготовок (если перенести nm_preform в SQL)
+CREATE INDEX IF NOT EXISTS idx_msm_id_preform
+  ON substitute.make_substitute_main (id_preform);
+
+Рекомендуемые индексы — детали переводника
+------------------------------------------
+  MakeSubstituteDetailRepository.countGroupedBySubstitutePreparedId
+
+CREATE INDEX IF NOT EXISTS idx_msd_substitute_prepared
+  ON substitute.make_substitute_detail (id_substitute_prepared);
+
+Дополнительные меры (уровень приложения / схемы)
+------------------------------------------------
+  - Переписать запрос: display_name ILIKE вместо COALESCE(...) в WHERE.
+  - Объединить подсчёт переходов в один SQL (LEFT JOIN + COUNT) или денормализовать
+    transition_count в main с обновлением триггером/процедурой.
+  - Batch-загрузка preform_typ: findAllById(uniqueIds) вместо findById в цикле.
+  - Разделить репозиторий на отдельные методы без (:x IS NULL OR ...).
+  - Пагинация LIMIT/OFFSET или keyset по (nm_sub1..nm_sub5, id_substitute_prepared).
+
+
+================================================================================
+  2. ПАТРУБКИ И ТРУБЫ — substitute.fiting
+================================================================================
+
+Источник запросов
+-----------------
+  FitingRepository.findByTipOrderByNmAsc
+  Эндпоинты: GET /api/fittings?tip=1 (патрубки), tip=2 (трубы)
+
+Типичный SQL (JPQL → SQL, упрощённо):
+  SELECT * FROM substitute.fiting f
+  WHERE f.tip = :tip
+    AND (:search IS NULL OR LOWER(f.nm) LIKE LOWER('%' || :search || '%'))
+    AND (:createdFrom IS NULL OR (f.created_at >= :createdFrom AND f.created_at < :createdTo))
+    AND (:userId IS NULL OR f.id_user_creator = :userId)
+  ORDER BY f.nm;
+
+Дополнительные запросы (FitingService):
+  - GROUP BY по fiting_detail.id_fiting (подсчёт переходов)
+  - N+1: preformTypRepository.findById для каждой строки
+
+Особенность
+-----------
+  Колонка tip всегда в WHERE (1 = патрубки, 2 = трубы).
+  Индексы должны начинаться с tip — иначе планировщик не сможет эффективно
+  отфильтровать половину таблицы.
+
+Узкие места
+-----------
+  1. LIKE '%текст%' по nm — без trigram только Seq Scan внутри tip.
+  2. ORDER BY nm после фильтрации.
+  3. Те же проблемы: (:param IS NULL OR ...), SELECT *, нет пагинации.
+
+Рекомендуемые индексы — fiting
+------------------------------
+
+-- 2.1 Базовый: тип + сортировка (список без поиска, без месяца)
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_nm
+  ON substitute.fiting (tip, nm);
+
+-- 2.2 Тип + месяц + сортировка
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_created_nm
+  ON substitute.fiting (tip, created_at, nm);
+
+-- 2.3 Тип + пользователь + месяц + сортировка («мои записи»)
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_user_created_nm
+  ON substitute.fiting (tip, id_user_creator, created_at, nm);
+
+-- 2.4 Поиск по наименованию (pg_trgm) — отдельно для каждого tip не нужно,
+--     trigram-индекс по nm с префиксом tip в составном индексе:
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_nm_trgm
+  ON substitute.fiting
+  USING gin (tip, nm gin_trgm_ops);
+-- Примечание: составной GIN (tip, nm) поддерживается в PG 11+.
+-- Альтернатива — два частичных индекса (если tip только 1 и 2):
+
+CREATE INDEX IF NOT EXISTS idx_fiting_tip1_nm_trgm
+  ON substitute.fiting
+  USING gin (nm gin_trgm_ops)
+  WHERE tip = 1;
+
+CREATE INDEX IF NOT EXISTS idx_fiting_tip2_nm_trgm
+  ON substitute.fiting
+  USING gin (nm gin_trgm_ops)
+  WHERE tip = 2;
+
+-- 2.5 Справочник заготовок (при JOIN или batch в Java)
+CREATE INDEX IF NOT EXISTS idx_fiting_id_preform
+  ON substitute.fiting (id_preform);
+
+-- 2.6 Фильтр только по создателю (если используется отдельно)
+CREATE INDEX IF NOT EXISTS idx_fiting_id_user_creator
+  ON substitute.fiting (id_user_creator);
+
+Рекомендуемые индексы — детали патрубка/трубы
+----------------------------------------------
+  FitingDetailRepository.countGroupedByFitingId
+  FitingDetailRepository.findByIdFiting_IdFitingOrderBySeqNumOperAsc
+
+CREATE INDEX IF NOT EXISTS idx_fiting_detail_id_fiting
+  ON substitute.fiting_detail (id_fiting);
+
+-- Для загрузки переходов с сортировкой по операции:
+CREATE INDEX IF NOT EXISTS idx_fiting_detail_fiting_seq
+  ON substitute.fiting_detail (id_fiting, seq_num_oper);
+
+Дополнительные меры
+-------------------
+  - Для поиска: WHERE f.tip = :tip AND f.nm ILIKE '%' || :search || '%'
+    (вместо LOWER(...) LIKE LOWER(...) — проще для trigram в PostgreSQL).
+  - Batch preform_typ, один SQL с LEFT JOIN preform_typ.
+  - Денормализация transition_count на fiting (как для переводников).
+  - Пагинация на списке.
+
+
+================================================================================
+  3. ГИДРОИСПЫТАНИЯ — substitute.hydrotest
+================================================================================
+
+Источник запросов
+-----------------
+  HydrotestRepository.findAllOrderByNhAsc
+  Эндпоинт: GET /api/hydrotests
+
+Типичный SQL (упрощённо):
+  SELECT * FROM substitute.hydrotest h
+  WHERE (:search IS NULL OR LOWER(h.nh) LIKE LOWER('%' || :search || '%'))
+    AND (:createdFrom IS NULL OR (h.created_at >= :createdFrom AND h.created_at < :createdTo))
+    AND (:userId IS NULL OR h.id_user_creator = :userId)
+  ORDER BY h.nh;
+
+Дополнительные запросы при загрузке списка: нет (только toDto, без detail/count).
+
+Узкие места
+-----------
+  1. LIKE '%текст%' по nh — главный bottleneck при поиске.
+  2. ORDER BY nh.
+  3. (:param IS NULL OR ...), SELECT *, нет пагинации.
+
+Рекомендуемые индексы — hydrotest
+---------------------------------
+
+-- 3.1 Сортировка списка без фильтров
+CREATE INDEX IF NOT EXISTS idx_hydrotest_nh
+  ON substitute.hydrotest (nh);
+
+-- 3.2 Фильтр по месяцу + сортировка
+CREATE INDEX IF NOT EXISTS idx_hydrotest_created_nh
+  ON substitute.hydrotest (created_at, nh);
+
+-- 3.3 «Мои записи» + месяц + сортировка
+CREATE INDEX IF NOT EXISTS idx_hydrotest_user_created_nh
+  ON substitute.hydrotest (id_user_creator, created_at, nh);
+
+-- 3.4 Поиск по наименованию nh (pg_trgm)
+CREATE INDEX IF NOT EXISTS idx_hydrotest_nh_trgm
+  ON substitute.hydrotest
+  USING gin (nh gin_trgm_ops);
+
+-- 3.5 Фильтр по создателю
+CREATE INDEX IF NOT EXISTS idx_hydrotest_id_user_creator
+  ON substitute.hydrotest (id_user_creator);
+
+Дополнительные меры
+-------------------
+  - Заменить LOWER(nh) LIKE на nh ILIKE для использования trigram.
+  - Пагинация при росте таблицы.
+  - Раздельные методы репозитория под комбинации фильтров.
+
+
+================================================================================
+  4. СВОДНЫЙ СКРИПТ (выполнять поэтапно, проверяя EXPLAIN)
+================================================================================
+
+-- Расширение
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- ---------- make_substitute_main ----------
+ALTER TABLE substitute.make_substitute_main
+  ADD COLUMN IF NOT EXISTS display_name text GENERATED ALWAYS AS (
+    COALESCE(nm_sub1, '') || ' - ' || COALESCE(nm_sub2, '') || ' - ' ||
+    COALESCE(nm_sub3, '') || ' x ' || COALESCE(nm_sub4, '') || ' - ' || COALESCE(nm_sub5, '')
+  ) STORED;
+
+CREATE INDEX IF NOT EXISTS idx_msm_display_name_trgm
+  ON substitute.make_substitute_main USING gin (display_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_msm_created_at
+  ON substitute.make_substitute_main (created_at);
+CREATE INDEX IF NOT EXISTS idx_msm_user_created_at
+  ON substitute.make_substitute_main (id_user_creator, created_at);
+CREATE INDEX IF NOT EXISTS idx_msm_name_sort
+  ON substitute.make_substitute_main (nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+CREATE INDEX IF NOT EXISTS idx_msm_created_name
+  ON substitute.make_substitute_main (created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+CREATE INDEX IF NOT EXISTS idx_msm_user_created_name
+  ON substitute.make_substitute_main (id_user_creator, created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+CREATE INDEX IF NOT EXISTS idx_msm_id_preform
+  ON substitute.make_substitute_main (id_preform);
+
+CREATE INDEX IF NOT EXISTS idx_msd_substitute_prepared
+  ON substitute.make_substitute_detail (id_substitute_prepared);
+
+-- ---------- fiting (патрубки tip=1, трубы tip=2) ----------
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_nm
+  ON substitute.fiting (tip, nm);
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_created_nm
+  ON substitute.fiting (tip, created_at, nm);
+CREATE INDEX IF NOT EXISTS idx_fiting_tip_user_created_nm
+  ON substitute.fiting (tip, id_user_creator, created_at, nm);
+CREATE INDEX IF NOT EXISTS idx_fiting_tip1_nm_trgm
+  ON substitute.fiting USING gin (nm gin_trgm_ops) WHERE tip = 1;
+CREATE INDEX IF NOT EXISTS idx_fiting_tip2_nm_trgm
+  ON substitute.fiting USING gin (nm gin_trgm_ops) WHERE tip = 2;
+CREATE INDEX IF NOT EXISTS idx_fiting_id_preform
+  ON substitute.fiting (id_preform);
+
+CREATE INDEX IF NOT EXISTS idx_fiting_detail_id_fiting
+  ON substitute.fiting_detail (id_fiting);
+CREATE INDEX IF NOT EXISTS idx_fiting_detail_fiting_seq
+  ON substitute.fiting_detail (id_fiting, seq_num_oper);
+
+-- ---------- hydrotest ----------
+CREATE INDEX IF NOT EXISTS idx_hydrotest_nh
+  ON substitute.hydrotest (nh);
+CREATE INDEX IF NOT EXISTS idx_hydrotest_created_nh
+  ON substitute.hydrotest (created_at, nh);
+CREATE INDEX IF NOT EXISTS idx_hydrotest_user_created_nh
+  ON substitute.hydrotest (id_user_creator, created_at, nh);
+CREATE INDEX IF NOT EXISTS idx_hydrotest_nh_trgm
+  ON substitute.hydrotest USING gin (nh gin_trgm_ops);
+
+
+================================================================================
+  5. ПРИОРИТЕТ ВНЕДРЕНИЯ
+================================================================================
+
+  Высокий (максимальный эффект при поиске и фильтре по месяцу):
+    - pg_trgm + display_name на make_substitute_main
+    - pg_trgm на fiting.nm (частичные по tip) и hydrotest.nh
+    - created_at / (tip, created_at) / (id_user_creator, created_at)
+    - id_substitute_prepared на make_substitute_detail
+    - id_fiting на fiting_detail
+
+  Средний (ускорение сортировки и типичных списков без поиска):
+    - Составные индексы с ORDER BY колонками в хвосте
+    - idx_fiting_tip_nm, idx_hydrotest_nh, idx_msm_name_sort
+
+  Низкий (архитектурные улучшения):
+    - Пагинация API
+    - Устранение N+1 по preform_typ
+    - Денормализация transition_count
+    - Разделение запросов по сценариям фильтрации
+
+
+================================================================================
+  6. ПРИМЕРЫ EXPLAIN ДЛЯ ПРОВЕРКИ
+================================================================================
+
+-- Переводники: месяц без поиска
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM substitute.make_substitute_main m
+WHERE m.created_at >= '2025-06-01' AND m.created_at < '2025-07-01'
+ORDER BY nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5;
+
+-- Переводники: поиск + месяц (после display_name + trigram)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM substitute.make_substitute_main m
+WHERE m.display_name ILIKE '%DN%'
+  AND m.created_at >= '2025-06-01' AND m.created_at < '2025-07-01'
+ORDER BY nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5;
+
+-- Патрубки (tip=1), месяц
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM substitute.fiting f
+WHERE f.tip = 1
+  AND f.created_at >= '2025-06-01' AND f.created_at < '2025-07-01'
+ORDER BY f.nm;
+
+-- Трубы (tip=2), поиск
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM substitute.fiting f
+WHERE f.tip = 2 AND f.nm ILIKE '%325%'
+ORDER BY f.nm;
+
+-- Гидроиспытания, поиск
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM substitute.hydrotest h
+WHERE h.nh ILIKE '%исп%'
+ORDER BY h.nh;
+
+-- Подсчёт переходов (переводники)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id_substitute_prepared, COUNT(*)
+FROM substitute.make_substitute_detail
+WHERE id_substitute_prepared IN (1, 2, 3, 4, 5)
+GROUP BY id_substitute_prepared;
+
+-- Подсчёт переходов (патрубки/трубы)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT id_fiting, COUNT(*)
+FROM substitute.fiting_detail
+WHERE id_fiting IN (1, 2, 3, 4, 5)
+GROUP BY id_fiting;
+
+
+================================================================================
+  7. ССЫЛКИ НА КОД ПРИЛОЖЕНИЯ
+================================================================================
+
+  backend/src/main/java/patrubki/repository/MakeSubstituteMainRepository.java
+  backend/src/main/java/patrubki/repository/MakeSubstituteDetailRepository.java
+  backend/src/main/java/patrubki/service/MakeSubstituteMainService.java
+
+  backend/src/main/java/patrubki/repository/FitingRepository.java
+  backend/src/main/java/patrubki/repository/FitingDetailRepository.java
+  backend/src/main/java/patrubki/service/FitingService.java
+
+  backend/src/main/java/patrubki/repository/HydrotestRepository.java
+  backend/src/main/java/patrubki/service/HydrotestService.java
+
+  frontend/src/hooks/useHomeData.js — debounce поиска 350 ms, фильтры month/user
+
+================================================================================
