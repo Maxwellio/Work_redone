@@ -1,0 +1,396 @@
+Рекомендации по оптимизации запросов БД для make_substitute_main, fiting, hydrotest
+================================================================================
+
+Контекст анализа
+----------------
+Проанализированы backend-запросы:
+- backend/src/main/java/patrubki/repository/MakeSubstituteMainRepository.java
+- backend/src/main/java/patrubki/repository/FitingRepository.java
+- backend/src/main/java/patrubki/repository/HydrotestRepository.java
+- backend/src/main/java/patrubki/repository/MakeSubstituteDetailRepository.java
+- backend/src/main/java/patrubki/repository/FitingDetailRepository.java
+- backend/src/main/java/patrubki/repository/FitingDetailNtkRepository.java
+- backend/src/main/java/patrubki/service/MakeSubstituteMainService.java
+- backend/src/main/java/patrubki/service/FitingService.java
+- backend/src/main/java/patrubki/service/HydrotestService.java
+- backend/src/main/java/patrubki/service/FitingDetailService.java
+- backend/src/main/java/patrubki/service/MakeSubstituteDetailService.java
+- backend/src/main/java/patrubki/service/NtkService.java
+
+БД: PostgreSQL. В репозитории миграции не найдены, поэтому ниже приведены
+рекомендации и SQL-примеры для проверки/применения в БД.
+
+Перед применением
+-----------------
+1. Проверить существующие индексы, чтобы не создать дубликаты:
+
+   SELECT schemaname, tablename, indexname, indexdef
+   FROM pg_indexes
+   WHERE schemaname = 'substitute'
+     AND tablename IN (
+       'make_substitute_main',
+       'make_substitute_detail',
+       'fiting',
+       'fiting_detail',
+       'fiting_detail_ntk',
+       'hydrotest',
+       'ntk'
+     )
+   ORDER BY tablename, indexname;
+
+2. Сравнить планы до/после через EXPLAIN (ANALYZE, BUFFERS) на реальных
+   параметрах: без поиска, с поиском, с фильтром месяца, с фильтром "только мои".
+
+3. Для production желательно создавать индексы через CONCURRENTLY.
+   Важно: CREATE INDEX CONCURRENTLY нельзя выполнять внутри транзакции.
+
+
+1. substitute.make_substitute_main
+----------------------------------
+Текущий список переводников:
+- фильтр по поиску:
+  (COALESCE(nm_sub1, '') || ' - ' || ... || COALESCE(nm_sub5, '')) ILIKE '%search%'
+- опциональный фильтр по created_at
+- опциональный фильтр по id_user_creator
+- сортировка:
+  ORDER BY nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5
+
+1.1. Индексы для обычной выдачи без текстового поиска
+
+Если часто открывается общий список без фильтра месяца:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_name
+   ON substitute.make_substitute_main
+   (nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+Если часто используется "только мои" без фильтра месяца:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_user_name
+   ON substitute.make_substitute_main
+   (id_user_creator, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+Если основной сценарий - выдача за выбранный месяц:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_created_name
+   ON substitute.make_substitute_main
+   (created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+Если основной сценарий - "только мои" + выбранный месяц:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_user_created_name
+   ON substitute.make_substitute_main
+   (id_user_creator, created_at, nm_sub1, nm_sub2, nm_sub3, nm_sub4, nm_sub5);
+
+Не обязательно создавать все четыре индекса сразу. Лучше начать с тех,
+которые соответствуют самым частым фильтрам в интерфейсе, затем проверить
+pg_stat_user_indexes и EXPLAIN.
+
+1.2. Индекс для поиска ILIKE '%...%' по составному названию
+
+Обычный btree-индекс не помогает при поиске по подстроке с шаблоном '%search%'.
+Для такого поиска в PostgreSQL лучше использовать pg_trgm + GIN.
+
+Сначала один раз включить расширение:
+
+   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+Затем создать expression GIN index ровно под выражение из запроса:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_full_name_trgm
+   ON substitute.make_substitute_main
+   USING gin ((
+     COALESCE(nm_sub1, '') || ' - ' ||
+     COALESCE(nm_sub2, '') || ' - ' ||
+     COALESCE(nm_sub3, '') || ' x ' ||
+     COALESCE(nm_sub4, '') || ' - ' ||
+     COALESCE(nm_sub5, '')
+   ) gin_trgm_ops);
+
+Альтернатива для более стабильного плана: добавить generated column, например
+full_name_search, в котором хранить это составное имя, и индексировать уже его.
+Это упростит запрос и уменьшит риск, что PostgreSQL не сопоставит выражение
+в WHERE с expression index.
+
+Пример идеи:
+
+   ALTER TABLE substitute.make_substitute_main
+   ADD COLUMN full_name_search text GENERATED ALWAYS AS (
+     COALESCE(nm_sub1, '') || ' - ' ||
+     COALESCE(nm_sub2, '') || ' - ' ||
+     COALESCE(nm_sub3, '') || ' x ' ||
+     COALESCE(nm_sub4, '') || ' - ' ||
+     COALESCE(nm_sub5, '')
+   ) STORED;
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_msm_full_name_search_trgm
+   ON substitute.make_substitute_main
+   USING gin (full_name_search gin_trgm_ops);
+
+Такое изменение нужно сначала проверить на тестовой БД, потому что ALTER TABLE
+с generated column может быть тяжелым на большой таблице.
+
+
+2. substitute.fiting
+--------------------
+Текущий список патрубков/труб:
+- обязательный фильтр tip = :tip
+- опциональный поиск LOWER(nm) LIKE LOWER('%search%')
+- опциональный фильтр по id_user_creator
+- опциональный фильтр по created_at
+- сортировка ORDER BY nm
+
+2.1. Индексы для обычной выдачи без текстового поиска
+
+Базовый индекс для вкладок "Патрубки" и "Трубы":
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_tip_nm
+   ON substitute.fiting (tip, nm);
+
+Если часто используется "только мои":
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_tip_user_nm
+   ON substitute.fiting (tip, id_user_creator, nm);
+
+Если часто используется фильтр месяца:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_tip_created_nm
+   ON substitute.fiting (tip, created_at, nm);
+
+Если часто используется "только мои" + месяц:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_tip_user_created_nm
+   ON substitute.fiting (tip, id_user_creator, created_at, nm);
+
+Практический порядок внедрения:
+1) idx_fiting_tip_nm;
+2) idx_fiting_tip_user_nm, если showMyRecords используется часто;
+3) индексы с created_at, если фильтр месяца используется часто и EXPLAIN
+   показывает Seq Scan/дорогую сортировку.
+
+2.2. Индекс для поиска по nm
+
+Для LOWER(nm) LIKE LOWER('%search%') нужен trigram expression index:
+
+   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_lower_nm_trgm
+   ON substitute.fiting
+   USING gin (lower(nm) gin_trgm_ops);
+
+После этого желательно оставить в запросе именно lower(nm) LIKE lower(...)
+или перейти на nm ILIKE ..., но индекс должен соответствовать выражению
+в WHERE.
+
+
+3. substitute.hydrotest
+-----------------------
+Текущий список гидроиспытаний:
+- опциональный поиск LOWER(nh) LIKE LOWER('%search%')
+- опциональный фильтр по id_user_creator
+- опциональный фильтр по created_at
+- сортировка ORDER BY nh
+
+3.1. Индексы для обычной выдачи без текстового поиска
+
+Базовый индекс для сортировки списка:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hydrotest_nh
+   ON substitute.hydrotest (nh);
+
+Если часто используется "только мои":
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hydrotest_user_nh
+   ON substitute.hydrotest (id_user_creator, nh);
+
+Если часто используется фильтр месяца:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hydrotest_created_nh
+   ON substitute.hydrotest (created_at, nh);
+
+Если часто используется "только мои" + месяц:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hydrotest_user_created_nh
+   ON substitute.hydrotest (id_user_creator, created_at, nh);
+
+3.2. Индекс для поиска по nh
+
+   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hydrotest_lower_nh_trgm
+   ON substitute.hydrotest
+   USING gin (lower(nh) gin_trgm_ops);
+
+
+4. Таблицы деталей для подсчета и открытия переходов
+----------------------------------------------------
+Списки make_substitute_main и fiting после основной выборки дополнительно
+запрашивают количество переходов:
+- make_substitute_detail: WHERE id_substitute_prepared IN (...) GROUP BY id_substitute_prepared
+- fiting_detail: WHERE id_fiting IN (...) GROUP BY id_fiting
+
+Также при открытии карточки выполняется:
+- make_substitute_detail WHERE id_substitute_prepared = ? ORDER BY seq_num_oper
+- fiting_detail WHERE id_fiting = ? ORDER BY seq_num_oper
+
+Рекомендуемые индексы:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_make_substitute_detail_parent_seq
+   ON substitute.make_substitute_detail (id_substitute_prepared, seq_num_oper);
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_detail_parent_seq
+   ON substitute.fiting_detail (id_fiting, seq_num_oper);
+
+Эти индексы помогают и для подсчета, и для загрузки деталей в нужном порядке.
+
+Для связей NTK:
+
+   -- Проверить, есть ли уже PRIMARY KEY/UNIQUE (id_fiting_detail, id_ntk).
+   -- Если нет, добавить уникальный индекс:
+   CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS idx_fiting_detail_ntk_detail_ntk
+   ON substitute.fiting_detail_ntk (id_fiting_detail, id_ntk);
+
+Он покрывает:
+- findByIdFitingDetailOrderByIdNtkAsc
+- existsByIdFitingDetailAndIdNtk
+- deleteByIdFitingDetailAndIdNtk
+
+
+5. Таблица substitute.ntk
+-------------------------
+Для панели NTK используется запрос:
+
+   SELECT ...
+   FROM substitute.ntk
+   WHERE d = (SELECT MIN(d) FROM substitute.ntk WHERE d >= ?)
+
+Чтобы быстро находить ближайший d >= d_stan и затем строки с этим d:
+
+   CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ntk_d
+   ON substitute.ntk (d);
+
+Можно также переписать запрос в два шага внутри SQL через CTE/LATERAL, чтобы
+план был очевиднее:
+
+   WITH nearest AS (
+     SELECT d
+     FROM substitute.ntk
+     WHERE d >= ?
+     ORDER BY d
+     LIMIT 1
+   )
+   SELECT n.id_ntk, (n.nm || ': ' || n.ntk::varchar) AS nm, n.d, n.ntk, n.poz, n.ind
+   FROM substitute.ntk n
+   JOIN nearest x ON x.d = n.d
+   ORDER BY n.id_ntk;
+
+При индексе idx_ntk_d это обычно быстрее и понятнее, чем MIN(d), особенно на
+большой таблице.
+
+
+6. Изменения запросов/кода без изменения бизнес-логики
+------------------------------------------------------
+
+6.1. Убрать шаблон "(:param IS NULL OR ...)" из основных списков
+
+Сейчас запросы содержат условия вида:
+- (:search IS NULL OR :search = '' OR ...)
+- (:createdFrom IS NULL OR ...)
+- (:userId IS NULL OR ...)
+
+Такой универсальный запрос удобен, но часто мешает PostgreSQL выбрать лучший
+индекс. Более быстрый вариант - строить WHERE динамически и добавлять только
+активные фильтры. Например, отдельные запросы/Specification/Criteria для:
+- без search/userId/month;
+- только userId;
+- только month;
+- userId + month;
+- search + остальные фильтры.
+
+Это не меняет функциональность ответа, но делает планы предсказуемее и лучше
+использует btree/trigram индексы.
+
+6.2. Не использовать SELECT * для make_substitute_main
+
+В MakeSubstituteMainRepository сейчас native query делает SELECT *.
+Лучше перечислить только реально используемые поля или перейти на DTO projection.
+Это уменьшает объем чтения из таблицы и сетевой/ORM overhead.
+
+6.3. Уменьшить N+1 при заполнении nmPreform
+
+В MakeSubstituteMainService.toDto и FitingService.toDto на каждую строку списка
+выполняется preformTypRepository.findById(idPreform). Даже если справочник
+маленький, на больших списках это лишние запросы.
+
+Безопасные варианты:
+- загрузить все preform_typ один раз в Map<Integer, String> перед stream();
+- сделать LEFT JOIN substitute.preform_typ в основном запросе и вернуть nm_preform
+  сразу в DTO projection;
+- если справочник почти неизменяемый, закэшировать его на backend-уровне.
+
+6.4. Уменьшить N+1 при расчете t_sum в деталях
+
+MakeSubstituteDetailService.toDto:
+- для каждой строки вызывается operationStructureSprRepository.findById(idOps);
+- затем вызывается функция calculate_tsum.
+
+FitingDetailService.toDto:
+- для каждой строки запрашиваются fiting_detail_ntk по id_fiting_detail;
+- затем вызывается calculate_tsum_ntk.
+
+Для ускорения открытия карточек:
+- подтягивать operation_structure_spr через JOIN FETCH или batch-запросом;
+- для fiting_detail_ntk загрузить все связи для списка деталей одним запросом
+  WHERE id_fiting_detail IN (...), затем сгруппировать в памяти;
+- если t_sum можно хранить/обновлять при сохранении детали или при вызове
+  calc_*_time, лучше отдавать сохраненное значение, а не пересчитывать его
+  на каждое открытие списка.
+
+6.5. Добавить серверную пагинацию или ограничение размера ответа
+
+Сейчас endpoints /substitutes, /fittings, /hydrotests возвращают весь список.
+При росте таблиц индексы ускорят поиск, но передача и рендеринг большого JSON
+останутся дорогими. Безопасный путь:
+- добавить page/size с дефолтом;
+- сохранить обратную совместимость: если page/size не переданы, временно
+  оставлять старое поведение или использовать разумный лимит после согласования;
+- на frontend подгружать страницы или виртуализировать таблицу.
+
+
+7. Приоритет внедрения
+----------------------
+1. Для быстрого эффекта:
+   - idx_fiting_tip_nm
+   - idx_hydrotest_nh
+   - idx_msm_name
+   - idx_make_substitute_detail_parent_seq
+   - idx_fiting_detail_parent_seq
+
+2. Если часто используются "только мои" и фильтр месяца:
+   - соответствующие индексы с id_user_creator и created_at из разделов 1-3.
+
+3. Если пользователи активно ищут по строке:
+   - включить pg_trgm;
+   - создать trigram-индексы для make_substitute_main, fiting.nm, hydrotest.nh.
+
+4. Если медленно открываются карточки с переходами:
+   - индекс fiting_detail_ntk (если нет PK/unique);
+   - убрать N+1 по preform_typ, operation_structure_spr, fiting_detail_ntk;
+   - рассмотреть хранение/выдачу уже рассчитанного t_sum.
+
+5. После каждого шага:
+   - EXPLAIN (ANALYZE, BUFFERS);
+   - pg_stat_user_indexes;
+   - сравнить время API /substitutes, /fittings, /hydrotests на реальных
+     сценариях интерфейса.
+
+
+Итог
+----
+Наиболее безопасные изменения, которые не ломают функционал:
+- добавить btree-индексы под фильтры tip/userId/created_at и сортировки name/nh;
+- добавить composite-индексы деталей по parent_id + seq_num_oper;
+- добавить pg_trgm GIN индексы для поиска по подстроке;
+- переписать универсальные WHERE с OR-проверками параметров на динамические
+  запросы;
+- убрать N+1 запросы при построении DTO;
+- постепенно добавить пагинацию для больших списков.
