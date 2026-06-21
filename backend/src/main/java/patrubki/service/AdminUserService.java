@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 @Service
 public class AdminUserService {
 
+    private static final String RESET_PASSWORD_PLAINTEXT = "123";
+
     private final UserRepository userRepository;
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
@@ -33,6 +35,22 @@ public class AdminUserService {
         return userRepository.findAllForAdminList().stream()
                 .map(this::toListItem)
                 .collect(Collectors.toList());
+    }
+
+    public void resetPassword(Integer usersId) {
+        if (usersId == null) {
+            throw new IllegalArgumentException("usersId обязателен");
+        }
+        userRepository.findById(usersId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        String hash = passwordEncoder.encode(RESET_PASSWORD_PLAINTEXT);
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall("call substitute.reset_password(?, ?)");
+            cs.setInt(1, usersId);
+            cs.setString(2, hash);
+            cs.execute();
+            return null;
+        });
     }
 
     public Integer saveUser(AdminUserSaveDto dto) {

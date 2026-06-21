@@ -2,6 +2,9 @@ import CloseIcon from '@mui/icons-material/Close'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import InputLabel from '@mui/material/InputLabel'
@@ -13,7 +16,8 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
-import { saveAdminUser } from '../api/adminUsers'
+import DraggableDialog from '../../../components/DraggableDialog'
+import { resetAdminUserPassword, saveAdminUser } from '../api/adminUsers'
 import { ensureAdminOrgStruct, ensureAdminRoles } from '../api/adminReferenceCache'
 import { NM_USER } from '../constants'
 
@@ -30,9 +34,9 @@ function today() {
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
- * @param {{ selectedUser: object | null, isNewUserDraft?: boolean, onSaved?: () => Promise<void> | void }} props
+ * @param {{ selectedUser: object | null, isNewUserDraft?: boolean, onSaved?: () => Promise<void> | void, onRefreshed?: () => Promise<void> | void }} props
  */
-export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSaved }) {
+export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSaved, onRefreshed }) {
   const [roles, setRoles] = useState([])
   const [orgChoices, setOrgChoices] = useState([])
   const [refsLoading, setRefsLoading] = useState(true)
@@ -51,6 +55,9 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
   const [isFirstLogin, setIsFirstLogin] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false)
+  const [resetting, setResetting] = useState(false)
+  const [resetError, setResetError] = useState(null)
 
   const applyDefaultsForAdd = useCallback((roleList) => {
     if (!roleList || roleList.length === 0) return
@@ -137,6 +144,23 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     }
   }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, roleId, selectedUser?.usersId, telefon, userName])
 
+  const handleResetPasswordConfirm = useCallback(async () => {
+    if (!selectedUser?.usersId) return
+    setResetConfirmOpen(false)
+    setResetting(true)
+    setResetError(null)
+    try {
+      await resetAdminUserPassword(selectedUser.usersId)
+      if (onRefreshed) {
+        await onRefreshed()
+      }
+    } catch (e) {
+      setResetError(e instanceof Error ? e.message : 'Не удалось сбросить пароль')
+    } finally {
+      setResetting(false)
+    }
+  }, [onRefreshed, selectedUser?.usersId])
+
   const title = isNewUserDraft
     ? 'Новый пользователь'
     : `Пользователь #${selectedUser.usersId}`
@@ -158,6 +182,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
       </Typography>
 
       {saveError && <Alert severity="error">{saveError}</Alert>}
+      {resetError && <Alert severity="error">{resetError}</Alert>}
 
       <FormControl size="small" fullWidth>
         <InputLabel id="admin-form-role-label">Роль пользователя программы</InputLabel>
@@ -217,7 +242,11 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         onChange={(e) => setPassword(e.target.value)}
         fullWidth
         autoComplete="new-password"
-        helperText="Для существующего пользователя: оставьте пустым или введите новый пароль. Хэш не подставляется."
+        helperText={
+          isNewUserDraft
+            ? undefined
+            : 'Для существующего пользователя: оставьте пустым или введите новый пароль. Хэш не подставляется.'
+        }
       />
 
       <TextField
@@ -315,6 +344,41 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
       >
         {saving ? 'Сохранение…' : isNewUserDraft ? 'Добавить' : 'Сохранить'}
       </Button>
+
+      {!isNewUserDraft && (
+        <Button
+          type="button"
+          variant="outlined"
+          size="medium"
+          fullWidth
+          disabled={saving || resetting}
+          onClick={() => setResetConfirmOpen(true)}
+        >
+          {resetting ? 'Сброс…' : 'Сбросить пароль'}
+        </Button>
+      )}
+
+      <DraggableDialog
+        open={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Сброс пароля</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1">
+            {`Вы уверены, что хотите сбросить пароль пользователя ${userName}?`}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button variant="outlined" color="inherit" onClick={() => setResetConfirmOpen(false)}>
+            Отмена
+          </Button>
+          <Button variant="contained" onClick={handleResetPasswordConfirm} autoFocus>
+            Да
+          </Button>
+        </DialogActions>
+      </DraggableDialog>
     </Stack>
   )
 }

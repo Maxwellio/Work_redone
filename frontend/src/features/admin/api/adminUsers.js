@@ -13,3 +13,12 @@ export function saveAdminUser(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+/** @param {number} usersId @returns {Promise<{ok:boolean}>} POST /api/admin/users/reset-password */
+export function resetAdminUserPassword(usersId) {
+  return requestJson('/admin/users/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usersId }),
+  })
+}

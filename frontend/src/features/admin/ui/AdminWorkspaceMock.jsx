@@ -146,6 +146,10 @@ export function AdminWorkspaceMock() {
     setIsAddUserOpen(false)
   }, [load])
 
+  const handleUserRefreshed = useCallback(async () => {
+    await load()
+  }, [load])
+
   return (
     <Stack
       direction={{ xs: 'column', md: 'row' }}
@@ -395,6 +399,7 @@ export function AdminWorkspaceMock() {
             selectedUser={selected}
             isNewUserDraft={isAddUserOpen && selected == null}
             onSaved={handleUserSaved}
+            onRefreshed={handleUserRefreshed}
           />
         </Box>
       )}

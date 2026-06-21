@@ -13,6 +13,7 @@ import patrubki.service.AdminReferenceService;
 import patrubki.service.AdminUserService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -35,6 +36,12 @@ public class AdminUserController {
     public java.util.Map<String, Integer> saveUser(@RequestBody AdminUserSaveDto body) {
         Integer id = adminUserService.saveUser(body);
         return java.util.Map.of("id", id);
+    }
+
+    @PostMapping("/users/reset-password")
+    public Map<String, Boolean> resetPassword(@RequestBody Map<String, Integer> body) {
+        adminUserService.resetPassword(body.get("usersId"));
+        return Map.of("ok", true);
     }
 
     @GetMapping("/roles")
