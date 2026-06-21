@@ -62,6 +62,7 @@ export function AdminWorkspaceMock() {
   const [orgRefsError, setOrgRefsError] = useState(null)
   const [orgFilterId, setOrgFilterId] = useState(null)
   const [roleFilter, setRoleFilter] = useState('none')
+  const [activeFilter, setActiveFilter] = useState('none')
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
 
   const load = useCallback(async () => {
@@ -111,6 +112,11 @@ export function AdminWorkspaceMock() {
     } else if (roleFilter === 'user') {
       list = list.filter((u) => u.roleName === NM_USER)
     }
+    if (activeFilter === 'active') {
+      list = list.filter((u) => u.active === 1)
+    } else if (activeFilter === 'inactive') {
+      list = list.filter((u) => u.active !== 1)
+    }
     const q = searchQuery.trim().toLowerCase()
     if (!q) return list
     return list.filter((u) => {
@@ -127,7 +133,7 @@ export function AdminWorkspaceMock() {
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [users, orgFilterId, roleFilter, searchQuery])
+  }, [users, orgFilterId, roleFilter, activeFilter, searchQuery])
 
   const selected = useMemo(
     () => users.find((u) => u.usersId === selectedUsersId) ?? null,
@@ -233,6 +239,28 @@ export function AdminWorkspaceMock() {
               />
             }
             label="Только пользователи"
+            sx={{ m: 0 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={activeFilter === 'active'}
+                onChange={(_, c) => setActiveFilter(c ? 'active' : 'none')}
+              />
+            }
+            label="Активные"
+            sx={{ m: 0, ml: 1 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={activeFilter === 'inactive'}
+                onChange={(_, c) => setActiveFilter(c ? 'inactive' : 'none')}
+              />
+            }
+            label="Неактивные"
             sx={{ m: 0 }}
           />
           <Button
