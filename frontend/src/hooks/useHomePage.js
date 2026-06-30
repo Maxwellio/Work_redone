@@ -524,9 +524,11 @@ export function useHomePage() {
     setResetTransitionsRefContextOnClose(false)
   }
 
-  const handleSaveTransitionSmall = async (draft) => {
+  const handleSaveTransitionSmall = async (savePayload) => {
     const s = transitionSmallForm
-    if (!s.ownerType || s.idOperations == null) {
+    const draft = savePayload?.draft ?? savePayload
+    const operationId = savePayload?.idOperations ?? s.idOperations
+    if (!s.ownerType || operationId == null) {
       throw new Error('Недостаточно данных для сохранения')
     }
     const idUserCreator = s.isEditMode ? null : user?.userId ?? null
@@ -548,7 +550,7 @@ export function useHomePage() {
       await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
-        idOperations: s.idOperations,
+        idOperations: operationId,
         ...emptyGeom,
         masCur: parseNum(draft.masCur),
         lCur: parseNum(draft.lCur),
@@ -562,7 +564,7 @@ export function useHomePage() {
       await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
-        idOperations: s.idOperations,
+        idOperations: operationId,
         ...emptyGeom,
         masCur: parseNum(draft.masCur),
         lCur: parseNum(draft.lCur),
@@ -575,9 +577,11 @@ export function useHomePage() {
     closeTransitionSmallForm()
   }
 
-  const handleSaveTransitionLarge = async (draft) => {
+  const handleSaveTransitionLarge = async (savePayload) => {
     const s = transitionLargeForm
-    if (!s.ownerType || s.idOperations == null) {
+    const draft = savePayload?.draft ?? savePayload
+    const operationId = savePayload?.idOperations ?? s.idOperations
+    if (!s.ownerType || operationId == null) {
       throw new Error('Недостаточно данных для сохранения')
     }
     const idUserCreator = s.isEditMode ? null : user?.userId ?? null
@@ -585,8 +589,8 @@ export function useHomePage() {
     const payloadBase = {
       d: parseNum(draft.d),
       l: parseNum(draft.l),
-      irazm: isIrazmUsedInLargeFormCalc(s.idOperations) ? parseNum(draft.irazm) : null,
-      valueMeas: isValueMeasUsedInLargeFormCalc(s.idOperations)
+      irazm: isIrazmUsedInLargeFormCalc(operationId) ? parseNum(draft.irazm) : null,
+      valueMeas: isValueMeasUsedInLargeFormCalc(operationId)
         ? parseNum(draft.valueMeas)
         : null,
       i: parseIntOrNull(draft.i),
@@ -606,22 +610,22 @@ export function useHomePage() {
       await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
-        idOperations: s.idOperations,
+        idOperations: operationId,
         ...payloadBase,
       })
     } else if (s.ownerType === 'fitting') {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
-      const idNtk = Array.isArray(draft.idNtk)
-        ? draft.idNtk
+      const idNtk = Array.isArray(savePayload?.idNtk)
+        ? savePayload.idNtk
             .map((n) => (typeof n === 'number' ? n : parseInt(String(n), 10)))
             .filter((n) => Number.isInteger(n))
         : []
       await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
-        idOperations: s.idOperations,
+        idOperations: operationId,
         ...payloadBase,
         idNtk,
       })
