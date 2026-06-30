@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -21,6 +21,7 @@ import { copySubstituteDetail, deleteSubstituteDetail, saveSubstituteDetail } fr
 import { useTheme } from '@mui/material/styles'
 import { useConfirm } from '../context/ConfirmContext'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
+import { useTransitionListFocus } from '../hooks/useTransitionListFocus'
 
 const COLUMNS = [
   { key: 'seqNumOper', label: '№' },
@@ -47,6 +48,8 @@ const mapRow = (row) => ({
 
 const getRowKey = (row) => row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
 
+const getRecordId = (row) => row.idMakeSubstitute ?? null
+
 function SubstituteTransitionsModal({
   open,
   substituteId,
@@ -55,6 +58,8 @@ function SubstituteTransitionsModal({
   onOpenTransitionsRefModal,
   onTransitionsListChange,
   transitionsListRefreshKey = 0,
+  pendingTransitionFocus = null,
+  onTransitionFocusHandled,
 }) {
   const theme = useTheme()
   const confirm = useConfirm()
@@ -65,10 +70,13 @@ function SubstituteTransitionsModal({
   const [deleting, setDeleting] = useState(false)
   const [moving, setMoving] = useState(false)
   const [copying, setCopying] = useState(false)
+  const [localPendingFocus, setLocalPendingFocus] = useState(null)
+  const tableContainerRef = useRef(null)
 
   useEffect(() => {
     if (!open) {
       setSelectedRowKey(null)
+      setLocalPendingFocus(null)
     }
   }, [open])
 
@@ -101,6 +109,27 @@ function SubstituteTransitionsModal({
     () => [...rows].sort((a, b) => (a.seqNumOper ?? 0) - (b.seqNumOper ?? 0)),
     [rows]
   )
+
+  const effectivePendingFocus = pendingTransitionFocus ?? localPendingFocus
+
+  const handleFocusHandled = useCallback(() => {
+    if (localPendingFocus) {
+      setLocalPendingFocus(null)
+    } else {
+      onTransitionFocusHandled?.()
+    }
+  }, [localPendingFocus, onTransitionFocusHandled])
+
+  useTransitionListFocus({
+    pendingFocus: effectivePendingFocus,
+    rowsSorted,
+    loading,
+    getRecordId,
+    getRowKey,
+    setSelectedRowKey,
+    tableContainerRef,
+    onHandled: handleFocusHandled,
+  })
 
   const titleName = substituteName ? ` ${substituteName}` : ''
   const selectedIndex = useMemo(
@@ -183,6 +212,7 @@ function SubstituteTransitionsModal({
     setCopying(true)
     try {
       await copySubstituteDetail(pk)
+      setLocalPendingFocus({ kind: 'lastRow', scrollBlock: 'end' })
       onTransitionsListChange?.()
     } catch (err) {
       window.alert(err.message || 'Ошибка копирования')
@@ -263,7 +293,7 @@ function SubstituteTransitionsModal({
       </DialogTitle>
 
       <DialogContent dividers>
-        <TableContainer sx={refModalTableContainerSx}>
+        <TableContainer ref={tableContainerRef} sx={refModalTableContainerSx}>
           {error && (
             <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>{error}</Box>
           )}
@@ -299,6 +329,7 @@ function SubstituteTransitionsModal({
                   return (
                     <TableRow
                       key={rowKey}
+                      data-transition-row-id={row.idMakeSubstitute ?? undefined}
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
                       onDoubleClick={() => {
