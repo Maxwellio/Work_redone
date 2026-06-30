@@ -34,7 +34,7 @@ function today() {
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
- * @param {{ selectedUser: object | null, isNewUserDraft?: boolean, onSaved?: () => Promise<void> | void, onRefreshed?: () => Promise<void> | void }} props
+ * @param {{ selectedUser: object | null, isNewUserDraft?: boolean, onSaved?: (savedUsersId: number | null) => Promise<void> | void, onRefreshed?: () => Promise<void> | void }} props
  */
 export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSaved, onRefreshed }) {
   const [roles, setRoles] = useState([])
@@ -120,7 +120,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     setSaving(true)
     setSaveError(null)
     try {
-      await saveAdminUser({
+      const result = await saveAdminUser({
         usersId: selectedUser?.usersId ?? null,
         roleId: roleId === '' ? null : Number(roleId),
         orgId: orgId == null ? null : Number(orgId),
@@ -135,7 +135,8 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         isFirstLogin,
       })
       if (onSaved) {
-        await onSaved()
+        const savedUsersId = result?.id ?? selectedUser?.usersId ?? null
+        await onSaved(savedUsersId)
       }
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Не удалось сохранить пользователя')

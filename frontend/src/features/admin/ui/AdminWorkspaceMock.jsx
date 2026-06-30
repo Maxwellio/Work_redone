@@ -140,10 +140,12 @@ export function AdminWorkspaceMock() {
     [users, selectedUsersId],
   )
 
-  const handleUserSaved = useCallback(async () => {
+  const handleUserSaved = useCallback(async (savedUsersId) => {
     await load()
-    setSelectedUsersId(null)
-    setIsAddUserOpen(false)
+    if (savedUsersId != null) {
+      setSelectedUsersId(savedUsersId)
+      setIsAddUserOpen(false)
+    }
   }, [load])
 
   const handleUserRefreshed = useCallback(async () => {
