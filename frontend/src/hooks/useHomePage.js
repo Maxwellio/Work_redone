@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { calcFitTime, calcSubTime } from '../api'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
@@ -84,11 +84,6 @@ export function useHomePage() {
     initialValues: null,
   })
   const [transitionsListRefreshKey, setTransitionsListRefreshKey] = useState(0)
-  const [pendingTransitionFocus, setPendingTransitionFocus] = useState(null)
-
-  const clearPendingTransitionFocus = useCallback(() => {
-    setPendingTransitionFocus(null)
-  }, [])
 
   const data = useHomeData({
     activeTab,
@@ -107,7 +102,6 @@ export function useHomePage() {
   }
 
   const closeSubstituteTransitions = () => {
-    setPendingTransitionFocus((prev) => (prev?.ownerType === 'substitute' ? null : prev))
     let idToCalc = null
     setSubstituteTransitionsModal((prev) => {
       if (prev.isOpen && prev.idSubstitutePrepared != null) {
@@ -135,7 +129,6 @@ export function useHomePage() {
   }
 
   const closeFittingTransitions = () => {
-    setPendingTransitionFocus((prev) => (prev?.ownerType === 'fitting' ? null : prev))
     let idToCalc = null
     setFittingTransitionsModal((prev) => {
       if (prev.isOpen && prev.idFiting != null) {
@@ -376,7 +369,7 @@ export function useHomePage() {
       if (idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      return saveSubstituteDetail({
+      await saveSubstituteDetail({
         id: isEditMode ? transitionRecordId : null,
         idSubstitutePrepared,
         idOperations: operationId,
@@ -393,13 +386,14 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
+      return
     }
 
     if (ownerType === 'fitting') {
       if (idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
-      return saveFittingDetail({
+      await saveFittingDetail({
         id: isEditMode ? transitionRecordId : null,
         idFiting,
         idOperations: operationId,
@@ -416,6 +410,7 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
+      return
     }
 
     throw new Error('Не определен тип владельца перехода')
@@ -504,7 +499,7 @@ export function useHomePage() {
 
     if (isAssignmentOperationId(selectedOperationId)) {
       try {
-        const result = await saveAssignmentTransitionDirect({
+        await saveAssignmentTransitionDirect({
           ownerType,
           idSubstitutePrepared,
           idFiting,
@@ -513,15 +508,6 @@ export function useHomePage() {
           transitionRecordId: ctx.transitionRecordId ?? null,
           seqNumOper: modeEdit ? parseIntOrNull(ctx.transitionDraft?.seqNumOper) : null,
         })
-        const recordId = modeEdit ? ctx.transitionRecordId : result?.id
-        if (recordId != null) {
-          setPendingTransitionFocus({
-            ownerType,
-            kind: 'record',
-            recordId,
-            scrollBlock: modeEdit ? 'center' : 'end',
-          })
-        }
         setTransitionsListRefreshKey((k) => k + 1)
       } catch (err) {
         window.alert(err?.message || 'Ошибка сохранения перехода')
@@ -557,12 +543,11 @@ export function useHomePage() {
       s: null,
     }
 
-    let savedId = null
     if (s.ownerType === 'substitute') {
       if (s.idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      const result = await saveSubstituteDetail({
+      await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
         idOperations: operationId,
@@ -572,12 +557,11 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
-      savedId = result?.id
     } else if (s.ownerType === 'fitting') {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
-      const result = await saveFittingDetail({
+      await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
         idOperations: operationId,
@@ -586,17 +570,6 @@ export function useHomePage() {
         lCur: parseNum(draft.lCur),
         seqNumOper,
         idUserCreator,
-      })
-      savedId = result?.id
-    }
-
-    const recordId = s.isEditMode ? s.transitionRecordId : savedId
-    if (recordId != null) {
-      setPendingTransitionFocus({
-        ownerType: s.ownerType,
-        kind: 'record',
-        recordId,
-        scrollBlock: s.isEditMode ? 'center' : 'end',
       })
     }
 
@@ -630,18 +603,16 @@ export function useHomePage() {
       idUserCreator,
     }
 
-    let savedId = null
     if (s.ownerType === 'substitute') {
       if (s.idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      const result = await saveSubstituteDetail({
+      await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
         idOperations: operationId,
         ...payloadBase,
       })
-      savedId = result?.id
     } else if (s.ownerType === 'fitting') {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
@@ -651,23 +622,12 @@ export function useHomePage() {
             .map((n) => (typeof n === 'number' ? n : parseInt(String(n), 10)))
             .filter((n) => Number.isInteger(n))
         : []
-      const result = await saveFittingDetail({
+      await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
         idOperations: operationId,
         ...payloadBase,
         idNtk,
-      })
-      savedId = result?.id
-    }
-
-    const recordId = s.isEditMode ? s.transitionRecordId : savedId
-    if (recordId != null) {
-      setPendingTransitionFocus({
-        ownerType: s.ownerType,
-        kind: 'record',
-        recordId,
-        scrollBlock: s.isEditMode ? 'center' : 'end',
       })
     }
 
@@ -701,8 +661,6 @@ export function useHomePage() {
     handleSaveTransitionLarge,
     refreshTransitionsList,
     transitionsListRefreshKey,
-    pendingTransitionFocus,
-    clearPendingTransitionFocus,
     isPreformRefModalOpen,
     openPreformRefModal: () => setIsPreformRefModalOpen(true),
     closePreformRefModal: () => setIsPreformRefModalOpen(false),

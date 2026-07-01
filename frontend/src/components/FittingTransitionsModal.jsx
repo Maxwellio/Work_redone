@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -21,7 +21,6 @@ import { copyFittingDetail, deleteFittingDetail, saveFittingDetail } from '../ap
 import { useTheme } from '@mui/material/styles'
 import { useConfirm } from '../context/ConfirmContext'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
-import { useTransitionListFocus } from '../hooks/useTransitionListFocus'
 
 const COLUMNS = [
   { key: 'seqNumOper', label: '№' },
@@ -48,8 +47,6 @@ const mapRow = (row) => ({
 
 const getRowKey = (row) => row.idFitingDetail ?? `${row.seqNumOper}-${row.idOperations}`
 
-const getRecordId = (row) => row.idFitingDetail ?? null
-
 function FittingTransitionsModal({
   open,
   fittingId,
@@ -59,8 +56,6 @@ function FittingTransitionsModal({
   onOpenTransitionsRefModal,
   onTransitionsListChange,
   transitionsListRefreshKey = 0,
-  pendingTransitionFocus = null,
-  onTransitionFocusHandled,
 }) {
   const theme = useTheme()
   const confirm = useConfirm()
@@ -71,13 +66,10 @@ function FittingTransitionsModal({
   const [deleting, setDeleting] = useState(false)
   const [moving, setMoving] = useState(false)
   const [copying, setCopying] = useState(false)
-  const [localPendingFocus, setLocalPendingFocus] = useState(null)
-  const tableContainerRef = useRef(null)
 
   useEffect(() => {
     if (!open) {
       setSelectedRowKey(null)
-      setLocalPendingFocus(null)
     }
   }, [open])
 
@@ -110,27 +102,6 @@ function FittingTransitionsModal({
     () => [...rows].sort((a, b) => (a.seqNumOper ?? 0) - (b.seqNumOper ?? 0)),
     [rows]
   )
-
-  const effectivePendingFocus = pendingTransitionFocus ?? localPendingFocus
-
-  const handleFocusHandled = useCallback(() => {
-    if (localPendingFocus) {
-      setLocalPendingFocus(null)
-    } else {
-      onTransitionFocusHandled?.()
-    }
-  }, [localPendingFocus, onTransitionFocusHandled])
-
-  useTransitionListFocus({
-    pendingFocus: effectivePendingFocus,
-    rowsSorted,
-    loading,
-    getRecordId,
-    getRowKey,
-    setSelectedRowKey,
-    tableContainerRef,
-    onHandled: handleFocusHandled,
-  })
 
   const titleName = fittingName ? ` ${fittingName}` : ''
   const tipLabel = tip === 1 ? 'патрубку' : 'трубе'
@@ -215,7 +186,6 @@ function FittingTransitionsModal({
     setCopying(true)
     try {
       await copyFittingDetail(pk)
-      setLocalPendingFocus({ kind: 'lastRow', scrollBlock: 'end' })
       onTransitionsListChange?.()
     } catch (err) {
       window.alert(err.message || 'Ошибка копирования')
@@ -303,7 +273,7 @@ function FittingTransitionsModal({
       </DialogTitle>
 
       <DialogContent dividers>
-        <TableContainer ref={tableContainerRef} sx={refModalTableContainerSx}>
+        <TableContainer sx={refModalTableContainerSx}>
           {error && (
             <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>{error}</Box>
           )}
@@ -339,7 +309,6 @@ function FittingTransitionsModal({
                   return (
                     <TableRow
                       key={rowKey}
-                      data-transition-row-id={row.idFitingDetail ?? undefined}
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
                       onDoubleClick={() => {

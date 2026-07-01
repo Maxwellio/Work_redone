@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
 import DraggableDialog from './DraggableDialog'
-import TransitionOperationSelect from './TransitionOperationSelect'
-import { useTransitionGroupOperations } from '../hooks/useTransitionGroupOperations'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -32,19 +30,11 @@ function TransitionSmallFormModal({
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
   const [saveError, setSaveError] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [selectedIdOperations, setSelectedIdOperations] = useState(idOperations)
   const [draft, setDraft] = useState({
     masCur: '',
     lCur: '',
     tVp: '',
   })
-  const { options: operationOptions, loading: operationsLoading, error: operationsError } =
-    useTransitionGroupOperations(open, idOperations, nmOperations)
-
-  useEffect(() => {
-    if (!open) return
-    setSelectedIdOperations(idOperations)
-  }, [open, idOperations])
 
   useEffect(() => {
     if (!open) return
@@ -62,12 +52,7 @@ function TransitionSmallFormModal({
       lCur: '',
       tVp: '',
     })
-  }, [open, isEditMode, initialValues])
-
-  const handleOperationChange = (newIdOperations) => {
-    setSelectedIdOperations(newIdOperations)
-    setDraft((prev) => ({ ...prev, tVp: '' }))
-  }
+  }, [open, idOperations, isEditMode, initialValues])
 
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
@@ -88,7 +73,7 @@ function TransitionSmallFormModal({
     if (typeof onSave === 'function') {
       setSaving(true)
       try {
-        await onSave({ draft, idOperations: selectedIdOperations })
+        await onSave(draft)
       } catch (err) {
         setSaveError(err.message || 'Ошибка сохранения')
       } finally {
@@ -104,7 +89,7 @@ function TransitionSmallFormModal({
     setSaving(true)
     try {
       const payload = {
-        idOperations: selectedIdOperations,
+        idOperations,
         massPreform: draft.masCur === '' ? null : Number(draft.masCur),
         lPreform: draft.lCur === '' ? null : Number(draft.lCur),
       }
@@ -131,15 +116,15 @@ function TransitionSmallFormModal({
           <Close />
         </IconButton>
       </DialogTitle>
-      <Box sx={{ px: 3, pt: 0 }}>
-        <TransitionOperationSelect
-          value={selectedIdOperations}
-          options={operationOptions}
-          loading={operationsLoading}
-          disabled={saving}
-          error={operationsError}
-          onChange={handleOperationChange}
-        />
+      <Box sx={{ px: 3, pt: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ flex: 1, minWidth: 0 }}>
+          {nmOperations || '—'}
+        </Typography>
+        {idOperations != null && (
+          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
+            {idOperations}
+          </Typography>
+        )}
       </Box>
       <DialogContent dividers>
         {saveError && (

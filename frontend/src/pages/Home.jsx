@@ -79,8 +79,6 @@ function Home() {
           onSaveTransitionLarge={home.handleSaveTransitionLarge}
           transitionsListRefreshKey={home.transitionsListRefreshKey}
           onTransitionsListChange={home.refreshTransitionsList}
-          pendingTransitionFocus={home.pendingTransitionFocus}
-          onTransitionFocusHandled={home.clearPendingTransitionFocus}
           isPreformRefModalOpen={home.isPreformRefModalOpen}
           onClosePreformRef={home.closePreformRefModal}
           preformRef={home.preformRef}

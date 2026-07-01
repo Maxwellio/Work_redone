@@ -29,8 +29,6 @@ function HomeModals({
   onSaveTransitionLarge,
   transitionsListRefreshKey,
   onTransitionsListChange,
-  pendingTransitionFocus,
-  onTransitionFocusHandled,
   isPreformRefModalOpen,
   onClosePreformRef,
   preformRef,
@@ -140,10 +138,6 @@ function HomeModals({
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
         onTransitionsListChange={onTransitionsListChange}
-        pendingTransitionFocus={
-          pendingTransitionFocus?.ownerType === 'substitute' ? pendingTransitionFocus : null
-        }
-        onTransitionFocusHandled={onTransitionFocusHandled}
       />
 
       <FittingTransitionsModal
@@ -155,10 +149,6 @@ function HomeModals({
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
         onTransitionsListChange={onTransitionsListChange}
-        pendingTransitionFocus={
-          pendingTransitionFocus?.ownerType === 'fitting' ? pendingTransitionFocus : null
-        }
-        onTransitionFocusHandled={onTransitionFocusHandled}
       />
     </>
   )

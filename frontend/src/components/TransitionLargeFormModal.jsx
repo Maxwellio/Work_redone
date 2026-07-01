@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import DraggableDialog from './DraggableDialog'
-import TransitionOperationSelect from './TransitionOperationSelect'
-import { useTransitionGroupOperations } from '../hooks/useTransitionGroupOperations'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
@@ -79,35 +77,25 @@ function TransitionLargeFormModal({
   const title = isEditMode ? 'Редактирование перехода' : 'Добавление перехода'
   const [saveError, setSaveError] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [selectedIdOperations, setSelectedIdOperations] = useState(idOperations)
   const [draft, setDraft] = useState(emptyDraft)
   const [ntkRows, setNtkRows] = useState([])
   const [ntkLoading, setNtkLoading] = useState(false)
   const [ntkError, setNtkError] = useState(null)
   const [checkedNtkIds, setCheckedNtkIds] = useState(() => new Set())
   const [ntkLinksError, setNtkLinksError] = useState(null)
-  const { options: operationOptions, loading: operationsLoading, error: operationsError } =
-    useTransitionGroupOperations(open, idOperations, nmOperations)
 
-  const irazmEnabled = isIrazmUsedInLargeFormCalc(selectedIdOperations)
-  const valueMeasEnabled = isValueMeasUsedInLargeFormCalc(selectedIdOperations)
-
-  useEffect(() => {
-    if (!open) return
-    setSelectedIdOperations(idOperations)
-  }, [open, idOperations])
+  const irazmEnabled = isIrazmUsedInLargeFormCalc(idOperations)
+  const valueMeasEnabled = isValueMeasUsedInLargeFormCalc(idOperations)
 
   useEffect(() => {
     if (!open) return
     setSaveError(null)
-    const initIrazmEnabled = isIrazmUsedInLargeFormCalc(idOperations)
-    const initValueMeasEnabled = isValueMeasUsedInLargeFormCalc(idOperations)
     if (isEditMode && initialValues) {
       setDraft({
         d: initialValues.d ?? '',
         l: initialValues.l ?? '',
-        irazm: initIrazmEnabled ? initialValues.irazm ?? '' : '',
-        valueMeas: initValueMeasEnabled ? initialValues.valueMeas ?? '' : '',
+        irazm: irazmEnabled ? initialValues.irazm ?? '' : '',
+        valueMeas: valueMeasEnabled ? initialValues.valueMeas ?? '' : '',
         depthCut: initialValues.depthCut ?? '',
         i: initialValues.i ?? '',
         s: initialValues.s ?? '',
@@ -120,7 +108,7 @@ function TransitionLargeFormModal({
       return
     }
     setDraft(emptyDraft())
-  }, [open, idOperations, isEditMode, initialValues])
+  }, [open, idOperations, isEditMode, initialValues, irazmEnabled, valueMeasEnabled])
 
   useEffect(() => {
     if (!open) {
@@ -194,21 +182,6 @@ function TransitionLargeFormModal({
     })
   }, [])
 
-  const handleOperationChange = (newIdOperations) => {
-    setSelectedIdOperations(newIdOperations)
-    const nextIrazmEnabled = isIrazmUsedInLargeFormCalc(newIdOperations)
-    const nextValueMeasEnabled = isValueMeasUsedInLargeFormCalc(newIdOperations)
-    setDraft((prev) => ({
-      ...prev,
-      irazm: nextIrazmEnabled ? prev.irazm : '',
-      valueMeas: nextValueMeasEnabled ? prev.valueMeas : '',
-      vRez: '',
-      tMach: '',
-      tVp: '',
-      tSum: '',
-    }))
-  }
-
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
     if (NUMERIC_FIELDS.has(field)) {
@@ -236,7 +209,7 @@ function TransitionLargeFormModal({
   }
 
   const canRunLargeFormCalc =
-    selectedIdOperations != null &&
+    idOperations != null &&
     (ownerType === 'substitute' || (ownerType === 'fitting' && showNtkPanel))
 
   const handleCalculateLargeForm = async () => {
@@ -245,7 +218,7 @@ function TransitionLargeFormModal({
     setSaving(true)
     try {
       const basePayload = {
-        idOperations: selectedIdOperations,
+        idOperations,
         i: parseIntOrNull(draft.i),
         s: parseNumOrNull(draft.s),
         d: parseNumOrNull(draft.d),
@@ -286,8 +259,8 @@ function TransitionLargeFormModal({
       try {
         const payload =
           showNtkPanel && ownerType === 'fitting'
-            ? { draft, idOperations: selectedIdOperations, idNtk: Array.from(checkedNtkIds) }
-            : { draft, idOperations: selectedIdOperations }
+            ? { ...draft, idNtk: Array.from(checkedNtkIds) }
+            : draft
         await onSave(payload)
       } catch (err) {
         setSaveError(err.message || 'Ошибка сохранения')
@@ -478,15 +451,15 @@ function TransitionLargeFormModal({
           <Close />
         </IconButton>
       </DialogTitle>
-      <Box sx={{ px: 3, pt: 0 }}>
-        <TransitionOperationSelect
-          value={selectedIdOperations}
-          options={operationOptions}
-          loading={operationsLoading}
-          disabled={saving}
-          error={operationsError}
-          onChange={handleOperationChange}
-        />
+      <Box sx={{ px: 3, pt: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        <Typography variant="subtitle1" fontWeight={600} sx={{ flex: 1, minWidth: 0 }}>
+          {nmOperations || '—'}
+        </Typography>
+        {idOperations != null && (
+          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
+            {idOperations}
+          </Typography>
+        )}
       </Box>
       <DialogContent dividers>
         {saveError && (
