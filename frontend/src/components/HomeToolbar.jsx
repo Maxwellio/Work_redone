@@ -21,6 +21,7 @@ function HomeToolbar({
   onOpenTransitionsRef,
   onOpenPreformRef,
   onDelete,
+  onCopy,
   onCalcNorms,
   onPrint,
   onToggleMyRecords,
@@ -77,6 +78,9 @@ function HomeToolbar({
           {transitionsLabel}
         </Button>
       )}
+      <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={onCopy}>
+        Копировать запись
+      </Button>
       <Button variant="contained" color="primary" size="small" disabled={!hasSelection} onClick={onDelete}>
         Удалить
       </Button>

@@ -66,6 +66,19 @@ public class HydrotestService {
         });
     }
 
+    public void copyById(Integer id, Integer userId) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall("call substitute.copy_hydrotest(?, ?)");
+            cs.setObject(1, id, Types.INTEGER);
+            cs.setObject(2, userId, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     @Transactional(readOnly = true)
     public BigDecimal calcHydroNvForm(HydrotestNvCalcRequestDto dto) {
         return jdbcTemplate.queryForObject(

@@ -28,6 +28,7 @@ function Home() {
         onOpenTransitionsRef={home.openTransitionsRefModal}
         onOpenPreformRef={home.openPreformRefModal}
         onDelete={actions.handleDelete}
+        onCopy={actions.handleCopy}
         onCalcNorms={actions.handleCalcNorms}
         onPrint={actions.handlePrint}
         onToggleMyRecords={home.toggleMyRecords}

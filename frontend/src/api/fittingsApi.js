@@ -43,6 +43,17 @@ export async function deleteFitting(id) {
   }
 }
 
+export async function copyFitting(id, userId) {
+  const query = buildQuery({ userId })
+  const res = await request(`/fittings/${id}/copy${query}`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка копирования')
+  }
+}
+
 export async function getFittingDetails(idFiting) {
   const res = await request(`/fittings/${idFiting}/details`, {
     method: 'GET',

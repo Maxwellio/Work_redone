@@ -166,6 +166,12 @@ public class MainDataController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/substitutes/{id}/copy")
+    public ResponseEntity<Void> copySubstitute(@PathVariable Integer id, @RequestParam Integer userId) {
+        substituteService.copyById(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/fittings")
     public ResponseEntity<java.util.Map<String, Integer>> saveFitting(@RequestBody FitingSaveDto body) {
         Integer id = fitingService.saveFitting(body);
@@ -184,6 +190,12 @@ public class MainDataController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/fittings/{id}/copy")
+    public ResponseEntity<Void> copyFitting(@PathVariable Integer id, @RequestParam Integer userId) {
+        fitingService.copyById(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/hydrotests")
     public ResponseEntity<java.util.Map<String, Integer>> saveHydrotest(@RequestBody HydrotestSaveDto body) {
         Integer id = hydrotestService.saveHydrotest(body);
@@ -193,6 +205,12 @@ public class MainDataController {
     @PostMapping("/hydrotests/{id}/calc-time")
     public ResponseEntity<Void> calcHydroTime(@PathVariable Integer id) {
         hydrotestService.calcHydroTime(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/hydrotests/{id}/copy")
+    public ResponseEntity<Void> copyHydrotest(@PathVariable Integer id, @RequestParam Integer userId) {
+        hydrotestService.copyById(id, userId);
         return ResponseEntity.noContent().build();
     }
 

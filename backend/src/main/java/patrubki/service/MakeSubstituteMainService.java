@@ -82,6 +82,19 @@ public class MakeSubstituteMainService {
         });
     }
 
+    public void copyById(Integer id, Integer userId) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        jdbcTemplate.execute((Connection conn) -> {
+            CallableStatement cs = conn.prepareCall("call substitute.copy_substitute(?, ?)");
+            cs.setObject(1, id, Types.INTEGER);
+            cs.setObject(2, userId, Types.INTEGER);
+            cs.execute();
+            return null;
+        });
+    }
+
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);

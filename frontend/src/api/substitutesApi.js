@@ -42,3 +42,14 @@ export async function deleteSubstitute(id) {
     throw new Error(text || 'Ошибка удаления')
   }
 }
+
+export async function copySubstitute(id, userId) {
+  const query = buildQuery({ userId })
+  const res = await request(`/substitutes/${id}/copy${query}`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка копирования')
+  }
+}

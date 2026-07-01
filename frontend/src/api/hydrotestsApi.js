@@ -56,3 +56,14 @@ export async function deleteHydrotest(id) {
     throw new Error(text || 'Ошибка удаления')
   }
 }
+
+export async function copyHydrotest(id, userId) {
+  const query = buildQuery({ userId })
+  const res = await request(`/hydrotests/${id}/copy${query}`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || 'Ошибка копирования')
+  }
+}

@@ -200,6 +200,7 @@ export function useHomePage() {
     loadData: data.loadData,
     setSelectedRowId: data.setSelectedRowId,
     setPendingScrollToId: data.setPendingScrollToId,
+    userId: user?.userId ?? null,
   })
 
   const disallowedGroupIds = useMemo(() => {

@@ -1,4 +1,4 @@
-import { calcFitTime, calcHydroTime, calcSubTime, deleteFitting, deleteHydrotest, deleteSubstitute, downloadReport } from '../api'
+import { calcFitTime, calcHydroTime, calcSubTime, copyFitting, copyHydrotest, copySubstitute, deleteFitting, deleteHydrotest, deleteSubstitute, downloadReport } from '../api'
 import { useConfirm } from '../context/ConfirmContext'
 import { getRowId } from '../utils/format'
 
@@ -9,6 +9,7 @@ export function useHomeActions({
   loadData,
   setSelectedRowId,
   setPendingScrollToId,
+  userId,
 }) {
   const confirm = useConfirm()
 
@@ -72,5 +73,24 @@ export function useHomeActions({
     }
   }
 
-  return { handleDelete, handleCalcNorms, handlePrint }
+  const handleCopy = async () => {
+    if (selectedRowId == null) {
+      window.alert('Выберите запись для копирования')
+      return
+    }
+    if (userId == null) {
+      window.alert('Не удалось определить текущего пользователя')
+      return
+    }
+    try {
+      if (activeTab === 0) await copySubstitute(selectedRowId, userId)
+      else if (activeTab === 1 || activeTab === 2) await copyFitting(selectedRowId, userId)
+      else await copyHydrotest(selectedRowId, userId)
+      await loadData()
+    } catch (err) {
+      window.alert(err.message || 'Ошибка копирования')
+    }
+  }
+
+  return { handleDelete, handleCalcNorms, handlePrint, handleCopy }
 }
