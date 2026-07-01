@@ -24,9 +24,11 @@ function HomeModals({
   transitionSmallForm,
   onCloseTransitionSmallForm,
   onSaveTransitionSmall,
+  onChangeTransitionFromSmallForm,
   transitionLargeForm,
   onCloseTransitionLargeForm,
   onSaveTransitionLarge,
+  onChangeTransitionFromLargeForm,
   transitionsListRefreshKey,
   onTransitionsListChange,
   isPreformRefModalOpen,
@@ -104,6 +106,7 @@ function HomeModals({
         nmOperations={transitionSmallForm.nmOperations}
         initialValues={transitionSmallForm.initialValues}
         onSave={onSaveTransitionSmall}
+        onChangeTransition={onChangeTransitionFromSmallForm}
         ownerType={transitionSmallForm.ownerType}
       />
 
@@ -115,6 +118,7 @@ function HomeModals({
         nmOperations={transitionLargeForm.nmOperations}
         initialValues={transitionLargeForm.initialValues}
         onSave={onSaveTransitionLarge}
+        onChangeTransition={onChangeTransitionFromLargeForm}
         ownerType={transitionLargeForm.ownerType}
         tip={transitionLargeForm.tip}
         idFiting={transitionLargeForm.idFiting}

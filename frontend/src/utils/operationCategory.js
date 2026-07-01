@@ -54,3 +54,53 @@ export function isValueMeasUsedInLargeFormCalc(id) {
   if (n >= 28 && n <= 37) return true
   return n === 59 || n === 60
 }
+
+/** Малая форма: перенос черновика при смене операции (расчётные поля сбрасываются). */
+export function sanitizeSmallFormDraftForOperation(draft) {
+  if (!draft) {
+    return { masCur: '', lCur: '', tVp: '' }
+  }
+  return {
+    seqNumOper: draft.seqNumOper ?? '',
+    masCur: draft.masCur ?? '',
+    lCur: draft.lCur ?? '',
+    tVp: '',
+  }
+}
+
+/** Большая форма: перенос черновика при смене операции с учётом активности полей. */
+export function sanitizeLargeFormDraftForOperation(draft, operationId) {
+  const irazmEnabled = isIrazmUsedInLargeFormCalc(operationId)
+  const valueMeasEnabled = isValueMeasUsedInLargeFormCalc(operationId)
+  if (!draft) {
+    return {
+      d: '',
+      l: '',
+      irazm: '',
+      valueMeas: '',
+      depthCut: '',
+      i: '',
+      s: '',
+      n: '',
+      vRez: '',
+      tMach: '',
+      tVp: '',
+      tSum: '',
+    }
+  }
+  return {
+    seqNumOper: draft.seqNumOper ?? '',
+    d: draft.d ?? '',
+    l: draft.l ?? '',
+    irazm: irazmEnabled ? draft.irazm ?? '' : '',
+    valueMeas: valueMeasEnabled ? draft.valueMeas ?? '' : '',
+    depthCut: draft.depthCut ?? '',
+    i: draft.i ?? '',
+    s: draft.s ?? '',
+    n: draft.n ?? '',
+    vRez: '',
+    tMach: '',
+    tVp: '',
+    tSum: '',
+  }
+}

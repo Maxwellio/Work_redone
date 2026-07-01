@@ -16,6 +16,8 @@ import {
   isLargeFormOperationId,
   isIrazmUsedInLargeFormCalc,
   isValueMeasUsedInLargeFormCalc,
+  sanitizeSmallFormDraftForOperation,
+  sanitizeLargeFormDraftForOperation,
 } from '../utils/operationCategory'
 
 function parseNum(v) {
@@ -46,6 +48,7 @@ export function useHomePage() {
     selectedOperationId: null,
     selectedOperationName: '',
     transitionDraft: null,
+    sourceFormType: null, // 'small' | 'large' | null — смена операции из формы перехода
   })
   const [isPreformRefModalOpen, setIsPreformRefModalOpen] = useState(false)
   const [substituteTransitionsModal, setSubstituteTransitionsModal] = useState({
@@ -227,6 +230,7 @@ export function useHomePage() {
       selectedOperationId: null,
       selectedOperationName: '',
       transitionDraft: null,
+      sourceFormType: null,
     })
   }
 
@@ -354,6 +358,59 @@ export function useHomePage() {
     setIsTransitionsRefModalOpen(true)
   }
 
+  const openChangeTransitionFromSmallForm = (formDraft) => {
+    const s = transitionSmallForm
+    if (!s.ownerType || s.idOperations == null) return
+    setResetTransitionsRefContextOnClose(false)
+    setTransitionsRefContext({
+      ownerType: s.ownerType,
+      tip: s.tip,
+      mode: s.isEditMode ? 'edit' : 'add',
+      transitionRecordId: s.transitionRecordId,
+      selectedOperationId: s.idOperations,
+      selectedOperationName: s.nmOperations,
+      transitionDraft: {
+        seqNumOper: s.initialValues?.seqNumOper ?? '',
+        masCur: formDraft?.masCur ?? '',
+        lCur: formDraft?.lCur ?? '',
+        tVp: formDraft?.tVp ?? '',
+      },
+      sourceFormType: 'small',
+    })
+    setIsTransitionsRefModalOpen(true)
+  }
+
+  const openChangeTransitionFromLargeForm = (formDraft) => {
+    const s = transitionLargeForm
+    if (!s.ownerType || s.idOperations == null) return
+    setResetTransitionsRefContextOnClose(false)
+    setTransitionsRefContext({
+      ownerType: s.ownerType,
+      tip: s.tip,
+      mode: s.isEditMode ? 'edit' : 'add',
+      transitionRecordId: s.transitionRecordId,
+      selectedOperationId: s.idOperations,
+      selectedOperationName: s.nmOperations,
+      transitionDraft: {
+        seqNumOper: s.initialValues?.seqNumOper ?? '',
+        d: formDraft?.d ?? '',
+        l: formDraft?.l ?? '',
+        irazm: formDraft?.irazm ?? '',
+        valueMeas: formDraft?.valueMeas ?? '',
+        depthCut: formDraft?.depthCut ?? '',
+        i: formDraft?.i ?? '',
+        s: formDraft?.s ?? '',
+        n: formDraft?.n ?? '',
+        vRez: formDraft?.vRez ?? '',
+        tMach: formDraft?.tMach ?? '',
+        tVp: formDraft?.tVp ?? '',
+        tSum: formDraft?.tSum ?? '',
+      },
+      sourceFormType: 'large',
+    })
+    setIsTransitionsRefModalOpen(true)
+  }
+
   const saveAssignmentTransitionDirect = async ({
     ownerType,
     idSubstitutePrepared,
@@ -457,6 +514,8 @@ export function useHomePage() {
     const op = transitionsRef.operations.find((o) => o.idOperations === selectedOperationId)
     const modeEdit = transitionsRefContext.mode === 'edit'
     const ctx = { ...transitionsRefContext }
+    const sourceFormType = ctx.sourceFormType ?? null
+    const formDraft = ctx.transitionDraft ?? null
 
     setIsTransitionsRefModalOpen(false)
     setResetTransitionsRefContextOnClose(true)
@@ -466,9 +525,15 @@ export function useHomePage() {
     const idFiting = ownerType === 'fitting' ? fittingTransitionsModal.idFiting : null
     const tip = ownerType === 'fitting' ? (ctx.tip ?? fittingTransitionsModal.tip) : null
 
-    const initialValues = modeEdit
-      ? { seqNumOper: ctx.transitionDraft?.seqNumOper ?? '' }
+    let initialValues = modeEdit
+      ? { seqNumOper: formDraft?.seqNumOper ?? '' }
       : null
+
+    if (sourceFormType === 'small' && isSmallFormOperationId(selectedOperationId)) {
+      initialValues = sanitizeSmallFormDraftForOperation(formDraft)
+    } else if (sourceFormType === 'large' && isLargeFormOperationId(selectedOperationId)) {
+      initialValues = sanitizeLargeFormDraftForOperation(formDraft, selectedOperationId)
+    }
 
     const payloadBase = {
       open: true,
@@ -484,20 +549,46 @@ export function useHomePage() {
     }
 
     if (isSmallFormOperationId(selectedOperationId)) {
+      if (sourceFormType === 'large') {
+        closeTransitionLargeForm()
+      }
       setTimeout(() => {
-        setTransitionSmallForm(payloadBase)
+        setTransitionSmallForm((prev) =>
+          sourceFormType === 'small'
+            ? {
+                ...prev,
+                idOperations: selectedOperationId,
+                nmOperations: op?.nmOperations ?? '',
+                initialValues,
+              }
+            : payloadBase
+        )
       }, 0)
       return
     }
 
     if (isLargeFormOperationId(selectedOperationId)) {
+      if (sourceFormType === 'small') {
+        closeTransitionSmallForm()
+      }
       setTimeout(() => {
-        setTransitionLargeForm(payloadBase)
+        setTransitionLargeForm((prev) =>
+          sourceFormType === 'large'
+            ? {
+                ...prev,
+                idOperations: selectedOperationId,
+                nmOperations: op?.nmOperations ?? '',
+                initialValues,
+              }
+            : payloadBase
+        )
       }, 0)
       return
     }
 
     if (isAssignmentOperationId(selectedOperationId)) {
+      if (sourceFormType === 'small') closeTransitionSmallForm()
+      if (sourceFormType === 'large') closeTransitionLargeForm()
       try {
         await saveAssignmentTransitionDirect({
           ownerType,
@@ -506,7 +597,7 @@ export function useHomePage() {
           operationId: selectedOperationId,
           isEditMode: modeEdit,
           transitionRecordId: ctx.transitionRecordId ?? null,
-          seqNumOper: modeEdit ? parseIntOrNull(ctx.transitionDraft?.seqNumOper) : null,
+          seqNumOper: modeEdit ? parseIntOrNull(formDraft?.seqNumOper) : null,
         })
         setTransitionsListRefreshKey((k) => k + 1)
       } catch (err) {
@@ -659,6 +750,8 @@ export function useHomePage() {
     transitionsRefContext,
     handleSaveTransitionSmall,
     handleSaveTransitionLarge,
+    openChangeTransitionFromSmallForm,
+    openChangeTransitionFromLargeForm,
     refreshTransitionsList,
     transitionsListRefreshKey,
     isPreformRefModalOpen,

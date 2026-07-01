@@ -67,6 +67,7 @@ function TransitionLargeFormModal({
   nmOperations,
   initialValues,
   onSave,
+  onChangeTransition,
   ownerType = null,
   tip = null,
   idFiting = null,
@@ -90,7 +91,7 @@ function TransitionLargeFormModal({
   useEffect(() => {
     if (!open) return
     setSaveError(null)
-    if (isEditMode && initialValues) {
+    if (initialValues) {
       setDraft({
         d: initialValues.d ?? '',
         l: initialValues.l ?? '',
@@ -455,11 +456,28 @@ function TransitionLargeFormModal({
         <Typography variant="subtitle1" fontWeight={600} sx={{ flex: 1, minWidth: 0 }}>
           {nmOperations || '—'}
         </Typography>
-        {idOperations != null && (
-          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>
-            {idOperations}
-          </Typography>
-        )}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0 }}>
+          {idOperations != null && (
+            <Typography variant="body2" color="text.secondary">
+              {idOperations}
+            </Typography>
+          )}
+          {typeof onChangeTransition === 'function' && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() =>
+                onChangeTransition({
+                  ...draft,
+                  seqNumOper: initialValues?.seqNumOper ?? '',
+                })
+              }
+              disabled={saving}
+            >
+              Сменить переход
+            </Button>
+          )}
+        </Box>
       </Box>
       <DialogContent dividers>
         {saveError && (
