@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getFittings, getHydrotests, getSubstitutes } from '../api'
 import { ensureParty, ensurePreformTypes } from '../api/staticReferenceCache'
 import { COLUMNS } from '../models/tableConfig'
@@ -18,6 +18,7 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
   const [pendingScrollToId, setPendingScrollToId] = useState(null)
   const [sortField, setSortField] = useState(null)
   const [sortDirection, setSortDirection] = useState('asc')
+  const loadRequestIdRef = useRef(0)
 
   const beginLoading = () => {
     setLoading(true)
@@ -31,39 +32,38 @@ export function useHomeData({ activeTab, searchQuery, monthFilter, showMyRecords
   }, [searchQuery])
 
   const loadData = useCallback(async () => {
-    const requestId = Symbol('home-data-request')
-    let isCurrent = true
+    const requestId = ++loadRequestIdRef.current
     setLoading(true)
     setError(null)
     try {
       const userId = showMyRecords && user?.userId ? user.userId : null
       const yearMonth = monthFilter || null
+      let data
       if (activeTab === 0) {
-        const data = await getSubstitutes(debouncedSearch, userId, yearMonth)
-        setListData(data)
+        data = await getSubstitutes(debouncedSearch, userId, yearMonth)
       } else if (activeTab === 1 || activeTab === 2) {
-        const data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId, yearMonth)
-        setListData(data)
+        data = await getFittings(activeTab === 1 ? 1 : 2, debouncedSearch, userId, yearMonth)
       } else {
-        const data = await getHydrotests(debouncedSearch, userId, yearMonth)
-        setListData(data)
+        data = await getHydrotests(debouncedSearch, userId, yearMonth)
       }
+      if (requestId !== loadRequestIdRef.current) return
+      setListData(data)
     } catch (err) {
-      if (!isCurrent) return
+      if (requestId !== loadRequestIdRef.current) return
       setError(err.message || 'Ошибка загрузки')
       setListData([])
     } finally {
-      if (!isCurrent) return
-      setLoading(false)
-    }
-    return () => {
-      isCurrent = false
+      if (requestId === loadRequestIdRef.current) {
+        setLoading(false)
+      }
     }
   }, [activeTab, debouncedSearch, monthFilter, showMyRecords, user])
 
   useEffect(() => {
-    const cleanup = loadData()
-    return typeof cleanup === 'function' ? cleanup : undefined
+    loadData()
+    return () => {
+      loadRequestIdRef.current += 1
+    }
   }, [loadData])
 
   const ensurePreformLoaded = useCallback(async () => {
