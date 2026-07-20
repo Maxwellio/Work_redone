@@ -14,6 +14,7 @@ import { userHasAdminRole } from '../utils/userRoles'
  * Страница входа: форма логин/пароль, вызов POST /api/login (form-urlencoded),
  * после успеха — getCurrentUser и редирект на `/` или `/admin` при роли администратора.
  * При заходе на /login авторизованного пользователя — редирект по той же логике.
+ * У обычного входа слева — колонка 3×4 под изображение из public/ (заглушка до подстановки файла).
  */
 function Login() {
   const navigate = useNavigate()
@@ -63,23 +64,24 @@ function Login() {
 
   const showFirstLoginChangePassword = firstLoginPending || Boolean(user?.isFirstLogin)
 
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 2,
-        bgcolor: 'background.default',
-      }}
-    >
-      <Card sx={{ width: '100%', maxWidth: 360 }}>
-        <CardContent>
-          <Typography variant="h6" component="h2" sx={{ m: '0 0 1.5rem', textAlign: 'center' }}>
-            {showFirstLoginChangePassword ? 'Смена пароля' : 'Вход'}
-          </Typography>
-          {showFirstLoginChangePassword ? (
+  // Режим смены пароля: узкая карточка без бокового изображения (как раньше).
+  if (showFirstLoginChangePassword) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2,
+          bgcolor: 'background.default',
+        }}
+      >
+        <Card sx={{ width: '100%', maxWidth: 360 }}>
+          <CardContent>
+            <Typography variant="h6" component="h2" sx={{ m: '0 0 1.5rem', textAlign: 'center' }}>
+              Смена пароля
+            </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 При первом входе в ПС необходимо сменить выданный пароль
@@ -107,7 +109,48 @@ function Login() {
                 cancelLabel="Отменить вход"
               />
             </Box>
-          ) : (
+          </CardContent>
+        </Card>
+      </Box>
+    )
+  }
+
+  // Обычный вход: слева колонка 3×4 под персонализирующее изображение из public/.
+  // Файл: frontend/public/login-side.jpg → URL /login-side.jpg (замените заглушку на <img>).
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2,
+        bgcolor: 'background.default',
+      }}
+    >
+      <Card sx={{ width: '100%', maxWidth: 600, overflow: 'hidden' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' },
+            alignItems: 'stretch',
+          }}
+        >
+          {/* Заглушка: положите login-side.jpg в public/ и замените Box на img src="/login-side.jpg". */}
+          <Box
+            aria-hidden
+            sx={{
+              display: { xs: 'none', sm: 'block' },
+              width: 200,
+              aspectRatio: '3 / 4',
+              bgcolor: 'action.hover',
+              flexShrink: 0,
+            }}
+          />
+          <CardContent sx={{ minWidth: 0, maxWidth: 360, width: '100%', justifySelf: { xs: 'center', sm: 'stretch' } }}>
+            <Typography variant="h6" component="h2" sx={{ m: '0 0 1.5rem', textAlign: 'center' }}>
+              Вход
+            </Typography>
             <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column' }}>
               <TextField
                 fullWidth
@@ -159,8 +202,8 @@ function Login() {
                 {submitting ? 'Вход…' : 'Войти'}
               </Button>
             </Box>
-          )}
-        </CardContent>
+          </CardContent>
+        </Box>
       </Card>
     </Box>
   )
