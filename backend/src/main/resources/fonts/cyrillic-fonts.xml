@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Arial from classpath fonts/arial/ (also registered in JasperArialFontConfig). -->
+<fontFamilies>
+	<fontFamily name="Arial">
+		<normal>fonts/arial/arial.ttf</normal>
+		<bold>fonts/arial/arialbd.ttf</bold>
+		<italic>fonts/arial/ariali.ttf</italic>
+		<boldItalic>fonts/arial/arialbi.ttf</boldItalic>
+		<pdfEncoding>Identity-H</pdfEncoding>
+		<pdfEmbedded>true</pdfEmbedded>
+	</fontFamily>
+</fontFamilies>
