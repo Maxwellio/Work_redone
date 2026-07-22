@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Arial font family for PDF (Cyrillic).
-  Place Windows TTF files into this classpath folder:
-    fonts/arial/arial.ttf
-    fonts/arial/arialbd.ttf
-    fonts/arial/ariali.ttf
-    fonts/arial/arialbi.ttf
-  Source on Windows: C:\Windows\Fonts\
+  Fallback font-extension for Arial (also registered in JasperArialFontConfig).
+  Prefer putting TTFs in fonts/arial/ or set jasper.fonts.arial-dir.
 -->
 <fontFamilies>
-
 	<fontFamily name="Arial">
 		<normal>fonts/arial/arial.ttf</normal>
 		<bold>fonts/arial/arialbd.ttf</bold>
@@ -18,24 +12,4 @@
 		<pdfEncoding>Identity-H</pdfEncoding>
 		<pdfEmbedded>true</pdfEmbedded>
 	</fontFamily>
-
-	<!-- Common Studio / PDF aliases → same Arial TTFs -->
-	<fontFamily name="SansSerif">
-		<normal>fonts/arial/arial.ttf</normal>
-		<bold>fonts/arial/arialbd.ttf</bold>
-		<italic>fonts/arial/ariali.ttf</italic>
-		<boldItalic>fonts/arial/arialbi.ttf</boldItalic>
-		<pdfEncoding>Identity-H</pdfEncoding>
-		<pdfEmbedded>true</pdfEmbedded>
-	</fontFamily>
-
-	<fontFamily name="Helvetica">
-		<normal>fonts/arial/arial.ttf</normal>
-		<bold>fonts/arial/arialbd.ttf</bold>
-		<italic>fonts/arial/ariali.ttf</italic>
-		<boldItalic>fonts/arial/arialbi.ttf</boldItalic>
-		<pdfEncoding>Identity-H</pdfEncoding>
-		<pdfEmbedded>true</pdfEmbedded>
-	</fontFamily>
-
 </fontFamilies>
