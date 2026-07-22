@@ -19,7 +19,17 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- Matches Jaspersoft Studio 6.20 / Spring Boot 2.7 / Java 17 -->
+        <jasperreports.version>6.20.0</jasperreports.version>
     </properties>
+
+    <repositories>
+        <!-- Required for com.lowagie:itext:2.1.7.js10 (JasperReports PDF) -->
+        <repository>
+            <id>jaspersoft-third-party</id>
+            <url>https://jaspersoft.jfrog.io/artifactory/third-party-ce-artifacts/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -38,6 +48,18 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>${jasperreports.version}</version>
+        </dependency>
+        <!-- Optional in JasperReports POM; required for XLS path and some OOXML tooling -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.1.0</version>
         </dependency>
 
         <dependency>
