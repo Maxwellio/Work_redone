@@ -19,6 +19,11 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- Совпадает с линейкой Jaspersoft Studio 6.20; Java 17 / Spring Boot 2.7 -->
+        <jasperreports.version>6.20.6</jasperreports.version>
+        <!-- OpenPDF с Maven Central вместо openpdf:*.jaspersoft.* (тот только на jaspersoft.jfrog.io) -->
+        <openpdf.version>1.3.30</openpdf.version>
+        <poi.version>5.1.0</poi.version>
     </properties>
 
     <dependencies>
@@ -49,6 +54,32 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- JasperReports 6.20.x — совместим с Jaspersoft Studio 6.20, Java 17, Spring Boot 2.7 -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>${jasperreports.version}</version>
+            <exclusions>
+                <!-- Патченная сборка только на jaspersoft.jfrog.io — для офлайн-среды берём OpenPDF с Central -->
+                <exclusion>
+                    <groupId>com.github.librepdf</groupId>
+                    <artifactId>openpdf</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- PDF-бэкенд JasperReports (замена itext); версия с Maven Central -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${openpdf.version}</version>
+        </dependency>
+        <!-- POI нужен для XLSX/DOCX (optional-зависимости jasperreports) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
         </dependency>
     </dependencies>
 
