@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Fallback font-extension for Arial (also registered in JasperArialFontConfig).
-  Prefer putting TTFs in fonts/arial/ or set jasper.fonts.arial-dir.
--->
+<!-- Arial from classpath fonts/arial/ (also registered in JasperArialFontConfig). -->
 <fontFamilies>
 	<fontFamily name="Arial">
 		<normal>fonts/arial/arial.ttf</normal>

@@ -8,7 +8,6 @@ import net.sf.jasperreports.extensions.ExtensionsRegistry;
 import net.sf.jasperreports.extensions.ListExtensionsRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -18,45 +17,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Registers Arial TTF for Jasper PDF (Identity-H + embed).
- * Looks up files in: configured dir → classpath fonts/arial → Windows/Linux system fonts.
+ * Registers Arial from classpath {@code fonts/arial/*.ttf} for Jasper PDF embed.
  */
 @Configuration
 public class JasperArialFontConfig {
 
     private static final Logger log = LoggerFactory.getLogger(JasperArialFontConfig.class);
-
-    @Value("${jasper.fonts.arial-dir:}")
-    private String arialDir;
+    private static final String CLASSPATH_DIR = "fonts/arial/";
 
     @PostConstruct
     public void registerArial() throws IOException {
-        Path normal = resolveFont("arial.ttf", "Arial.ttf");
-        Path bold = resolveFont("arialbd.ttf", "Arialbd.ttf", "arialbd.ttf");
-        Path italic = resolveFont("ariali.ttf", "Ariali.ttf", "ariali.ttf");
-        Path boldItalic = resolveFont("arialbi.ttf", "Arialbi.ttf", "arialbi.ttf");
-
-        if (normal == null) {
-            throw new IllegalStateException(
-                    "Arial TTF not found. Put arial.ttf (and arialbd/ariali/arialbi) into "
-                            + "classpath:fonts/arial/ or set jasper.fonts.arial-dir to a folder "
-                            + "with those files (e.g. C:/Windows/Fonts).");
-        }
-        if (bold == null) {
-            bold = normal;
-        }
-        if (italic == null) {
-            italic = normal;
-        }
-        if (boldItalic == null) {
-            boldItalic = bold;
-        }
+        Path normal = requireFont("arial.ttf");
+        Path bold = optionalFont("arialbd.ttf", normal);
+        Path italic = optionalFont("ariali.ttf", normal);
+        Path boldItalic = optionalFont("arialbi.ttf", bold);
 
         SimpleFontFamily family = new SimpleFontFamily(DefaultJasperReportsContext.getInstance());
         family.setName("Arial");
@@ -89,49 +68,33 @@ public class JasperArialFontConfig {
             }
         };
         ExtensionsEnvironment.setSystemExtensionsRegistry(combined);
-        log.info("Jasper Arial font registered from {}", normal);
+        log.info("Jasper Arial registered from classpath:{}", CLASSPATH_DIR + "arial.ttf");
     }
 
     private static String absolutePath(Path path) {
         return path.toAbsolutePath().normalize().toString();
     }
 
-    private Path resolveFont(String... names) throws IOException {
-        if (arialDir != null && !arialDir.isBlank()) {
-            Path dir = Paths.get(arialDir);
-            for (String name : names) {
-                Path candidate = dir.resolve(name);
-                if (Files.isRegularFile(candidate)) {
-                    return candidate;
-                }
-            }
+    private Path requireFont(String name) throws IOException {
+        Path path = loadClasspathFont(name);
+        if (path == null) {
+            throw new IllegalStateException(
+                    "Arial TTF not found: classpath:" + CLASSPATH_DIR + name
+                            + ". Place the file under src/main/resources/fonts/arial/");
         }
-
-        for (String name : names) {
-            Resource resource = new ClassPathResource("fonts/arial/" + name);
-            if (resource.exists()) {
-                return copyToTemp(resource, name);
-            }
-        }
-
-        String[] systemDirs = {
-                "C:/Windows/Fonts",
-                "C:\\Windows\\Fonts",
-                "/usr/share/fonts/truetype/msttcorefonts",
-                "/usr/share/fonts/truetype/liberation"
-        };
-        for (String dir : systemDirs) {
-            for (String name : names) {
-                Path candidate = Paths.get(dir, name);
-                if (Files.isRegularFile(candidate)) {
-                    return candidate;
-                }
-            }
-        }
-        return null;
+        return path;
     }
 
-    private static Path copyToTemp(Resource resource, String name) throws IOException {
+    private Path optionalFont(String name, Path fallback) throws IOException {
+        Path path = loadClasspathFont(name);
+        return path != null ? path : fallback;
+    }
+
+    private Path loadClasspathFont(String name) throws IOException {
+        Resource resource = new ClassPathResource(CLASSPATH_DIR + name);
+        if (!resource.exists()) {
+            return null;
+        }
         Path temp = Files.createTempFile("jasper-" + name.replace('.', '-') + "-", ".ttf");
         temp.toFile().deleteOnExit();
         try (InputStream in = resource.getInputStream()) {

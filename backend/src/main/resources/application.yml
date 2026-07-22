@@ -14,9 +14,3 @@ spring:
     properties:
       hibernate:
         default_schema: substitute
-
-# Folder with arial.ttf / arialbd.ttf / ariali.ttf / arialbi.ttf (optional).
-# If empty: classpath:fonts/arial/, then C:/Windows/Fonts, then Linux msttcorefonts.
-jasper:
-  fonts:
-    arial-dir:
