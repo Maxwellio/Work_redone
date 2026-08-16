@@ -36,6 +36,7 @@ export function useTransitionsRef(open, disallowedGroupIds = []) {
 
   useEffect(() => {
     if (!open) {
+      setSelectedGroupId(null)
       return
     }
     let cancelled = false
@@ -50,7 +51,6 @@ export function useTransitionsRef(open, disallowedGroupIds = []) {
       setErrorRefData(null)
       setLoadingRefData(false)
     }
-    setSelectedGroupId(null)
 
     ;(async () => {
       const [gRes, oRes] = await Promise.all([ensureOperationGroups(), ensureOperations()])
