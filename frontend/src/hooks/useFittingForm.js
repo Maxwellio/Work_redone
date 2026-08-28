@@ -104,16 +104,20 @@ export function useFittingForm({
     try {
       const { id } = await saveFitting(payload)
       setIsModalOpen(false)
-      await loadData()
-      if (id != null && id > 0) {
+      if (openTransitions && id != null && id > 0 && typeof onOpenTransitions === 'function') {
+        // loadData() и setPendingScrollToId() не вызываем здесь:
+        // они будут вызваны в closeFittingTransitions при закрытии формы переходов
         setSelectedRowId(id)
-        setPendingScrollToId(id)
-        if (openTransitions && typeof onOpenTransitions === 'function') {
-          onOpenTransitions({
-            idFiting: id,
-            name: source.nm || '',
-            tip,
-          })
+        onOpenTransitions({
+          idFiting: id,
+          name: source.nm || '',
+          tip,
+        })
+      } else {
+        await loadData()
+        if (id != null && id > 0) {
+          setSelectedRowId(id)
+          setPendingScrollToId(id)
         }
       }
       return id
