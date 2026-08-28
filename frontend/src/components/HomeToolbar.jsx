@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import CloseIcon from '@mui/icons-material/Close'
+import MonthFilterField from './MonthFilterField'
 
 function HomeToolbar({
   activeTab,
@@ -105,15 +106,9 @@ function HomeToolbar({
       </Button>
       <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
         <Stack direction="row" spacing={0.5} alignItems="flex-start">
-          <TextField
-            type="month"
-            size="small"
-            label="Месяц"
+          <MonthFilterField
             value={monthFilter}
-            onChange={(e) => onMonthFilterChange(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            sx={{ minWidth: 160 }}
-            aria-label="Фильтр по месяцу"
+            onChange={onMonthFilterChange}
           />
           <Tooltip title="Сбросить фильтр по месяцу">
             <span>
