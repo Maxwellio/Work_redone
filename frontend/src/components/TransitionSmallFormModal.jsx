@@ -61,7 +61,7 @@ function TransitionSmallFormModal({
       if (value !== '') {
         value = String(value).replace(',', '.')
         value = value.replace(/[^0-9.]/g, '')
-        if (value.length > 10) {
+        if (value.length > 7) {
           value = value.slice(0, 10)
         }
       }
@@ -127,21 +127,6 @@ function TransitionSmallFormModal({
               {idOperations}
             </Typography>
           )}
-          {typeof onChangeTransition === 'function' && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() =>
-                onChangeTransition({
-                  ...draft,
-                  seqNumOper: initialValues?.seqNumOper ?? '',
-                })
-              }
-              disabled={saving}
-            >
-              Сменить переход
-            </Button>
-          )}
         </Box>
       </Box>
       <DialogContent dividers>
@@ -188,6 +173,21 @@ function TransitionSmallFormModal({
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
+      {typeof onChangeTransition === 'function' && (
+            <Button
+              variant="outlined"
+              sx={{ mr: 'auto' }} 
+              onClick={() =>
+                onChangeTransition({
+                  ...draft,
+                  seqNumOper: initialValues?.seqNumOper ?? '',
+                })
+              }
+              disabled={saving}
+            >
+              Сменить переход
+            </Button>
+          )}
         <Button variant="contained" color="primary" onClick={handleOk} disabled={saving}>
           ОК
         </Button>
