@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import DraggableDialog from './DraggableDialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -21,6 +21,7 @@ import { copySubstituteDetail, deleteSubstituteDetail, saveSubstituteDetail } fr
 import { useTheme } from '@mui/material/styles'
 import { useConfirm } from '../context/ConfirmContext'
 import { refModalTableContainerSx, tablePlaceholderMessageSx } from '../theme'
+import { useTransitionListFocus } from '../hooks/useTransitionListFocus'
 
 const COLUMNS = [
   { key: 'seqNumOper', label: '№' },
@@ -28,7 +29,7 @@ const COLUMNS = [
   { key: 'd', label: 'Диам. наруж. мм' },
   { key: 'lCalc', label: 'Длина обраб. Поверх. мм' },
   { key: 'valueMeas', label: 'Измер. велич. мм' },
-  { key: 'depthCut', label: 'Глубиа резания мм' },
+  { key: 'depthCut', label: 'Глубина резания мм' },
   { key: 'i', label: 'Число проходов' },
   { key: 's', label: 'Подача мм/об' },
   { key: 'n', label: 'Обороты шп. мм' },
@@ -47,6 +48,8 @@ const mapRow = (row) => ({
 
 const getRowKey = (row) => row.idMakeSubstitute ?? `${row.seqNumOper}-${row.idOperations}`
 
+const getRecordId = (row) => row.idMakeSubstitute ?? null
+
 function SubstituteTransitionsModal({
   open,
   substituteId,
@@ -55,6 +58,8 @@ function SubstituteTransitionsModal({
   onOpenTransitionsRefModal,
   onTransitionsListChange,
   transitionsListRefreshKey = 0,
+  pendingTransitionFocus = null,
+  onTransitionFocusHandled,
 }) {
   const theme = useTheme()
   const confirm = useConfirm()
@@ -65,10 +70,13 @@ function SubstituteTransitionsModal({
   const [deleting, setDeleting] = useState(false)
   const [moving, setMoving] = useState(false)
   const [copying, setCopying] = useState(false)
+  const [localPendingFocus, setLocalPendingFocus] = useState(null)
+  const tableContainerRef = useRef(null)
 
   useEffect(() => {
     if (!open) {
       setSelectedRowKey(null)
+      setLocalPendingFocus(null)
     }
   }, [open])
 
@@ -101,6 +109,27 @@ function SubstituteTransitionsModal({
     () => [...rows].sort((a, b) => (a.seqNumOper ?? 0) - (b.seqNumOper ?? 0)),
     [rows]
   )
+
+  const effectivePendingFocus = pendingTransitionFocus ?? localPendingFocus
+
+  const handleFocusHandled = useCallback(() => {
+    if (localPendingFocus) {
+      setLocalPendingFocus(null)
+    } else {
+      onTransitionFocusHandled?.()
+    }
+  }, [localPendingFocus, onTransitionFocusHandled])
+
+  useTransitionListFocus({
+    pendingFocus: effectivePendingFocus,
+    rowsSorted,
+    loading,
+    getRecordId,
+    getRowKey,
+    setSelectedRowKey,
+    tableContainerRef,
+    onHandled: handleFocusHandled,
+  })
 
   const titleName = substituteName ? ` ${substituteName}` : ''
   const selectedIndex = useMemo(
@@ -183,6 +212,7 @@ function SubstituteTransitionsModal({
     setCopying(true)
     try {
       await copySubstituteDetail(pk)
+      setLocalPendingFocus({ kind: 'lastRow', scrollBlock: 'end' })
       onTransitionsListChange?.()
     } catch (err) {
       window.alert(err.message || 'Ошибка копирования')
@@ -262,8 +292,14 @@ function SubstituteTransitionsModal({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers>
-        <TableContainer sx={refModalTableContainerSx}>
+      <DialogContent 
+        dividers 
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        >
+        <TableContainer ref={tableContainerRef} sx={refModalTableContainerSx}>
           {error && (
             <Box sx={tablePlaceholderMessageSx(theme, { emphasized: true, nestedInWrap: true })}>{error}</Box>
           )}
@@ -299,6 +335,7 @@ function SubstituteTransitionsModal({
                   return (
                     <TableRow
                       key={rowKey}
+                      data-transition-row-id={row.idMakeSubstitute ?? undefined}
                       selected={isSelected}
                       onClick={() => setSelectedRowKey(isSelected ? null : rowKey)}
                       onDoubleClick={() => {
@@ -309,7 +346,7 @@ function SubstituteTransitionsModal({
                       sx={{
                         cursor: 'pointer',
                         userSelect: 'none',
-                        // Hover-подсветка как на `Home` (включая выбранную строку).
+                        // Hover-подсветка
                         '&:hover': { backgroundColor: theme.palette.secondary.light },
                       }}
                     >
@@ -335,26 +372,26 @@ function SubstituteTransitionsModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1, mr: 'auto' }}>
-          <Button
-            variant="outlined"
-            color="inherit"
-            startIcon={<ArrowUpward />}
-            disabled={deleting || moving || copying || !canMoveUp}
-            onClick={() => handleMoveTransition(-1)}
-          >
-            Вверх
-          </Button>
-          <Button
-            variant="outlined"
-            color="inherit"
-            startIcon={<ArrowDownward />}
-            disabled={deleting || moving || copying || !canMoveDown}
-            onClick={() => handleMoveTransition(1)}
-          >
-            Вниз
-          </Button>
-        </Box>
+      <Box sx={{ display: 'flex', gap: 1, mr: 'auto' }}>
+        <IconButton
+          variant="outlined" // Само по себе не рисует рамку в IconButton
+          color="inherit"
+          disabled={deleting || moving || copying || !canMoveUp}
+          onClick={() => handleMoveTransition(-1)}
+          sx={{ border: '1px solid rgba(0, 0, 0, 0.23)', borderRadius: 1 }}
+        >
+        <ArrowUpward />
+        </IconButton>
+  
+        <IconButton
+          color="inherit"
+          disabled={deleting || moving || copying || !canMoveDown}
+          onClick={() => handleMoveTransition(1)}
+          sx={{ border: '1px solid rgba(0, 0, 0, 0.23)', borderRadius: 1 }}
+        >
+        <ArrowDownward />
+        </IconButton>
+      </Box>
         <Button
           variant="contained"
           color="primary"
@@ -370,20 +407,20 @@ function SubstituteTransitionsModal({
           Добавить переход
         </Button>
         <Button
-          variant="contained"
-          color="primary"
-          disabled={deleting || moving || copying || !selectedRowKey}
-          onClick={handleEditSelectedTransition}
-        >
-          Изменить переход
-        </Button>
-        <Button
           variant="outlined"
           color="primary"
           disabled={deleting || moving || copying || !selectedRowKey}
           onClick={handleCopyTransition}
         >
           Копировать переход
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={deleting || moving || copying || !selectedRowKey}
+          onClick={handleEditSelectedTransition}
+        >
+          Изменить переход
         </Button>
         <Button
           variant="outlined"

@@ -208,6 +208,7 @@ public class MakeSubstituteDetailDto {
         this.lCur = lCur;
     }
 
+
     @JsonProperty("tSum")
     public BigDecimal getTSum() {
         return tSum;

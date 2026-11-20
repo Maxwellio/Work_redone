@@ -14,7 +14,6 @@ import { userHasAdminRole } from '../utils/userRoles'
  * Страница входа: форма логин/пароль, вызов POST /api/login (form-urlencoded),
  * после успеха — getCurrentUser и редирект на `/` или `/admin` при роли администратора.
  * При заходе на /login авторизованного пользователя — редирект по той же логике.
- * У обычного входа слева — колонка 3×4 под изображение из public/ (заглушка до подстановки файла).
  */
 function Login() {
   const navigate = useNavigate()
@@ -83,8 +82,8 @@ function Login() {
               Смена пароля
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                При первом входе в ПС необходимо сменить выданный пароль
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+                При первом входе в ПС необходимо сменить выданный пароль.
               </Typography>
               {changePasswordError && (
                 <Typography
@@ -116,96 +115,118 @@ function Login() {
   }
 
   // Обычный вход: слева колонка 3×4 под персонализирующее изображение из public/.
-  // Файл: frontend/public/login-side.jpg → URL /login-side.jpg (замените заглушку на <img>).
+  // Файл: frontend/public/login-side.jpg → URL /login-side.jpg.
   return (
     <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 2,
-        bgcolor: 'background.default',
+  sx={{
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    p: 2,
+    bgcolor: 'background.default',
+  }}
+>
+  <Card sx={{ width: '100%', maxWidth: 850, overflow: 'hidden', p: 3 }}>
+    <Box 
+      component="form" 
+      onSubmit={handleSubmit} 
+      sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
       }}
     >
-      <Card sx={{ width: '100%', maxWidth: 600, overflow: 'hidden' }}>
+      {/* 1. НАДПИСЬ ВХОД (НАД ВСЕМ КОНТЕНТОМ) */}
+      <Typography variant="h5" component="h1" sx={{ textAlign: 'center', fontWeight: 'medium', mt: 0  }}>
+      Расчет норм штучного времени на токарную обработку при изготовлении переводников, патрубков и ремонте труб
+      </Typography>
+
+      {/* 2. СРЕДНЯЯ ЧАСТЬ (ИЗОБРАЖЕНИЕ И ФОРМА ДРУГ НАПРОТИВ ДРУГА) */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' },
+          alignItems: 'center', // Центрирует поля по вертикали относительно логотипа
+          
+        }}
+      >
+        {/* ЛОГОТИП */}
         <Box
+          role="img"
+          aria-hidden
           sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' },
-            alignItems: 'stretch',
+            display: { xs: 'none', sm: 'block' },
+            width: 400,
+            aspectRatio: '3.5 / 4',
+            bgcolor: '#ffffff',
+            flexShrink: 0,
+            backgroundImage: 'url(/icon.ico)',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            pointerEvents: 'none',
+            userSelect: 'none',
           }}
-        >
-          {/* Заглушка: положите login-side.jpg в public/ и замените Box на img src="/login-side.jpg". */}
-          <Box
-            aria-hidden
-            sx={{
-              display: { xs: 'none', sm: 'block' },
-              width: 200,
-              aspectRatio: '3 / 4',
-              bgcolor: 'action.hover',
-              flexShrink: 0,
-            }}
+        />
+
+        {/* ПОЛЯ ВВОДА И ТЕКСТ */}
+        <CardContent sx={{ minWidth: 400, maxWidth: 400, width: '100%', justifySelf: { xs: 'center', sm: 'stretch' }, p: 1 }}>
+          <TextField
+            fullWidth
+            label="Логин"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+            required
+            disabled={submitting}
+            margin="normal"
           />
-          <CardContent sx={{ minWidth: 0, maxWidth: 360, width: '100%', justifySelf: { xs: 'center', sm: 'stretch' } }}>
-            <Typography variant="h6" component="h2" sx={{ m: '0 0 1.5rem', textAlign: 'center' }}>
-              Вход
+          <TextField
+            fullWidth
+            label="Пароль"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            required
+            disabled={submitting}
+            margin="normal"
+          />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }} align="center">
+            Уважаемый пользователь! <br />Данное программное обеспечение <br /> и нормативные сборники по труду, <br />положенные в основу разработки,<br />являются собственностью ПАО "Сургутнефтегаз". <br />При работе с программным обеспечением необходимо соблюдать режим <br />коммерческой тайны.
+          </Typography>
+          {error && (
+            <Typography
+              variant="body2"
+              role="alert"
+              sx={{
+                mt: 2,
+                p: 1,
+                color: '#8b3a3a',
+                bgcolor: '#faf0f0',
+                borderRadius: 1,
+              }}
+            >
+              {error}
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column' }}>
-              <TextField
-                fullWidth
-                label="Логин"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                autoComplete="username"
-                required
-                disabled={submitting}
-                margin="normal"
-              />
-              <TextField
-                fullWidth
-                label="Пароль"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                disabled={submitting}
-                margin="normal"
-              />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Проверяйте вводимые данные
-              </Typography>
-              {error && (
-                <Typography
-                  variant="body2"
-                  role="alert"
-                  sx={{
-                    mt: 1,
-                    p: 1,
-                    color: '#8b3a3a',
-                    bgcolor: '#faf0f0',
-                    borderRadius: 1,
-                  }}
-                >
-                  {error}
-                </Typography>
-              )}
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-                disabled={submitting}
-                sx={{ mt: 2 }}
-              >
-                {submitting ? 'Вход…' : 'Войти'}
-              </Button>
-            </Box>
-          </CardContent>
-        </Box>
-      </Card>
+          )}
+        </CardContent>
+      </Box>
+
+      {/* 3. КНОПКА (В САМОМ НИЗУ ПОД ВСЕМ КОНТЕНТОМ) */}
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        disabled={submitting}
+        sx={{ py: 1 }} // Немного увеличим высоту кнопки для солидности
+      >
+        {submitting ? 'Вход…' : 'Войти'}
+      </Button>
     </Box>
+  </Card>
+</Box>
   )
 }
 

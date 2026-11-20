@@ -1,6 +1,7 @@
 package patrubki.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigDecimal;
 
 /**
@@ -11,49 +12,34 @@ public class SubstituteSaveDto {
 
     @JsonProperty("id")
     private Integer id;
-    
     @JsonProperty("nmSub1")
     private String nmSub1;
-    
     @JsonProperty("nmSub2")
     private String nmSub2;
-    
     @JsonProperty("nmSub3")
     private String nmSub3;
-    
     @JsonProperty("nmSub4")
     private String nmSub4;
-    
     @JsonProperty("nmSub5")
     private String nmSub5;
-    
     @JsonProperty("dSubstituteOut")
     private BigDecimal dSubstituteOut;
-    
     @JsonProperty("dSubstituteIn")
     private BigDecimal dSubstituteIn;
-    
     @JsonProperty("lSubstitute")
     private BigDecimal lSubstitute;
-    
     @JsonProperty("idPreform")
     private Integer idPreform;
-    
     @JsonProperty("dPreformOut")
     private BigDecimal dPreformOut;
-    
     @JsonProperty("dPreformIn")
     private BigDecimal dPreformIn;
-    
     @JsonProperty("lPreform")
     private BigDecimal lPreform;
-    
     @JsonProperty("ph")
     private BigDecimal ph;
-    
     @JsonProperty("massPreform")
     private BigDecimal massPreform;
-
     @JsonProperty("idUserCreator")
     private Integer idUserCreator;
 

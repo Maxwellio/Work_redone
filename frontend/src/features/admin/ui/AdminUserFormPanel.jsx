@@ -2,9 +2,6 @@ import CloseIcon from '@mui/icons-material/Close'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
 import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import InputLabel from '@mui/material/InputLabel'
@@ -16,10 +13,13 @@ import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { useCallback, useEffect, useState } from 'react'
-import DraggableDialog from '../../../components/DraggableDialog'
-import { resetAdminUserPassword, saveAdminUser } from '../api/adminUsers'
 import { ensureAdminOrgStruct, ensureAdminRoles } from '../api/adminReferenceCache'
 import { NM_USER } from '../constants'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import DraggableDialog from '../../../components/DraggableDialog'
+import { resetAdminUserPassword, saveAdminUser } from '../api/adminUsers'
 
 const DEFAULT_ORG_ID = 30
 
@@ -29,8 +29,9 @@ function today() {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  return `${day}-${m}-${y}`
 }
+
 
 /**
  * Правая панель: форма полей пользователя, данные с записи в таблице (без сохранения на сервер).
@@ -49,7 +50,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
   const [password, setPassword] = useState('')
   const [telefon, setTelefon] = useState('')
   const [dtenter, setDtenter] = useState(() => today())
-  const [dtout, setDtout] = useState('2100-01-01')
+  const [dtout, setDtout] = useState('01-01-2100')
   const [note, setNote] = useState('')
   const [active, setActive] = useState(true)
   const [isFirstLogin, setIsFirstLogin] = useState(true)
@@ -69,7 +70,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     setPassword('')
     setTelefon('')
     setDtenter(today())
-    setDtout('2100-01-01')
+    setDtout('01-01-2100')
     setNote('')
     setActive(true)
     setIsFirstLogin(true)
@@ -107,7 +108,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
       setPassword('')
       setTelefon(selectedUser.telefon ?? '')
       setDtenter(selectedUser.dtenter ? selectedUser.dtenter.slice(0, 10) : today())
-      setDtout(selectedUser.dtout ? selectedUser.dtout.slice(0, 10) : '2100-01-01')
+      setDtout(selectedUser.dtout ? selectedUser.dtout.slice(0, 10) : '01-01-2100')
       setNote(selectedUser.note ?? '')
       setActive(selectedUser.active === 1)
       setIsFirstLogin(selectedUser.isFirstLogin === true)
@@ -143,7 +144,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
     } finally {
       setSaving(false)
     }
-  }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, roleId, selectedUser?.usersId, telefon, userName])
+  }, [active, dtenter, dtout, fio, isFirstLogin, note, onSaved, orgId, password, telefon, roleId, selectedUser?.usersId, userName])
 
   const handleResetPasswordConfirm = useCallback(async () => {
     if (!selectedUser?.usersId) return
@@ -246,7 +247,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
         helperText={
           isNewUserDraft
             ? undefined
-            : 'Для существующего пользователя: оставьте пустым или введите новый пароль. Хэш не подставляется.'
+            : 'При пустом поле пароль не меняется'
         }
       />
 
@@ -290,11 +291,11 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
           fullWidth
           InputLabelProps={{ shrink: true }}
         />
-        <Tooltip title="Сбросить на сегодня">
+        <Tooltip title="Сбросить на 01-01-2100">
           <IconButton
             size="small"
-            aria-label="Сбросить дату отключения на сегодня"
-            onClick={() => setDtout(today())}
+            aria-label="Сбросить дату отключения на 01-01-2100"
+            onClick={() => setDtout('01-01-2100')}
             sx={{ mt: 0.5 }}
           >
             <CloseIcon fontSize="small" />
@@ -331,7 +332,7 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
               onChange={(e) => setIsFirstLogin(e.target.checked)}
             />
           }
-          label="Первое подключение"
+          label="Первый вход"
         />
       </Stack>
 
@@ -345,7 +346,6 @@ export function AdminUserFormPanel({ selectedUser, isNewUserDraft = false, onSav
       >
         {saving ? 'Сохранение…' : isNewUserDraft ? 'Добавить' : 'Сохранить'}
       </Button>
-
       {!isNewUserDraft && (
         <Button
           type="button"

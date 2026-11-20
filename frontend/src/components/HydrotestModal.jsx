@@ -166,10 +166,8 @@ function HydrotestModal({
       <DialogActions sx={{ px: 3, py: 2, gap: 1, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
         <Button
           variant="outlined"
-          color="secondary"
+          color="primary"
           onClick={handleCalcNv}
-          disabled={!onCalcNv || calcLoading}
-          startIcon={calcLoading ? <CircularProgress size={16} color="inherit" /> : undefined}
         >
           Рассчитать норму времени
         </Button>

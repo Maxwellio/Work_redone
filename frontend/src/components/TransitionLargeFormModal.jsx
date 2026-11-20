@@ -189,7 +189,7 @@ function TransitionLargeFormModal({
       if (value !== '') {
         value = String(value).replace(',', '.')
         value = value.replace(/[^0-9.]/g, '')
-        if (value.length > 10) {
+        if (value.length > 7) {
           value = value.slice(0, 10)
         }
       }
@@ -283,12 +283,12 @@ function TransitionLargeFormModal({
       }}
     >
       <Stack spacing={2}>
-        <TextField fullWidth size="small" label="Длина наруж, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
+        <TextField fullWidth size="small" label="Обраб. диаметр, мм" type="number" value={draft.d} onChange={handleFieldChange('d')} />
         <TextField fullWidth size="small" label="Длина, мм" type="number" value={draft.l} onChange={handleFieldChange('l')} />
         <TextField
           fullWidth
           size="small"
-          label="Измеряемый размер, мм"
+          label="Длина изм., мм"
           type="number"
           value={draft.irazm}
           onChange={handleFieldChange('irazm')}
@@ -298,7 +298,7 @@ function TransitionLargeFormModal({
         <TextField
           fullWidth
           size="small"
-          label="Измер велич, мм"
+          label="Диаметр изм., мм"
           type="number"
           value={draft.valueMeas}
           onChange={handleFieldChange('valueMeas')}
@@ -382,7 +382,7 @@ function TransitionLargeFormModal({
       }}
     >
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-        НТК
+          Приемы связанные с обработкой поверхности, не включенные в комплекс
       </Typography>
       {ntkLinksError && (
         <Typography variant="body2" color="error" sx={{ mb: 1 }}>
@@ -462,21 +462,6 @@ function TransitionLargeFormModal({
               {idOperations}
             </Typography>
           )}
-          {typeof onChangeTransition === 'function' && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() =>
-                onChangeTransition({
-                  ...draft,
-                  seqNumOper: initialValues?.seqNumOper ?? '',
-                })
-              }
-              disabled={saving}
-            >
-              Сменить переход
-            </Button>
-          )}
         </Box>
       </Box>
       <DialogContent dividers>
@@ -498,6 +483,21 @@ function TransitionLargeFormModal({
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
+      {typeof onChangeTransition === 'function' && (
+            <Button
+              variant="outlined"
+              sx={{ mr: 'auto' }} 
+              onClick={() =>
+                onChangeTransition({
+                  ...draft,
+                  seqNumOper: initialValues?.seqNumOper ?? '',
+                })
+              }
+              disabled={saving}
+            >
+              Сменить переход
+            </Button>
+          )}
         <Button variant="contained" color="primary" onClick={handleOk} disabled={saving}>
           ОК
         </Button>

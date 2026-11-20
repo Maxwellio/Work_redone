@@ -57,7 +57,7 @@ public class FitingDetailService {
         List<Integer> idNtkForSave = resolveIdNtkForSave(dto);
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_fiting_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                    "call substitute.add_edit_fiting_detail(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setObject(2, dto.getIdFiting(), Types.INTEGER);
@@ -106,7 +106,7 @@ public class FitingDetailService {
     @Transactional(readOnly = true)
     public BigDecimal calcFitTvp(Integer idOperations, BigDecimal massPreform, BigDecimal lPreform) {
         return jdbcTemplate.queryForObject(
-                "select substitute.calculate_fit_tvp(?,?,?,?,?,?,?,?,?,?,?)",
+                "select substitute.calculate_fit_tvp(?,?,?,?,?,?,?,?,?,?,?,?)",
                 BigDecimal.class,
                 idOperations,
                 null,
@@ -117,6 +117,7 @@ public class FitingDetailService {
                 null,
                 massPreform,
                 lPreform,
+                null,
                 null,
                 null
         );
@@ -185,7 +186,6 @@ public class FitingDetailService {
                 .collect(Collectors.toList());
         return jdbcTemplate.execute((Connection conn) -> calcTsumNtk(conn, tMach, tVp, idNtkList));
     }
-
     private static BigDecimal calcTsumNtk(Connection conn, BigDecimal tMach, BigDecimal tVp, List<Integer> idNtk)
             throws SQLException {
         Integer[] idArray = toDistinctIntegerArray(idNtk);
@@ -221,6 +221,7 @@ public class FitingDetailService {
                 .distinct()
                 .toArray(Integer[]::new);
     }
+
 
     private static Integer extractId(Object rawId, Integer fallbackId) {
         if (rawId instanceof Number) {

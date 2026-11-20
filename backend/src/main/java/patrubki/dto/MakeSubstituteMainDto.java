@@ -1,73 +1,50 @@
 package patrubki.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class MakeSubstituteMainDto {
 
-    @JsonProperty("id")
     private Integer idSubstitutePrepared;
-    
-    @JsonProperty("idPreform")
     private Integer idPreform;
-    
-    @JsonProperty("nmPreform")
     private String nmPreform;
-    
-    @JsonProperty("name")
     private String name;
-    
-    @JsonProperty("dPreformOut")
     private BigDecimal dPreformOut;
-    
-    @JsonProperty("dPreformIn")
     private BigDecimal dPreformIn;
-    
-    @JsonProperty("ph")
+
     private BigDecimal ph;
-    
-    @JsonProperty("lPreform")
+
     private BigDecimal lPreform;
-    
-    @JsonProperty("massPreform")
+
     private BigDecimal massPreform;
-    
-    @JsonProperty("tSum")
+
     private BigDecimal tSum;
-    
-    @JsonProperty("dSubstituteOut")
+
     private BigDecimal dSubstituteOut;
-    
-    @JsonProperty("dSubstituteIn")
+
     private BigDecimal dSubstituteIn;
-    
-    @JsonProperty("lSubstitute")
+
     private BigDecimal lSubstitute;
-    
-    @JsonProperty("nmSub1")
     private String nmSub1;
-    
-    @JsonProperty("nmSub2")
+
     private String nmSub2;
-    
-    @JsonProperty("nmSub3")
+
     private String nmSub3;
-    
-    @JsonProperty("nmSub4")
+
     private String nmSub4;
-    
-    @JsonProperty("nmSub5")
+
     private String nmSub5;
-    
-    @JsonProperty("idUserCreator")
+
     private Integer idUserCreator;
 
-    @JsonProperty("transitionCount")
     private long transitionCount;
 
     @JsonProperty("createdAt")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
     private LocalDate createdAt;
+
 
     public Integer getIdSubstitutePrepared() {
         return idSubstitutePrepared;

@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 public class AdminUserService {
 
     private static final String RESET_PASSWORD_PLAINTEXT = "123";
-
     private final UserRepository userRepository;
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
@@ -52,7 +51,6 @@ public class AdminUserService {
             return null;
         });
     }
-
     public Integer saveUser(AdminUserSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
@@ -74,6 +72,7 @@ public class AdminUserService {
             return extractId(cs.getObject(1), dto.getUsersId());
         });
     }
+
 
     private AdminUserListItemDto toListItem(UserEntity u) {
         return new AdminUserListItemDto(

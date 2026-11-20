@@ -77,9 +77,6 @@ function TransitionsRefModal({
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ m: '0 0 0.5rem' }}>
-              Группа
-            </Typography>
             <TableContainer sx={refModalTableContainerSx}>
               {loadingRefData && (
                 <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>
@@ -114,9 +111,6 @@ function TransitionsRefModal({
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ m: '0 0 0.5rem' }}>
-              Операции
-            </Typography>
             <TableContainer sx={refModalTableContainerSx}>
               {loadingRefData && (
                 <Box sx={tablePlaceholderMessageSx(theme, { nestedInWrap: true })}>Загрузка…</Box>

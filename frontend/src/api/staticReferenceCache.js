@@ -18,8 +18,10 @@ let operationsAllSettled = false
 let operationsAllList = []
 let operationsAllPromise = null
 
+
+
 /**
- * Статичные справочники: один успешный HTTP на сессию, дедуп параллельных вызовов.
+ * Статичные справочники: один успешный HTTP на сессию
  * Пустой массив с сервера кэшируется (preformSettled / partySettled).
  */
 export async function ensurePreformTypes() {

@@ -33,6 +33,7 @@ export async function calcSubTime(id) {
   }
 }
 
+
 export async function deleteSubstitute(id) {
   const res = await request(`/substitutes/${id}`, {
     method: 'DELETE',

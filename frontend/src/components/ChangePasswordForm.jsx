@@ -21,7 +21,7 @@ const passwordRulesTooltipContent = (
       <br />• содержать хотя бы 1 заглавную (A-Z)
       <br />• содержать хотя бы 1 строчную (a-z)
       <br />• содержать хотя бы 1 цифру (0-9)
-      <br />• содержать хотя бы 1 спецсимвол (например, !@#$%^&*)
+      <br />• содержать хотя бы 1 спецсимвол (!@#$%^&*)
     </Typography>
   </Box>
 )
@@ -175,10 +175,10 @@ function ChangePasswordForm({
         />
 
         <Stack direction="row" spacing={1} justifyContent="flex-end">
-          <Button variant="text" onClick={handleCancel}>
+          <Button variant="outlined" color="error" onClick={handleCancel}>
             {cancelLabel}
           </Button>
-          <Button type="submit" variant="contained" disabled={isSubmitDisabled}>
+          <Button type="submit" variant="outlined" disabled={isSubmitDisabled}>
             {submitLabel}
           </Button>
         </Stack>
@@ -188,4 +188,3 @@ function ChangePasswordForm({
 }
 
 export default ChangePasswordForm
-

@@ -5,12 +5,8 @@ import java.math.BigDecimal;
 
 /**
  * Тело запроса для расчёта нормы времени гидроиспытания (функция БД calculate_hydro_nv_form).
- * id = null при добавлении записи, иначе id редактируемой записи.
  */
 public class HydrotestNvCalcRequestDto {
-
-    @JsonProperty("id")
-    private Integer id;
 
     @JsonProperty("d")
     private BigDecimal d;
@@ -32,14 +28,6 @@ public class HydrotestNvCalcRequestDto {
 
     @JsonProperty("l2")
     private BigDecimal l2;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public BigDecimal getD() {
         return d;

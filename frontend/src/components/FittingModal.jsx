@@ -37,14 +37,13 @@ function FittingModal({
   const titleEdit = isPatrubok ? 'Редактирование патрубка' : 'Редактирование трубы'
   const titleAdd = isPatrubok ? 'Добавление патрубка' : 'Добавление трубы'
   const transitionsLabel = isPatrubok
-    ? 'Переходы при изготовлении патрубка'
-    : 'Переходы при изготовлении трубы'
+    ? 'Переходы'
+    : 'Переходы'
 
   const title = isEditMode ? titleEdit : titleAdd
   const [draft, setDraft] = useState(initialFormData)
 
   useEffect(() => {
-    // Normalize initial form data, especially idPreform for патрубок
     const next = { ...initialFormData }
 
     if (isPatrubok && Array.isArray(preformTypesFiltered) && preformTypesFiltered.length > 0) {
@@ -74,6 +73,8 @@ function FittingModal({
     setDraft(next)
   }, [open, initialFormData, isEditMode, isPatrubok, partyList, preformTypesFiltered])
 
+  
+
   const handleFieldChange = (field) => (event) => {
     let { value } = event.target
 
@@ -81,17 +82,17 @@ function FittingModal({
       if (value !== '') {
         value = String(value).replace(',', '.')
         value = value.replace(/[^0-9.]/g, '')
-        if (value.length > 10) {
-          value = value.slice(0, 10)
+        if (value.length > 7) {
+          value = value.slice(0, 7)
         }
       }
     }
-
     setDraft((prev) => ({ ...prev, [field]: value }))
   }
 
+
   return (
-    <DraggableDialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <DraggableDialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {title}
         <IconButton onClick={onClose} aria-label="Закрыть" size="small">
@@ -107,15 +108,14 @@ function FittingModal({
       <DialogContent dividers>
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography sx={{ minWidth: 100 }}>Наименование</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <TextField size="small" value={draft.nm} onChange={handleFieldChange('nm')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" label="Наименование" value={draft.nm} onChange={handleFieldChange('nm')} sx={{ width: 255, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" type="number" value={draft.d} onChange={handleFieldChange('d')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" type="number" value={draft.d} onChange={handleFieldChange('d')} sx={{ width: 84, minWidth: 64 }} />
               {isPatrubok && (
                 <>
                   <Typography color="text.secondary">x</Typography>
-                  <TextField size="small" type="number" value={draft.th} onChange={handleFieldChange('th')} sx={{ width: 96, minWidth: 64 }} />
+                  <TextField size="small" type="number" value={draft.th} onChange={handleFieldChange('th')} sx={{ width: 84, minWidth: 64 }} />
                 </>
               )}
             </Box>
@@ -148,7 +148,6 @@ function FittingModal({
                   label="Наименование"
                   onChange={handleFieldChange('idPreform')}
                 >
-                  <MenuItem value="">Выберите тип</MenuItem>
                   {preformTypesFiltered.map((item) => (
                     <MenuItem key={item.idPreform} value={String(item.idPreform)}>
                       {item.nmPreform}
@@ -173,16 +172,16 @@ function FittingModal({
           <TextField
             fullWidth
             size="small"
-            label="Коэф. жесткости, ГПа"
+            label="Механические характеристики материала, Гпа"
             type="number"
-            required
             value={draft.phPreform}
             onChange={handleFieldChange('phPreform')}
+            required
           />
           <TextField
             fullWidth
             size="small"
-            label="Наибольший диаметр изделия"
+            label="Наибольший диаметр изделия устанавливаемый над станиной, мм"
             type="number"
             value={draft.dStan}
             onChange={handleFieldChange('dStan')}
@@ -190,7 +189,6 @@ function FittingModal({
           <FormControl fullWidth size="small">
             <InputLabel>Количество деталей в партии, шт.</InputLabel>
             <Select value={draft.cnt ?? ''} label="Количество деталей в партии, шт." onChange={handleFieldChange('cnt')}>
-              <MenuItem value="">Выберите</MenuItem>
               {partyList.map((item) => (
                 <MenuItem key={item.colParty} value={item.colParty}>
                   {item.colParty}
@@ -207,9 +205,7 @@ function FittingModal({
         </Box>
       )}
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button variant="outlined" color="primary" onClick={() => onOpenTransitions?.(draft)}>
-          {transitionsLabel}
-        </Button>
+      <Button variant="outlined" color="primary" onClick={() => onOpenTransitions?.(draft)}> {transitionsLabel}</Button>
         <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)}>Ок</Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>Отмена</Button>
       </DialogActions>
