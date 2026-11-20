@@ -4,8 +4,8 @@ import HomeToolbar from '../components/HomeToolbar'
 import HomeTable from '../components/HomeTable'
 import HomeTabs from '../components/HomeTabs'
 import { useHomePage } from '../hooks/useHomePage'
-import Box from '@mui/material/Box'
 import { formatCell, getRowId } from '../utils/format'
+import Box from '@mui/material/Box'
 
 function Home() {
   const home = useHomePage()
@@ -93,6 +93,8 @@ function Home() {
           fittingForm={home.fittingForm}
           hydrotestForm={home.hydrotestForm}
           transitionsRef={home.transitionsRef}
+          pendingTransitionFocus={home.pendingTransitionFocus}
+          onTransitionFocusHandled={home.clearPendingTransitionFocus}
         />
       </Box>
     </Layout>
