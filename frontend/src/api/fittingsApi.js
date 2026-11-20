@@ -76,7 +76,8 @@ export async function getFittingDetailNtk(idFitingDetail) {
   return res.json()
 }
 
-/** Список NTK для панели большой формы перехода; dStan на сервере по id фитинга. */
+
+/** Список NTK для панели большой формы перехода; dStan на сервере по id fiting. */
 export async function getNtkForTransition(idFiting) {
   if (idFiting == null || idFiting === '') {
     return []
