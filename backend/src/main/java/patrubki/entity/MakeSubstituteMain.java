@@ -18,46 +18,46 @@ public class MakeSubstituteMain {
     @Column(name = "id_preform")
     private Integer idPreform;
 
-    @Column(name = "d_preform_out", precision = 19, scale = 2)
+    @Column(name = "d_preform_out", precision = 6, scale = 2)
     private BigDecimal dPreformOut;
 
-    @Column(name = "d_preform_in", precision = 19, scale = 2)
+    @Column(name = "d_preform_in", precision = 6, scale = 2)
     private BigDecimal dPreformIn;
 
-    @Column(name = "ph", precision = 19, scale = 2)
+    @Column(name = "ph", precision = 10, scale = 3)
     private BigDecimal ph;
 
-    @Column(name = "l_preform", precision = 19, scale = 2)
+    @Column(name = "l_preform", precision = 10, scale = 3)
     private BigDecimal lPreform;
 
-    @Column(name = "mass_preform", precision = 19, scale = 2)
+    @Column(name = "mass_preform", precision = 10, scale = 3)
     private BigDecimal massPreform;
 
-    @Column(name = "t_sum", precision = 19, scale = 2)
+    @Column(name = "t_sum", precision = 10, scale = 3)
     private BigDecimal tSum;
 
-    @Column(name = "d_substitute_out", precision = 19, scale = 2)
+    @Column(name = "d_substitute_out", precision = 10, scale = 3)
     private BigDecimal dSubstituteOut;
 
-    @Column(name = "d_substitute_in", precision = 19, scale = 2)
+    @Column(name = "d_substitute_in", precision = 10, scale = 3)
     private BigDecimal dSubstituteIn;
 
-    @Column(name = "l_substitute", precision = 19, scale = 2)
+    @Column(name = "l_substitute", precision = 10, scale = 3)
     private BigDecimal lSubstitute;
 
-    @Column(name = "nm_sub1", length = 255)
+    @Column(name = "nm_sub1", length = 100)
     private String nmSub1;
 
-    @Column(name = "nm_sub2", length = 255)
+    @Column(name = "nm_sub2", length = 100)
     private String nmSub2;
 
-    @Column(name = "nm_sub3", length = 255)
+    @Column(name = "nm_sub3", length = 100)
     private String nmSub3;
 
-    @Column(name = "nm_sub4", length = 255)
+    @Column(name = "nm_sub4", length = 100)
     private String nmSub4;
 
-    @Column(name = "nm_sub5", length = 255)
+    @Column(name = "nm_sub5", length = 100)
     private String nmSub5;
 
     @Column(name = "id_user_creator")
@@ -65,6 +65,7 @@ public class MakeSubstituteMain {
 
     @Column(name = "created_at")
     private LocalDate createdAt;
+
 
     public Integer getIdSubstitutePrepared() {
         return idSubstitutePrepared;
