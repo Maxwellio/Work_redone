@@ -32,6 +32,8 @@ function HomeModals({
   transitionsListRefreshKey,
   onTransitionsListChange,
   isPreformRefModalOpen,
+  pendingTransitionFocus,
+  onTransitionFocusHandled,
   onClosePreformRef,
   preformRef,
   substituteTransitionsModal,
@@ -104,9 +106,9 @@ function HomeModals({
         isEditMode={transitionSmallForm.isEditMode}
         idOperations={transitionSmallForm.idOperations}
         nmOperations={transitionSmallForm.nmOperations}
+        onChangeTransition={onChangeTransitionFromSmallForm}
         initialValues={transitionSmallForm.initialValues}
         onSave={onSaveTransitionSmall}
-        onChangeTransition={onChangeTransitionFromSmallForm}
         ownerType={transitionSmallForm.ownerType}
       />
 
@@ -116,9 +118,9 @@ function HomeModals({
         isEditMode={transitionLargeForm.isEditMode}
         idOperations={transitionLargeForm.idOperations}
         nmOperations={transitionLargeForm.nmOperations}
+        onChangeTransition={onChangeTransitionFromLargeForm}
         initialValues={transitionLargeForm.initialValues}
         onSave={onSaveTransitionLarge}
-        onChangeTransition={onChangeTransitionFromLargeForm}
         ownerType={transitionLargeForm.ownerType}
         tip={transitionLargeForm.tip}
         idFiting={transitionLargeForm.idFiting}
@@ -142,6 +144,10 @@ function HomeModals({
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
         onTransitionsListChange={onTransitionsListChange}
+        pendingTransitionFocus={
+          pendingTransitionFocus?.ownerType === 'substitute' ? pendingTransitionFocus : null
+        }
+        onTransitionFocusHandled={onTransitionFocusHandled}
       />
 
       <FittingTransitionsModal
@@ -153,6 +159,10 @@ function HomeModals({
         onOpenTransitionsRefModal={onOpenTransitionsRefModal}
         transitionsListRefreshKey={transitionsListRefreshKey}
         onTransitionsListChange={onTransitionsListChange}
+        pendingTransitionFocus={
+          pendingTransitionFocus?.ownerType === 'fitting' ? pendingTransitionFocus : null
+        }
+        onTransitionFocusHandled={onTransitionFocusHandled}
       />
     </>
   )
