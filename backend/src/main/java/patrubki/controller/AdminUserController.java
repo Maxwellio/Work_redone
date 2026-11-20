@@ -44,6 +44,7 @@ public class AdminUserController {
         return Map.of("ok", true);
     }
 
+
     @GetMapping("/roles")
     public List<AdminRoleOptionDto> listRoles() {
         return adminReferenceService.listRoles();
