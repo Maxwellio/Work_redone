@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { calcFitTime, calcSubTime } from '../api'
 import { saveSubstituteDetail, saveFittingDetail } from '../api/transitionDetailsApi'
@@ -36,15 +36,15 @@ export function useHomePage() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState(0)
   const [searchQuery, setSearchQuery] = useState('')
-  const [monthFilter, setMonthFilter] = useState('')
   const [showMyRecords, setShowMyRecords] = useState(false)
+  const [monthFilter, setMonthFilter] = useState('')
   const [isTransitionsRefModalOpen, setIsTransitionsRefModalOpen] = useState(false)
   const [resetTransitionsRefContextOnClose, setResetTransitionsRefContextOnClose] = useState(false)
   const [transitionsRefContext, setTransitionsRefContext] = useState({
     ownerType: null, // 'substitute' | 'fitting' | null
     tip: null, // for fitting: 1 = patrubok, 2 = tube
     mode: null, // 'add' | 'edit' | null
-    transitionRecordId: null, // id записи, которая будет редактироваться (для future)
+    transitionRecordId: null, // id записи, которая будет редактироваться
     selectedOperationId: null,
     selectedOperationName: '',
     transitionDraft: null,
@@ -87,12 +87,17 @@ export function useHomePage() {
     initialValues: null,
   })
   const [transitionsListRefreshKey, setTransitionsListRefreshKey] = useState(0)
+  const [pendingTransitionFocus, setPendingTransitionFocus] = useState(null)
+
+  const clearPendingTransitionFocus = useCallback(() => {
+    setPendingTransitionFocus(null)
+  }, [])
 
   const data = useHomeData({
     activeTab,
     searchQuery,
-    monthFilter,
     showMyRecords,
+    monthFilter,
     user,
   })
 
@@ -105,6 +110,7 @@ export function useHomePage() {
   }
 
   const closeSubstituteTransitions = () => {
+    setPendingTransitionFocus((prev) => (prev?.ownerType === 'substitute' ? null : prev))
     let idToCalc = null
     setSubstituteTransitionsModal((prev) => {
       if (prev.isOpen && prev.idSubstitutePrepared != null) {
@@ -132,6 +138,7 @@ export function useHomePage() {
   }
 
   const closeFittingTransitions = () => {
+    setPendingTransitionFocus((prev) => (prev?.ownerType === 'fitting' ? null : prev))
     let idToCalc = null
     setFittingTransitionsModal((prev) => {
       if (prev.isOpen && prev.idFiting != null) {
@@ -427,7 +434,7 @@ export function useHomePage() {
       if (idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      await saveSubstituteDetail({
+      return saveSubstituteDetail({
         id: isEditMode ? transitionRecordId : null,
         idSubstitutePrepared,
         idOperations: operationId,
@@ -444,14 +451,13 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
-      return
     }
 
     if (ownerType === 'fitting') {
       if (idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
-      await saveFittingDetail({
+      return saveFittingDetail({
         id: isEditMode ? transitionRecordId : null,
         idFiting,
         idOperations: operationId,
@@ -468,7 +474,6 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
-      return
     }
 
     throw new Error('Не определен тип владельца перехода')
@@ -530,11 +535,11 @@ export function useHomePage() {
       ? { seqNumOper: formDraft?.seqNumOper ?? '' }
       : null
 
-    if (sourceFormType === 'small' && isSmallFormOperationId(selectedOperationId)) {
-      initialValues = sanitizeSmallFormDraftForOperation(formDraft)
-    } else if (sourceFormType === 'large' && isLargeFormOperationId(selectedOperationId)) {
-      initialValues = sanitizeLargeFormDraftForOperation(formDraft, selectedOperationId)
-    }
+      if (sourceFormType === 'small' && isSmallFormOperationId(selectedOperationId)) {
+        initialValues = sanitizeSmallFormDraftForOperation(formDraft)
+      } else if (sourceFormType === 'large' && isLargeFormOperationId(selectedOperationId)) {
+        initialValues = sanitizeLargeFormDraftForOperation(formDraft, selectedOperationId)
+      }
 
     const payloadBase = {
       open: true,
@@ -589,9 +594,9 @@ export function useHomePage() {
 
     if (isAssignmentOperationId(selectedOperationId)) {
       if (sourceFormType === 'small') closeTransitionSmallForm()
-      if (sourceFormType === 'large') closeTransitionLargeForm()
+        if (sourceFormType === 'large') closeTransitionLargeForm()
       try {
-        await saveAssignmentTransitionDirect({
+        const result = await saveAssignmentTransitionDirect({
           ownerType,
           idSubstitutePrepared,
           idFiting,
@@ -600,6 +605,29 @@ export function useHomePage() {
           transitionRecordId: ctx.transitionRecordId ?? null,
           seqNumOper: modeEdit ? parseIntOrNull(formDraft?.seqNumOper) : null,
         })
+        const recordId = modeEdit ? ctx.transitionRecordId : result?.id
+        if (modeEdit) {
+          setPendingTransitionFocus({
+            ownerType: ctx.ownerType,
+            kind: 'record',
+            recordId: ctx.transitionRecordId,
+            scrollBlock: 'center',
+          })
+        } else {
+          setPendingTransitionFocus({
+            ownerType: ctx.ownerType, kind: 'lastRow',
+            scrollBlock: 'end',
+          })
+        }
+        /*}
+        if (recordId != null) {
+          setPendingTransitionFocus({
+            ownerType,
+            kind: 'record',
+            recordId,
+            scrollBlock: modeEdit ? 'center' : 'end',
+          })
+        } */
         setTransitionsListRefreshKey((k) => k + 1)
       } catch (err) {
         window.alert(err?.message || 'Ошибка сохранения перехода')
@@ -635,11 +663,12 @@ export function useHomePage() {
       s: null,
     }
 
+    let savedId = null
     if (s.ownerType === 'substitute') {
       if (s.idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      await saveSubstituteDetail({
+      const result = await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
         idOperations: operationId,
@@ -649,11 +678,12 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
+      savedId = result?.id
     } else if (s.ownerType === 'fitting') {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
       }
-      await saveFittingDetail({
+      const result = await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
         idOperations: operationId,
@@ -663,7 +693,31 @@ export function useHomePage() {
         seqNumOper,
         idUserCreator,
       })
+      savedId = result?.id
     }
+
+    const recordId = s.isEditMode ? s.transitionRecordId : savedId
+    if (s.isEditMode) {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType,
+        kind: 'record',
+        recordId: s.transitionRecordId,
+        scrollBlock: 'center',
+      })
+    } else {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType, kind: 'lastRow',
+        scrollBlock: 'end',
+      })
+    }
+    /*if (recordId != null) {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType,
+        kind: 'record',
+        recordId,
+        scrollBlock: s.isEditMode ? 'center' : 'end',
+      })
+    }*/
 
     setTransitionsListRefreshKey((k) => k + 1)
     closeTransitionSmallForm()
@@ -695,16 +749,18 @@ export function useHomePage() {
       idUserCreator,
     }
 
+    let savedId = null
     if (s.ownerType === 'substitute') {
       if (s.idSubstitutePrepared == null) {
         throw new Error('Не выбран переводник')
       }
-      await saveSubstituteDetail({
+      const result = await saveSubstituteDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idSubstitutePrepared: s.idSubstitutePrepared,
         idOperations: operationId,
         ...payloadBase,
       })
+      savedId = result?.id
     } else if (s.ownerType === 'fitting') {
       if (s.idFiting == null) {
         throw new Error('Не выбрана деталь')
@@ -714,14 +770,38 @@ export function useHomePage() {
             .map((n) => (typeof n === 'number' ? n : parseInt(String(n), 10)))
             .filter((n) => Number.isInteger(n))
         : []
-      await saveFittingDetail({
+        const result = await saveFittingDetail({
         id: s.isEditMode ? s.transitionRecordId : null,
         idFiting: s.idFiting,
         idOperations: operationId,
         ...payloadBase,
         idNtk,
       })
+      savedId = result?.id
     }
+
+    const recordId = s.isEditMode ? s.transitionRecordId : savedId
+    if (s.isEditMode) {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType,
+        kind: 'record',
+        recordId: s.transitionRecordId,
+        scrollBlock: 'center',
+      })
+    } else {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType, kind: 'lastRow',
+        scrollBlock: 'end',
+      })
+    }
+    /*if (recordId != null) {
+      setPendingTransitionFocus({
+        ownerType: s.ownerType,
+        kind: 'record',
+        recordId,
+        scrollBlock: s.isEditMode ? 'center' : 'end',
+      })
+    }*/
 
     setTransitionsListRefreshKey((k) => k + 1)
     closeTransitionLargeForm()
@@ -773,5 +853,7 @@ export function useHomePage() {
     handleAdd,
     handleEdit,
     handleOpenTransitions,
+    pendingTransitionFocus,
+    clearPendingTransitionFocus,
   }
 }
