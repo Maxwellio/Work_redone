@@ -50,24 +50,24 @@ function HomeTable({
             <TableRow>
               {columns.map((col) => (
                 <TableCell
-                  key={col.key}
-                  sortDirection={sortField === col.key ? sortDirection : false}
-                  onClick={col.sortable ? () => onSort(col.key) : undefined}
-                  sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
-                >
-                  {col.sortable ? (
-                    <TableSortLabel
-                      active={sortField === col.key}
-                      direction={sortField === col.key ? sortDirection : 'asc'}
-                      hideSortIcon={sortField !== col.key}
-                      sx={{ width: '100%' }}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  ) : (
-                    col.label
-                  )}
-                </TableCell>
+                key={col.key}
+                sortDirection={sortField === col.key ? sortDirection : false}
+                onClick={col.sortable ? () => onSort(col.key) : undefined}
+                sx={col.sortable ? { cursor: 'pointer', userSelect: 'none' } : undefined}
+              >
+                {col.sortable ? (
+                  <TableSortLabel
+                    active={sortField === col.key}
+                    direction={sortField === col.key ? sortDirection : 'asc'}
+                    hideSortIcon={sortField !== col.key}
+                    sx={{ width: '100%' }}
+                  >
+                    {col.label}
+                  </TableSortLabel>
+                ) : (
+                  col.label
+                )}
+              </TableCell>
               ))}
             </TableRow>
           </TableHead>
