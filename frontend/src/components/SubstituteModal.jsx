@@ -16,16 +16,8 @@ import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
 import { useEffect, useState } from 'react'
 
-const NUMERIC_FIELDS = new Set([
-  'dSubstituteOut',
-  'dSubstituteIn',
-  'lSubstitute',
-  'dPreformOut',
-  'dPreformIn',
-  'lPreform',
-  'ph',
-  'massPreform',
-])
+const NUMERIC_FIELDS = new Set(['dSubstituteOut', 'dSubstituteIn', 'lSubstitute', 'dPreformOut', 'dPreformIn', 'lPreform', 'ph', 'massPreform'])
+
 
 function SubstituteModal({
   open,
@@ -53,8 +45,8 @@ function SubstituteModal({
       if (value !== '') {
         value = String(value).replace(',', '.')
         value = value.replace(/[^0-9.]/g, '')
-        if (value.length > 10) {
-          value = value.slice(0, 10)
+        if (value.length > 7) {
+          value = value.slice(0, 7)
         }
       }
     }
@@ -69,7 +61,7 @@ function SubstituteModal({
   }
 
   return (
-    <DraggableDialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
+    <DraggableDialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { maxHeight: 'calc(100vh - 48px)' } }}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {title}
         <IconButton onClick={onClose} aria-label="Закрыть" size="small">
@@ -85,17 +77,16 @@ function SubstituteModal({
       <DialogContent dividers>
         <Stack spacing={2}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography sx={{ minWidth: 100 }}>Наименование</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-              <TextField size="small" value={draft.nmSub1 ?? ''} onChange={handleFieldChange('nmSub1')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" label="Наименование" value={draft.nmSub1 ?? ''} onChange={handleFieldChange('nmSub1')} sx={{ width: 155, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub2 ?? ''} onChange={handleFieldChange('nmSub2')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub2 ?? ''} onChange={handleFieldChange('nmSub2')} sx={{ width: 84, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub3 ?? ''} onChange={handleFieldChange('nmSub3')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub3 ?? ''} onChange={handleFieldChange('nmSub3')} sx={{ width: 84, minWidth: 64 }} />
               <Typography color="text.secondary">/</Typography>
-              <TextField size="small" value={draft.nmSub4 ?? ''} onChange={handleFieldChange('nmSub4')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub4 ?? ''} onChange={handleFieldChange('nmSub4')} sx={{ width: 84, minWidth: 64 }} />
               <Typography color="text.secondary">-</Typography>
-              <TextField size="small" value={draft.nmSub5 ?? ''} onChange={handleFieldChange('nmSub5')} sx={{ width: 96, minWidth: 64 }} />
+              <TextField size="small" value={draft.nmSub5 ?? ''} onChange={handleFieldChange('nmSub5')} sx={{ width: 84, minWidth: 64 }} />
             </Box>
           </Box>
 
@@ -133,7 +124,6 @@ function SubstituteModal({
               label="Наименование"
               onChange={handleFieldChange('idPreform')}
             >
-              <MenuItem value="">Выберите тип</MenuItem>
               {preformTypesFiltered.map((item) => (
                 <MenuItem key={item.idPreform} value={String(item.idPreform)}>
                   {item.nmPreform}
@@ -180,11 +170,11 @@ function SubstituteModal({
           <TextField
             fullWidth
             size="small"
-            label="Коэф. жесткости, ГПа"
+            label="Механические характеристики материала, Гпа"
             type="number"
-            required
             value={draft.ph ?? ''}
             onChange={handleFieldChange('ph')}
+            required
           />
           <TextField
             fullWidth
@@ -204,7 +194,7 @@ function SubstituteModal({
       )}
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button variant="outlined" color="primary" onClick={() => onOpenTransitions?.(draft)}>
-          Переходы при изготовлении переводника
+          Переходы
         </Button>
         <Button variant="contained" color="primary" startIcon={<Check />} onClick={() => onSave(draft)}>Ок</Button>
         <Button variant="outlined" color="inherit" startIcon={<Close />} onClick={onClose}>Отмена</Button>
