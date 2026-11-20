@@ -12,7 +12,6 @@ import patrubki.entity.MakeSubstituteMain;
 import patrubki.repository.MakeSubstituteDetailRepository;
 import patrubki.repository.MakeSubstituteMainRepository;
 import patrubki.repository.PreformTypRepository;
-
 import patrubki.util.YearMonthRangeUtil;
 
 import java.math.BigDecimal;
@@ -49,7 +48,7 @@ public class MakeSubstituteMainService {
     public Integer saveSubstitute(SubstituteSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_substitute(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "call substitute.add_edit_substitute(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
             cs.setString(2, dto.getNmSub1());
@@ -67,6 +66,7 @@ public class MakeSubstituteMainService {
             cs.setObject(14, dto.getPh(), Types.NUMERIC);
             cs.setObject(15, dto.getMassPreform(), Types.NUMERIC);
             cs.setObject(16, dto.getIdUserCreator(), Types.INTEGER);
+
             cs.execute();
             return extractId(cs.getObject(1), dto.getId());
         });
@@ -75,7 +75,7 @@ public class MakeSubstituteMainService {
     public void calcSubTime(Integer id) {
         jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.calc_sub_time(?)");
+                    "call substitute.calc_sub_time(?)");
             cs.setObject(1, id, Types.INTEGER);
             cs.execute();
             return null;
@@ -98,9 +98,9 @@ public class MakeSubstituteMainService {
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, createdFrom, createdTo);
+        List<MakeSubstituteMain> mains = range != null
+                ? repository.findAllOrderByNameAndCreatedAtBetween(searchParam, range[0], range[1])
+                : repository.findAllOrderByName(searchParam);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
@@ -110,9 +110,9 @@ public class MakeSubstituteMainService {
     public List<MakeSubstituteMainDto> findAllOrderByName(String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<MakeSubstituteMain> mains = repository.findAllOrderByName(searchParam, userId, createdFrom, createdTo);
+        List<MakeSubstituteMain> mains = range != null
+                ? repository.findAllOrderByNameAndCreatedAtBetween(searchParam, userId, range[0], range[1])
+                : repository.findAllOrderByName(searchParam, userId);
         Map<Integer, Long> transitionCounts = transitionCountsBySubstitutePreparedId(mains);
         return mains.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdSubstitutePrepared(), 0L)))
@@ -145,14 +145,13 @@ public class MakeSubstituteMainService {
         }
         return repository.findById(idSubstitutePrepared).map(MakeSubstituteMain::getPh).orElse(null);
     }
-
     private String buildName(MakeSubstituteMain e) {
         String s1 = e.getNmSub1() != null ? e.getNmSub1() : "";
         String s2 = e.getNmSub2() != null ? e.getNmSub2() : "";
         String s3 = e.getNmSub3() != null ? e.getNmSub3() : "";
         String s4 = e.getNmSub4() != null ? e.getNmSub4() : "";
         String s5 = e.getNmSub5() != null ? e.getNmSub5() : "";
-        return s1 + " - " + s2 + " - " + s3 + " x " + s4 + " - " + s5;
+        return s1 + "-" + s2 + "-" + s3 + "/" + s4 + "-" + s5;
     }
 
     private MakeSubstituteMainDto toDto(MakeSubstituteMain e, long transitionCount) {
