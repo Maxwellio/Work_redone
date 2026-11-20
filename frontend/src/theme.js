@@ -3,16 +3,16 @@ import { createTheme } from '@mui/material/styles'
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#008eb9',
-      dark: '#006b8f',
+      main: '#255F99',
+      dark: '#164a7e',
     },
     secondary: {
-      main: '#e5dfd2',
-      light: '#f5f2eb',
+      main: '#c4c4c4',
+      light: '#f1f1f1',
     },
     divider: '#e5dfd2',
     background: {
-      default: '#f5f2eb',
+      default: '#f1f1f1',
       paper: '#ffffff',
     },
     text: {
@@ -26,16 +26,17 @@ export const theme = createTheme({
   typography: {
     fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
     htmlFontSize: 18,
-    fontSize: 18,
+    fontSize: 16,
     h1: { fontSize: '1.75rem' },
     h2: { fontSize: '1.5rem' },
     h3: { fontSize: '1.25rem' },
     h4: { fontSize: '1.125rem' },
     h5: { fontSize: '1.0625rem' },
-    h6: { fontSize: '1rem' },
+    h6: { fontSize: '1.25rem' },
     body1: { fontSize: '1rem' },
+    //размер шрифта в таблице
     body2: { fontSize: '0.9375rem' },
-    button: { fontSize: '1rem' },
+    button: { fontSize: '0.9rem' },
     caption: { fontSize: '0.875rem' },
     /** Текст заглушки основной области админки */
     adminPageStub: {
@@ -78,7 +79,6 @@ export const theme = createTheme({
   },
 })
 
-/** Ссылки вне компонента `Link`/MUI (сырой тег `<a>`), как в корпоративном index.css */
 export function globalLegacyAnchorStyles(theme) {
   return {
     'html': {
@@ -221,6 +221,7 @@ export function computedNumericFieldSx(theme) {
     },
   }
 }
+
 
 /** Контейнер таблицы в модалках справочников (не admin) */
 export const refModalTableContainerSx = {
