@@ -47,7 +47,7 @@ function Layout({ children, chrome, title = 'Патрубки', flush = false })
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
       }}
