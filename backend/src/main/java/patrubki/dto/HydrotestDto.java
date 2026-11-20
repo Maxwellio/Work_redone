@@ -1,46 +1,27 @@
 package patrubki.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class HydrotestDto {
 
-    @JsonProperty("idHydrotest")
     private Integer idHydrotest;
-    
-    @JsonProperty("nh")
     private String nh;
-    
-    @JsonProperty("d")
     private BigDecimal d;
-    
-    @JsonProperty("l")
     private BigDecimal l;
-    
-    @JsonProperty("th")
     private BigDecimal th;
-    
-    @JsonProperty("testtime")
     private BigDecimal testtime;
-    
-    @JsonProperty("mass")
     private BigDecimal mass;
-    
-    @JsonProperty("l1")
     private BigDecimal l1;
-    
-    @JsonProperty("l2")
     private BigDecimal l2;
-    
-    @JsonProperty("nv")
     private BigDecimal nv;
-    
-    @JsonProperty("idUserCreator")
     private Integer idUserCreator;
-
     @JsonProperty("createdAt")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
     private LocalDate createdAt;
+
 
     public Integer getIdHydrotest() {
         return idHydrotest;
