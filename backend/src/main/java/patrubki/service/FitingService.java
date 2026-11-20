@@ -10,7 +10,6 @@ import patrubki.entity.Fiting;
 import patrubki.repository.FitingDetailRepository;
 import patrubki.repository.FitingRepository;
 import patrubki.repository.PreformTypRepository;
-
 import patrubki.util.YearMonthRangeUtil;
 
 import java.math.BigDecimal;
@@ -45,11 +44,11 @@ public class FitingService {
     public Integer saveFitting(FitingSaveDto dto) {
         return jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.add_edit_fiting(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "call substitute.add_edit_fiting(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setObject(1, dto.getId(), Types.INTEGER);
-            cs.setObject(2, dto.getTip(), Types.INTEGER);
-            cs.setString(3, dto.getNm());
+            cs.setString(2, dto.getNm());
+            cs.setObject(3, dto.getTip(), Types.INTEGER);
             cs.setObject(4, dto.getD(), Types.NUMERIC);
             cs.setObject(5, dto.getTh(), Types.NUMERIC);
             cs.setObject(6, dto.getL(), Types.NUMERIC);
@@ -68,7 +67,7 @@ public class FitingService {
     public void calcFitTime(Integer id) {
         jdbcTemplate.execute((Connection conn) -> {
             CallableStatement cs = conn.prepareCall(
-                "call substitute.calc_fit_time(?)");
+                    "call substitute.calc_fit_time(?)");
             cs.setObject(1, id, Types.INTEGER);
             cs.execute();
             return null;
@@ -91,9 +90,10 @@ public class FitingService {
     public List<FitingDto> findByTipOrderByNm(int tip, String search, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, createdFrom, createdTo);
+        BigDecimal tipParam = BigDecimal.valueOf(tip);
+        List<Fiting> fits = range != null
+                ? repository.findByTipOrderByNmAscAndCreatedAtBetween(tipParam, searchParam, range[0], range[1])
+                : repository.findByTipOrderByNmAsc(tipParam, searchParam);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
@@ -103,9 +103,10 @@ public class FitingService {
     public List<FitingDto> findByTipOrderByNm(int tip, String search, Integer userId, String yearMonth) {
         String searchParam = (search != null && search.trim().isEmpty()) ? null : search;
         LocalDate[] range = YearMonthRangeUtil.parseRange(yearMonth);
-        LocalDate createdFrom = range != null ? range[0] : null;
-        LocalDate createdTo = range != null ? range[1] : null;
-        List<Fiting> fits = repository.findByTipOrderByNmAsc(BigDecimal.valueOf(tip), searchParam, userId, createdFrom, createdTo);
+        BigDecimal tipParam = BigDecimal.valueOf(tip);
+        List<Fiting> fits = range != null
+                ? repository.findByTipOrderByNmAscAndCreatedAtBetween(tipParam, searchParam, userId, range[0], range[1])
+                : repository.findByTipOrderByNmAsc(tipParam, searchParam, userId);
         Map<Integer, Long> transitionCounts = transitionCountsByFitingId(fits);
         return fits.stream()
                 .map(e -> toDto(e, transitionCounts.getOrDefault(e.getIdFiting(), 0L)))
@@ -131,7 +132,7 @@ public class FitingService {
         repository.deleteById(id);
     }
 
-    /** Станочный диаметр для фитинга; null если запись не найдена. */
+    /** Станочный диаметр; null если запись не найдена. */
     public BigDecimal getDStanByIdFiting(Integer idFiting) {
         if (idFiting == null) {
             return null;
