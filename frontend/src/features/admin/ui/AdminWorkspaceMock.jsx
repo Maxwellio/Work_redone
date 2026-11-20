@@ -27,11 +27,19 @@ import { fetchAdminUsers } from '../api/adminUsers'
 import { NM_ADMIN, NM_USER } from '../constants'
 import { AdminUserFormPanel } from './AdminUserFormPanel'
 
-function formatDate(isoOrNull) {
-  if (isoOrNull == null || isoOrNull === '') return '—'
-  const d = typeof isoOrNull === 'string' ? isoOrNull.slice(0, 10) : String(isoOrNull)
-  return d
-}
+const formatDate = (isoString) => {
+  if (!isoString) return '—';
+  
+  // Безопасно отрезаем время, если оно случайно придет с бэка
+  const cleanDate = isoString.split('T')[0]; 
+  const parts = cleanDate.split('-');
+  
+  // Если строка не разбилась на 3 части (Y, M, D), возвращаем как есть
+  if (parts.length !== 3) return isoString; 
+  
+  const [year, month, day] = parts;
+  return `${day}.${month}.${year}`; // Если нужны точки/дефисы - заменить перед $
+};
 
 function activeLabel(active) {
   return active === 1 ? 'Да' : 'Нет'
@@ -62,8 +70,8 @@ export function AdminWorkspaceMock() {
   const [orgRefsError, setOrgRefsError] = useState(null)
   const [orgFilterId, setOrgFilterId] = useState(null)
   const [roleFilter, setRoleFilter] = useState('none')
-  const [activeFilter, setActiveFilter] = useState('none')
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+  const [activeFilter, setActiveFilter] = useState('none')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -151,6 +159,7 @@ export function AdminWorkspaceMock() {
   const handleUserRefreshed = useCallback(async () => {
     await load()
   }, [load])
+
 
   return (
     <Stack
