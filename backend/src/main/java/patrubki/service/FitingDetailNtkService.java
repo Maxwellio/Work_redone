@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import patrubki.dto.FitingDetailNtkDto;
 import patrubki.entity.FitingDetailNtk;
-import patrubki.entity.FitingDetailNtkId;
 import patrubki.repository.FitingDetailNtkRepository;
 import patrubki.repository.FitingDetailRepository;
 
@@ -20,7 +19,7 @@ public class FitingDetailNtkService {
     private final FitingDetailRepository fitingDetailRepository;
 
     public FitingDetailNtkService(FitingDetailNtkRepository repository,
-                                 FitingDetailRepository fitingDetailRepository) {
+                                  FitingDetailRepository fitingDetailRepository) {
         this.repository = repository;
         this.fitingDetailRepository = fitingDetailRepository;
     }
